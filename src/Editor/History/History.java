@@ -39,8 +39,8 @@ public class History {
         entry.editorLastReleasedPositionY = mainEditor.lastReleasedPositionY;
         entry.editorCreatingNewComponent = mainEditor.creatingNewComponent;
         entry.editorCreatingComponentID = mainEditor.creatingComponentID;
-        entry.editorXPress = mainEditor.xPress;
-        entry.editorYPress = mainEditor.yPress;
+        entry.editorXPress = mainEditor.mouseXLocation;
+        entry.editorYPress = mainEditor.mouseYLocation;
         entry.editorXDrag = mainEditor.xDrag;
         entry.editorYDrag = mainEditor.yDrag;
 
@@ -52,27 +52,6 @@ public class History {
         entry.componentType = component.getClass();
         editorHistoryList.addEntry(ev+" " +entry.componentType.getCanonicalName());
         pastHistoryEntries.add(entry);
-    }
-
-
-    public void loadEvent(HistoryEntry entry) {
-        mainEditor.scale = entry.editorScale;
-        mainEditor.xPosition = entry.editorXPosition;
-        mainEditor.yPosition = entry.editorYPosition;
-        mainEditor.pressScreenX = entry.editorPressScreenX;
-        mainEditor.pressScreenY = entry.editorPressScreenY;
-        mainEditor.wireStartComponent = entry.editorWireStartComponent;
-        mainEditor.wireStartIndex = entry.editorWireStartIndex;
-        mainEditor.inWireMode = entry.editorInWireMode;
-        mainEditor.lastReleasedPositionX = entry.editorLastReleasedPositionX;
-        mainEditor.lastReleasedPositionY = entry.editorLastReleasedPositionY;
-        mainEditor.creatingNewComponent = entry.editorCreatingNewComponent;
-        mainEditor.creatingComponentID = entry.editorCreatingComponentID;
-        mainEditor.xPress = entry.editorXPress;
-        mainEditor.yPress = entry.editorYPress;
-        mainEditor.xDrag = entry.editorXDrag;
-        mainEditor.yDrag = entry.editorYDrag;
-
     }
 
     public HistoryEntry getLastAndRemove() {

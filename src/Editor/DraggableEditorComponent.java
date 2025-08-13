@@ -1,6 +1,5 @@
 package Editor;
 
-import Editor.History.History;
 import ElectronicsBackend.*;
 
 import javax.swing.*;
@@ -78,7 +77,7 @@ public class DraggableEditorComponent extends JComponent {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!editor.creatingNewComponent) {
-                    if (editor.isInWireMode()) {
+                    if (editor.getInWireMode()) {
                         ElectricalComponent thisComponent = electricalComponent;
 
                         int nearestPinIndex = getNearestConnectionPointIndex(e.getPoint());

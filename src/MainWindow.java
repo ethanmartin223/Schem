@@ -8,6 +8,10 @@ import java.awt.*;
 import java.io.File;
 import java.util.Enumeration;
 
+// ---------------------- // Reference Material // ---------------------- //
+
+// https://images.edrawmax.com/symbols/eletrical-and-electronic-symbol/electrical-symbols-pdf.pdf
+
 public class MainWindow extends JFrame {
 
     public MainWindow() {
@@ -61,6 +65,9 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
+    // ---------------------- // Global Helper Functions // ---------------------- //
+
+    //Sets all fonts used in swing to be a certain font, ie. all fonts for every component created after the first call
     public static void setUIFont (FontUIResource f){
         Enumeration<Object> keys = UIManager.getDefaults().keys();
         while (keys.hasMoreElements()) {
@@ -72,7 +79,7 @@ public class MainWindow extends JFrame {
         }
     }
 
-
+    // ---------------------- // Main // ---------------------- //
     public static void main(String[] args) {
         MainWindowSplashScreen splash = new MainWindowSplashScreen("resources/generalAssets/wireworkssplash.png");
 
@@ -80,7 +87,7 @@ public class MainWindow extends JFrame {
         System.setProperty("sun.java2d.opengl", "true");
         MainWindow mw = new MainWindow();
 
-        splash.setVisible(false);
+        splash.setVisible(false);// hide splash after main window constructor finishes
 
     }
 }
