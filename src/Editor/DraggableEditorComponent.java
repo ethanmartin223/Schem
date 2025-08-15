@@ -1,5 +1,6 @@
 package Editor;
 
+// ---------------------- // Imports // ---------------------- //
 import ElectronicsBackend.*;
 
 import javax.swing.*;
@@ -9,24 +10,30 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+// ---------------------- // Draggable Editor Component // ---------------------- //
 public class DraggableEditorComponent extends JComponent {
-    private final EditorArea editor;
-    private final Image image;
-    private final Image selectedImage;
+
+    // ---- public ---- //
+    public int orientation;
     public double boundsOverride;
 
-    private Image currentDisplayedImage;
-
-    private double worldX, worldY;
+    // ---- private ---- //
     private double offsetX, offsetY;
+    private double worldX, worldY;
+
     private boolean dragging = false;
 
-    public int orientation;
-    private ElectricalComponent electricalComponent;
+    private final Image image;
+    private final Image selectedImage;
+    private final Image currentDisplayedImage;
+    private final EditorArea editor;
+    private final ElectricalComponent electricalComponent;
 
-    public DraggableEditorComponent(EditorArea editor, Image image, Image selectedImage, double worldX, double worldY, ElectricalComponent parentElectricalComponent) {
+    // ---------------------- // Constructor // ---------------------- //
+    public DraggableEditorComponent(EditorArea editor, Image image, Image selectedImage, double worldX, double worldY,
+                                    ElectricalComponent parentElectricalComponent) {
+        // ---- init vars ---- //
         this.editor = editor;
-
         this.electricalComponent = parentElectricalComponent;
 
         this.image = image;
@@ -35,25 +42,28 @@ public class DraggableEditorComponent extends JComponent {
 
         this.worldX = worldX;
         this.worldY = worldY;
-
         this.boundsOverride = 1;
-
         this.orientation = 0;
 
+        // ---- Swing Functions ---- //
         updateBounds();
         setOpaque(false);
         setFocusable(true);
 
-        addKeyListener(new KeyAdapter() {
+        this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
+
+                // On press key "r" rotate this component
                 if (e.getKeyChar() == 'r') {
                     orientation += 1;
                     if (orientation > 3) orientation = 0;
                     parentElectricalComponent.rotateConnectionPoints(orientation);
                     editor.repaint(); // to avoid wire not getting repainted
                 }
+
+                // On press key "del" delete this component
                 if (e.getKeyCode() == 127) { //delete key
                     editor.deleteComponent(parentElectricalComponent);
                 }
@@ -63,29 +73,30 @@ public class DraggableEditorComponent extends JComponent {
         this.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                EditorComponentInformationConfigurator ecic = editor.getInformationConfigurator();
-                ecic.setComponent(parentElectricalComponent);
+                // set the component value editor to display this component's editable values on click
+                EditorComponentInformationConfigurator componentValueEditor = editor.getInformationConfigurator();
+                componentValueEditor.setComponent(parentElectricalComponent);
             }
 
             @Override
-            public void focusLost(FocusEvent e) {
-            }
+            public void focusLost(FocusEvent e) {}
         });
-
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!editor.creatingNewComponent) {
+
+                    // While in wiring mode set the wires to go to the closest pin when the component is clicked
                     if (editor.getInWireMode()) {
                         ElectricalComponent thisComponent = electricalComponent;
 
                         int nearestPinIndex = getNearestConnectionPointIndex(e.getPoint());
 
-                        if (editor.wireStartComponent == null) {
+                        if (editor.wireStartComponent == null) { // if the first end of the wire doesn't exist
                             editor.wireStartComponent = thisComponent;
                             editor.wireStartIndex = nearestPinIndex;
-                        } else {
+                        } else { // if placing second part of wire
                             editor.connectComponents(editor.wireStartComponent, editor.wireStartIndex, thisComponent, nearestPinIndex);
                             editor.wireStartComponent = null;
                             editor.inWireMode = false;
@@ -93,9 +104,14 @@ public class DraggableEditorComponent extends JComponent {
                             editor.grabFocus();
                         }
                     }
+
+                    // Normal click on this component registering
                     else if (e.getButton() == 1 && !editor.inWireMode) {
                         grabFocus();
-                    } else if (e.getButton() == 3) {
+                    }
+
+                    // On right click pull up the Editor context menu
+                    else if (e.getButton() == 3) {
                         new EditorComponentContextMenu().show(e.getComponent(), e.getX(), e.getY());
                     }
                 }
@@ -103,6 +119,8 @@ public class DraggableEditorComponent extends JComponent {
 
             @Override
             public void mousePressed(MouseEvent e) {
+
+                // On mouse dragging this component move the component to the mouse
                 if (!editor.creatingNewComponent) {
                     Point panelPoint = SwingUtilities.convertPoint(DraggableEditorComponent.this, e.getPoint(), editor);
                     Point2D.Double worldPoint = screenToWorld(panelPoint.x, panelPoint.y);
@@ -152,6 +170,7 @@ public class DraggableEditorComponent extends JComponent {
         });
     }
 
+    // ---------------------- // Getter+Setter Methods // ---------------------- //
     private DraggableEditorComponent getSelf() {
         return this;
     }

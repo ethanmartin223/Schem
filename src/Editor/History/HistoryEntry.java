@@ -1,40 +1,43 @@
 package Editor.History;
 
-import Editor.Wire;
+// ---------------------- // Imports // ---------------------- //
 import ElectronicsBackend.ElectricalComponent;
 
-import java.util.ArrayList;
-import java.util.List;
-
+// ---------------------- // History Entry // ---------------------- //
 public class HistoryEntry {
-    public double editLocationX, editLocationY;
-    public Class componentType;
+
+    // ---- public ---- //
+    public double editLocationX;
+    public double editLocationY;
+
     public History.Event event;
+    public Class componentType;
     public Object component;
-    double editorScale;
+
+    // ---- private ---- //
     double editorXPosition;
     double editorYPosition;
-    int editorPressScreenX;
-    int editorPressScreenY;
-    public List<Wire> editorWires = new ArrayList<>();
-
-    ElectricalComponent editorWireStartComponent = null;
-    int editorWireStartIndex = 0;
-    boolean editorInWireMode = false;
-
     double editorLastReleasedPositionX = 0;
     double editorLastReleasedPositionY = 0;
+    double editorScale;
 
-    boolean editorCreatingNewComponent;
-    String editorCreatingComponentID;
-
+    int editorPressScreenX;
+    int editorPressScreenY;
+    int editorWireStartIndex = 0;
     int editorXPress = 0;
     int editorYPress = 0;
     int editorXDrag = 0;
     int editorYDrag = 0;
 
+    String editorCreatingComponentID;
+    ElectricalComponent editorWireStartComponent = null;
 
+    boolean editorInWireMode = false;
+    boolean editorCreatingNewComponent;
+
+    // ---------------------- // Constructor // ---------------------- //
     public HistoryEntry() {
+
     }
 
 }
