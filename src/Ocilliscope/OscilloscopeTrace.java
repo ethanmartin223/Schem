@@ -1,6 +1,7 @@
 package Ocilliscope;
 
 import java.awt.*;
+import java.awt.geom.Path2D;
 import java.util.Arrays;
 
 public class OscilloscopeTrace {
@@ -28,27 +29,34 @@ public class OscilloscopeTrace {
     }
 
     public void renderTrace(Graphics2D g2d) {
-        if (isVisible) {
-            g2d.setColor(color);
-            g2d.setStroke(new BasicStroke(3f));
+        if (!isVisible || function == null) return;
 
-            int width = oscilloscopeDisplay.getWidth() - oscilloscopeDisplay.leftMargin;
-            int[] yPoints = new int[width];
-            int[] xPoints = new int[width];
-            for (int x = 0; x < width; x++) {
-                yPoints[x] = (int) (vertShift + function[x]);
-                xPoints[x] = x + oscilloscopeDisplay.leftMargin;
+        g2d.setColor(color);
+        g2d.setStroke(new BasicStroke(3f));
+
+        int width = oscilloscopeDisplay.getWidth() - oscilloscopeDisplay.leftMargin;
+        int centerY = oscilloscopeDisplay.getHeight() / 2;
+
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        Path2D path = new Path2D.Double();
+        for (int x = 0; x < width; x++) {
+            double screenX = x + oscilloscopeDisplay.leftMargin + horizShift;
+            double screenY = centerY - function[x] - vertShift;
+
+            if (x == 0) {
+                path.moveTo(screenX, screenY);
+            } else {
+                path.lineTo(screenX, screenY);
             }
-
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-
-            Image scaled = traceIdentifierImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-            g2d.drawImage(scaled, 0, (int) ((vertShift + (double) oscilloscopeDisplay.getHeight() / 2) - 15), null);
-
-            g2d.drawPolyline(xPoints, yPoints, width);
         }
+
+        Image scaled = traceIdentifierImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        g2d.drawImage(scaled, 0, (int) (centerY - vertShift - 15), null);
+
+        g2d.draw(path);
     }
 
     public void setFunction(String waveform, double freq, double amp, double offset, double sampleRate, double duration) {

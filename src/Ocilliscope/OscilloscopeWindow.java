@@ -20,7 +20,7 @@ public class OscilloscopeWindow extends JFrame {
     private JLabel ch4VoltsLabel = null;
     private JLabel timeDivLabel = null;
 
-    private OscilloscopeKnob timeKnob, zoomKnob, verticalShiftKnob, horizontalShiftKnob;
+    protected OscilloscopeKnob timeKnob, zoomKnob, verticalShiftKnob, horizontalShiftKnob;
 
     OscilloscopeDisplay oc;
     Image knobImg;
@@ -229,9 +229,9 @@ public class OscilloscopeWindow extends JFrame {
         genWin.setVisible(true);
         setVisible(true);
 
-        oc.setWaveform("sine", 1000, 5.0, 0.0, 1);
-        oc.setWaveform("triangle", 1000, 5.0, 0.0, 2);
-        oc.setWaveform("square", 1000, 5.0, 0.0, 3);
+        oc.setWaveform("sine", 25, 30.0, 0.0, 1);
+        oc.setWaveform("triangle", 10, 30.0, 0.0, 2);
+        oc.setWaveform("square", 10, 35.0, 0.0, 3);
         oc.setWaveform("sine", 1000, 5.0, 0.0, 4);
     }
 
