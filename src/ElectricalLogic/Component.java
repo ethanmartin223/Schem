@@ -26,7 +26,7 @@ public class Component {
         int highestPriority = Integer.MIN_VALUE;
         Component currentHighest = null;
         for (int i=0; i<children.size(); i++) {
-            if (currentHighest == null || (children.get(i).priority>highestPriority) && !visited) {
+            if (children.get(i).priority > highestPriority && !visited) {
                 highestPriority = children.get(i).priority;
                 currentHighest = children.get(i);
                 visited = true;
@@ -45,10 +45,11 @@ public class Component {
 
     public static void transverse(Component start) {
         ArrayList<Component> queue = new ArrayList<>();
-        while (start.getNextComponent()!=null) {
-            Component comp = start.getNextComponent();
+        Component comp = start.getNextComponent();
+        while (comp!=null) {
             queue.add(comp);
             System.out.println("visited: "+comp.id);
+            comp = comp.getNextComponent();
         }
 //
 //        for (Component c : queue) {
