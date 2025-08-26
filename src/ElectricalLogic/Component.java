@@ -1,187 +1,160 @@
 package ElectricalLogic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Arrays;
+import java.util.*;
 
 class Component {
 
-    //static
+    // static
     public static boolean debugMode = false;
     public static ArrayList<Component> allComponents = new ArrayList<>();
 
-    //private
-    private int priority;
+    // fields
+    private int resistance;
     private ArrayList<Component> children;
-    private boolean visited;
     private String id;
 
-    //const
-    public Component(int priority, String id) {
-        this.priority = priority;
+    // constructor
+    public Component(int resistance, String id) {
+        this.resistance = resistance;
         this.children = new ArrayList<>();
-        this.visited = false;
         this.id = id;
-
         allComponents.add(this);
     }
 
-    public Component getNextComponent() {
-        int highestPriority = Integer.MAX_VALUE;
-        Component currentHighest = null;
-        for (int i=0; i<children.size(); i++) {
-            if (debugMode) System.out.println("\t"+children.get(i).priority +"<"+ highestPriority+" && "+!children.get(i).visited);
-            if (children.get(i).priority == highestPriority && !children.get(i).visited) {
-
-                if (debugMode) System.out.println("[Starting path search for path1]");
-                int path1 = totalTranversalResistance(transverse(children.get(i), true));
-
-                if (debugMode) System.out.println("[Starting path search for path2]");
-                int path2 = totalTranversalResistance(transverse(currentHighest, true));
-
-                if (path1 < path2) currentHighest = children.get(i);
-                else if (path1 > path2) currentHighest = currentHighest;
-                else currentHighest = Math.random() > .5?children.get(i):currentHighest;
-                highestPriority = currentHighest.priority;
-
-            } else if (children.get(i).priority < highestPriority && !children.get(i).visited) {
-                highestPriority = children.get(i).priority;
-                currentHighest = children.get(i);
-            }
-        }
-        if (debugMode) System.out.println("\t"+children);
-        if (currentHighest!= null) currentHighest.visited = true;
-        if (debugMode) System.out.println("\tcurrentHighest: "+currentHighest);
-        return currentHighest;
+    public void connect(Component other) {
+        if (other == this) return;
+        this.children.add(other);
+        other.children.add(this);
     }
 
-    public void addConnected(Component comp) {
-        children.add(comp);
+    public int getResistance() {
+        return resistance;
     }
 
-    public void setVisited(boolean hasBeenVisited) {
-        this.visited = hasBeenVisited;
+    public ArrayList<Component> getChildren() {
+        return children;
     }
 
-    public static void calcComponent(Component c) {
-        //do calc here for priority
-        if (debugMode) System.out.println("\n\n[visited node: "+c.id+"]");
+    public String getId() {
+        return id;
     }
 
     @Override
     public String toString() {
-        return "Component("+this.id+")";
+        return "Component(" + id + ")";
     }
 
 
+    public static List<Component> findPath(Component start, Component end) {
+        Map<Component, Integer> dist = new HashMap<>();
+        Map<Component, Component> prev = new HashMap<>();
+        PriorityQueue<Component> pq = new PriorityQueue<>(Comparator.comparingInt(dist::get));
 
-    public static ArrayList<Component> transverse(Component start) {
-        return transverse(start, false);
-    }
-
-    private static ArrayList<Component> transverse(Component start, boolean readOnly) {
-        Component comp = start;
-        start.visited = true;
-        ArrayList<Component> output = new ArrayList<>();
-
-        HashMap<Component, Boolean> visitedData = new HashMap<>();
-        if (readOnly) {
-            if (debugMode) System.out.println("[internal node search]");
-            for (Component c : allComponents) {
-                visitedData.put(c, c.visited);
+        for (Component c : allComponents) {
+            dist.put(c, Integer.MAX_VALUE);
+            prev.put(c, null);
+        }
+        dist.put(start, 0);
+        pq.add(start);
+        while (!pq.isEmpty()) {
+            Component u = pq.poll();
+            if (u == end) break;
+            for (Component v : u.getChildren()) {
+                int alt = dist.get(u) + v.getResistance();
+                if (alt < dist.get(v)) {
+                    dist.put(v, alt);
+                    prev.put(v, u);
+                    pq.remove(v);
+                    pq.add(v);
+                }
             }
         }
-
-        while (comp!=null) {
-            calcComponent(comp);
-            output.add(comp);
-            comp = comp.getNextComponent();
-        }
-
-        if (readOnly) {
-            for (Component c : allComponents) {
-                c.visited = visitedData.get(c);
+        List<Component> path = new ArrayList<>();
+        Component step = end;
+        if (prev.get(step) != null || step == start) {
+            while (step != null) {
+                path.add(0, step);
+                step = prev.get(step);
             }
         }
-        return output;
+        return path;
     }
 
-    public int totalTranversalResistance(ArrayList<Component> path) {
-        int total = 0;
-        for (Component c : path) {
-            total+=c.priority;
-        }
-        return total;
-    }
-
-    public static char[] compListToCharList(ArrayList<Component> compList) {
+    public static char[] compListToCharList(List<Component> compList) {
         char[] output = new char[compList.size()];
-        for (int i =0; i<compList.size(); i++) {
+        for (int i = 0; i < compList.size(); i++) {
             output[i] = compList.get(i).id.charAt(0);
         }
         return output;
     }
 
-
-
     public static void main(String[] args) {
 
         // Component Structure
-        //      a -- b -- e
-        //      |    |    |
-        //      c -- d -- g
-        //           |
-        //           f
+        //
+        //        a ---- b ---- e ---- i ---- m
+        //        |      |      |      |      |
+        //        c ---- r ---- g ---- j ---- n
+        //        |      |      |      |      |
+        //        t ---- f ---- h ---- k ---- o
+        //        |             |      |      |
+        //        x ---- y ---- z ---- l ---- p
+        //               |             |
+        //               q ------------w
+        //        s
+
 
         Component a = new Component(0, "A");
-        Component b = new Component(0, "B");
-        Component c = new Component(0, "C");
-        Component d = new Component(1, "D");
-        Component e = new Component(0, "E");
-        Component f = new Component(0, "F");
-        Component g = new Component(0, "G");
+        Component b = new Component(1, "B");
+        Component c = new Component(2, "C");
+        Component e = new Component(2, "E");
+        Component f = new Component(1, "F");
+        Component g = new Component(2, "G");
+        Component h = new Component(1, "H");
+        Component i = new Component(0, "I");
+        Component j = new Component(2, "J");
+        Component k = new Component(1, "K");
+        Component l = new Component(3, "L");
+        Component m = new Component(0, "M");
+        Component n = new Component(1, "N");
+        Component o = new Component(2, "O");
+        Component p = new Component(0, "P");
+        Component r = new Component(1, "R");
+        Component t = new Component(2, "T");
+        Component x = new Component(10, "X");
+        Component y = new Component(0, "Y");
+        Component z = new Component(2, "Z");
+        Component q = new Component(3, "Q");
+        Component w = new Component(1, "W");
+        Component s = new Component(1, "S");
 
-        a.addConnected(b);
-        a.addConnected(c);
-        b.addConnected(a);
-        b.addConnected(d);
-        b.addConnected(e);
-        c.addConnected(d);
-        c.addConnected(a);
-        d.addConnected(c);
-        d.addConnected(b);
-        d.addConnected(f);
-        e.addConnected(b);
-        e.addConnected(g);
-        f.addConnected(d);
-        d.addConnected(g);
-        d.addConnected(f);
-        g.addConnected(d);
-        g.addConnected(e);
+        a.connect(b); a.connect(c);
+        b.connect(e); b.connect(r);
+        c.connect(r); c.connect(t);
 
-        HashSet<char[]> hs = new HashSet<>();
-        for (int i=0; i<1000; i++) {
-            boolean dontAdd= false;
-            char[] toAdd = compListToCharList(transverse(a));
-            for (char[] ex: hs) {
-                if (ex.length!= toAdd.length) {
-                    continue;
-                }
-                boolean exists = true;
-                for (int x=0; x<ex.length; x++) {
-                    if (toAdd[x] != ex[x]) exists = false;
-                }
-                if (exists) dontAdd = true;
-            }
-            if (!dontAdd) hs.add(toAdd);
-            for (Component comp : allComponents) comp.visited = false;
+        e.connect(i); e.connect(g);
+        f.connect(r); f.connect(t); f.connect(h);
 
-        }
+        g.connect(r); g.connect(j); g.connect(h);
+        h.connect(g); h.connect(f); h.connect(k);
 
-        for (char[] i : hs) {
-            System.out.println(Arrays.toString(i));
-        }
+        i.connect(m); i.connect(j);
+        j.connect(n); j.connect(k);
+        k.connect(o); k.connect(l);
+
+        l.connect(p); l.connect(w);
+        m.connect(n);
+        n.connect(o);
+        o.connect(p);
+
+        t.connect(x);
+        x.connect(y);
+        y.connect(z); y.connect(q);
+        z.connect(h); z.connect(l);
+        q.connect(w);
+
+
+        List<Component> path = findPath(a, w);
+        System.out.println(Arrays.toString(compListToCharList(path)));
     }
-
 }
