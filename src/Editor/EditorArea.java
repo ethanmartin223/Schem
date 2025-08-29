@@ -12,6 +12,7 @@ import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 // ---------------------- // Editor Area // ---------------------- //
 public class EditorArea extends JPanel {
@@ -49,12 +50,14 @@ public class EditorArea extends JPanel {
     private EditorHistoryTrackerList editorHistoryList;
 
     private Image creatingNewComponentImage;
+    DraggableEditorComponent currentFocusedComponent;
 
     // ---------------------- // Constructor // ---------------------- //
     public EditorArea() {
         // ---- init vars ---- //
         creatingNewComponent = false;
         creatingNewComponentImage = null;
+        currentFocusedComponent = null;
 
         history = new History(this);
 
@@ -121,13 +124,16 @@ public class EditorArea extends JPanel {
 
                 // remove selected wire if delete key is pressed (if one is selected)
                 if (e.getKeyCode() == 127) { //delete key
-                    Wire removedWire = wires.stream().filter(w -> w.isHighlighted).findAny().get();
-                    removedWire.endComponent.disconnect(removedWire.startComponent);
-                    wires.remove(removedWire);
+                    Optional<Wire> removedWire = wires.stream().filter(w -> w.isHighlighted).findAny();
+                    if (removedWire.isPresent()) {
+                        Wire rmWire = removedWire.get();
+                        rmWire.endComponent.disconnect(rmWire.startComponent);
+                        wires.remove(rmWire);
 
-                    //update edit history
-                    history.addEvent(History.Event.DELETED_WIRE, removedWire.startIndex, removedWire.endIndex, removedWire);
-                    repaint();
+                        //update edit history
+                        history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
+                        repaint();
+                    }
                 }
             }
         });
@@ -176,6 +182,7 @@ public class EditorArea extends JPanel {
             public void focusGained(FocusEvent e) {
                 // reset the component value editor to display nothing on canvas clicked
                 informationConfigurator.setComponent(null);
+                currentFocusedComponent = null;
             }
 
             @Override
@@ -493,5 +500,9 @@ public class EditorArea extends JPanel {
     public void setEditorHistoryList(EditorHistoryTrackerList editorHistoryList) {
         this.editorHistoryList =editorHistoryList;
         history.setEditorHistoryList(editorHistoryList);
+    }
+
+    public DraggableEditorComponent getFocusedComponent() {
+        return currentFocusedComponent;
     }
 }

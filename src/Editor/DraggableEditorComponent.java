@@ -86,6 +86,8 @@ public class DraggableEditorComponent extends JComponent {
                 // set the component value editor to display this component's editable values on click
                 EditorComponentInformationConfigurator componentValueEditor = editor.getInformationConfigurator();
                 componentValueEditor.setComponent(parentElectricalComponent);
+                editor.currentFocusedComponent = electricalComponent.getDraggableEditorComponent();
+
             }
 
             @Override

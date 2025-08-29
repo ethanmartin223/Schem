@@ -1,8 +1,11 @@
 package Editor;
 
+import Editor.History.History;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Optional;
 
 public class EditorTopToolBar extends JPanel {
 
@@ -88,6 +91,62 @@ public class EditorTopToolBar extends JPanel {
                         mainEditor.lastReleasedPositionX = mainEditor.xPosition;
                         mainEditor.lastReleasedPositionY = mainEditor.yPosition;
 
+                        mainEditor.repaint();
+                    } else if (text.equals("delete")) {
+                        //if it's a component needed to be deleted
+                        DraggableEditorComponent removeComponent = mainEditor.getFocusedComponent();
+                        if (removeComponent!=null) {
+                            mainEditor.deleteComponent(removeComponent.getElectricalComponent());
+                        }
+                        //duplicated from EditorArea under key 127 (wires)
+                        Optional<Wire> removedWire = mainEditor.wires.stream().filter(w -> w.isHighlighted).findAny();
+                        if (removedWire.isPresent()) {
+                            Wire rmWire = removedWire.get();
+                            mainEditor.wires.remove(rmWire);
+                            rmWire.endComponent.disconnect(rmWire.startComponent);
+                            mainEditor.history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
+                            mainEditor.repaint();
+                        }
+                    } else if (text.equals("zoomcenter")) {
+                        //resets zoom to starting values
+                        mainEditor.xPosition = 0;
+                        mainEditor.yPosition = 0;
+                        mainEditor.scale = 80;
+                        mainEditor.lastReleasedPositionX = mainEditor.xPosition;
+                        mainEditor.lastReleasedPositionY = mainEditor.yPosition;
+                        mainEditor.repaint();
+                    } else if (text.equals("zoomfit")) {
+                        double top = Double.MAX_VALUE;
+                        double bottom = Double.MIN_VALUE;
+                        double left = Double.MAX_VALUE;
+                        double right = Double.MIN_VALUE;
+
+                        for (Component c : mainEditor.getComponents()) {
+                            if (c instanceof DraggableEditorComponent) {
+                                DraggableEditorComponent dec = ((DraggableEditorComponent)c);
+                                double cx = dec.getWorldX();
+                                double cy = dec.getWorldY();
+                                left = Math.min(left, cx);
+                                right = Math.max(right, cx+dec.getWidth()/ mainEditor.scale);
+                                top = Math.min(top, cy);
+                                bottom = Math.max(bottom, cy+(dec.getHeight()/ mainEditor.scale));
+                            }
+                        }
+                        double worldWidth = (right - left) * 1.05;
+                        double worldHeight = (bottom - top)* 1.05;
+
+                        double scaleX = (mainEditor.getWidth()) / worldWidth;
+                        double scaleY = (mainEditor.getHeight()) / worldHeight;
+                        mainEditor.scale = Math.min(scaleX, scaleY);
+
+                        double worldCenterX = (left + right) / 2.0;
+                        double worldCenterY = (top + bottom) / 2.0;
+
+                        mainEditor.xPosition = worldCenterX - (mainEditor.getWidth() / (2.0 * mainEditor.scale));
+                        mainEditor.yPosition = worldCenterY - (mainEditor.getHeight() / (2.0 * mainEditor.scale));
+
+                        mainEditor.lastReleasedPositionY = mainEditor.yPosition;
+                        mainEditor.lastReleasedPositionX = mainEditor.xPosition;
                         mainEditor.repaint();
                     }
                 }
