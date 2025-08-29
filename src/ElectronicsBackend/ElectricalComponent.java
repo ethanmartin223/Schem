@@ -35,14 +35,12 @@ public class ElectricalComponent {
         if (other == this) return;
         this.children.add(other);
         other.children.add(this);
-        ElectricalComponent.printConnectionMap();
     }
 
     public void disconnect(ElectricalComponent other) {
         if (other == this) return;
         this.children.remove(other);
         other.children.remove(this);
-        ElectricalComponent.printConnectionMap();
     }
 
     public int getResistance() {
@@ -214,18 +212,6 @@ public class ElectricalComponent {
     public JPanel getInfoCard() {
         return infoCard;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     // ---------- // INFO CARD METHODS // --------- //
     protected void styleInfoCard() {

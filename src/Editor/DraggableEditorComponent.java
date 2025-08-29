@@ -2,7 +2,6 @@ package Editor;
 
 // ---------------------- // Imports // ---------------------- //
 import Editor.History.History;
-import Editor.History.HistoryEntry;
 import ElectronicsBackend.*;
 
 import javax.swing.*;
@@ -10,6 +9,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 // ---------------------- // Draggable Editor Component // ---------------------- //
@@ -25,8 +25,8 @@ public class DraggableEditorComponent extends JComponent {
 
     private boolean dragging = false;
 
-    private final Image image;
-    private final Image selectedImage;
+    private Image image;
+    private Image selectedImage;
     private final Image currentDisplayedImage;
     private final EditorArea editor;
     private final ElectricalComponent electricalComponent;
@@ -41,6 +41,7 @@ public class DraggableEditorComponent extends JComponent {
         this.electricalComponent = parentElectricalComponent;
 
         this.image = image;
+
         this.currentDisplayedImage = image;
         this.selectedImage = selectedImage;
 
@@ -184,6 +185,7 @@ public class DraggableEditorComponent extends JComponent {
                 dispatchToParent(e);
             }
         });
+
     }
 
     // ---------------------- // Getter+Setter Methods // ---------------------- //
@@ -267,7 +269,6 @@ public class DraggableEditorComponent extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         Image imgToDraw = isFocusOwner() ? selectedImage : image;
-
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -286,6 +287,32 @@ public class DraggableEditorComponent extends JComponent {
         g2d.dispose();
     }
 
+    //color the components
+    private BufferedImage recolorImage(BufferedImage src, Color replacement, int tol) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = src.getRGB(x, y);
+                Color c = new Color(argb, true);
+                if (c.getAlpha() > 0) {
+                    if (c.getRed() < tol && c.getGreen() < tol && c.getBlue() < tol) {
+                        Color newC = new Color(
+                                replacement.getRed(),
+                                replacement.getGreen(),
+                                replacement.getBlue(),
+                                c.getAlpha()
+                        );
+                        src.setRGB(x, y, newC.getRGB());
+                        continue;
+                    }
+                }
+                src.setRGB(x, y, argb);
+            }
+        }
+        return src;
+    }
 
     public void updateFromEditor() {
         updateBounds();

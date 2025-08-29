@@ -69,11 +69,26 @@ public class EditorTopToolBar extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (text.equals("undo")) {
-                        System.out.println("UNDO FIRED");
                         mainEditor.undo();
                     } else if (text.equals("redo")) {
-                        System.out.println("REDO FIRED");
                         mainEditor.redo();
+                    } else if (text.equals("zoomin") || text.equals("zoomout")) {
+                        double oldScale = mainEditor.scale;
+                        mainEditor.scale*= text.equals("zoomout")?1/1.5:1.5;
+                        Point center = new Point(mainEditor.getWidth()/2, mainEditor.getHeight()/2);
+                        double mouseWorldXBefore = (center.x / oldScale) + mainEditor.xPosition;
+                        double mouseWorldYBefore = (center.y / oldScale) + mainEditor.yPosition;
+
+                        double mouseWorldXAfter = (center.x / mainEditor.scale) + mainEditor.xPosition;
+                        double mouseWorldYAfter = (center.y / mainEditor.scale) + mainEditor.yPosition;
+
+                        mainEditor.xPosition += (mouseWorldXBefore - mouseWorldXAfter);
+                        mainEditor.yPosition += (mouseWorldYBefore - mouseWorldYAfter);
+
+                        mainEditor.lastReleasedPositionX = mainEditor.xPosition;
+                        mainEditor.lastReleasedPositionY = mainEditor.yPosition;
+
+                        mainEditor.repaint();
                     }
                 }
             });

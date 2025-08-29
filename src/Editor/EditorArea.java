@@ -202,6 +202,7 @@ public class EditorArea extends JPanel {
 
 
             //I forget what this does. Its probably important tho
+            //      - 8/29/25 im pretty sure it centers the zoom
             Point mouse = e.getPoint();
             double mouseWorldXBefore = (mouse.x / oldScale) + xPosition;
             double mouseWorldYBefore = (mouse.y / oldScale) + yPosition;
@@ -264,6 +265,7 @@ public class EditorArea extends JPanel {
         history.addEvent(History.Event.DELETED_COMPONENT, eC.x, eC.y, eC);
         remove(eC.getDraggableEditorComponent());
         eC.setDeleted(true);
+        ElectricalComponent.allComponents.remove(eC);
         List<Wire> removedWires = wires.stream()
                 .filter(w -> w.endComponent == eC || w.startComponent == eC)
                 .toList();
@@ -316,6 +318,7 @@ public class EditorArea extends JPanel {
                         if (trackingEvent == History.Event.DELETED_COMPONENT) {
                             ElectricalComponent component = (ElectricalComponent) historyEntry.component;
                             component.setDeleted(false);
+                            ElectricalComponent.allComponents.add(component);
                             add(component.getDraggableEditorComponent());
                             wires.addAll(removedWires);
                         }
@@ -325,6 +328,7 @@ public class EditorArea extends JPanel {
             case History.Event.DELETED_COMPONENT:
                 ElectricalComponent component = (ElectricalComponent) lastEvent.component;
                 component.setDeleted(false);
+                ElectricalComponent.allComponents.add(component);
                 add(component.getDraggableEditorComponent());
             break;
 
@@ -337,6 +341,7 @@ public class EditorArea extends JPanel {
             case History.Event.CREATED_NEW_COMPONENT:
                 ElectricalComponent component1 = (ElectricalComponent) lastEvent.component;
                 remove(component1.getDraggableEditorComponent());
+                ElectricalComponent.allComponents.remove(component1);
                 component1.setDeleted(true);
             break;
 
@@ -415,19 +420,32 @@ public class EditorArea extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        //Paint background grid
-        //TODO: fix 1800 workaround. should be dynamic, need to do some kind of call to
-        // figure out current max viewport size
         g.setColor(Color.LIGHT_GRAY);
-        int gridSize = (int) scale;
-        for (int x = (int) -scale; x <= getWidth() + (int) scale; x += gridSize) {
-            int screenX = (int) (x - scale * xPosition % gridSize);
-            g.drawLine(screenX, 0, screenX, 1800);
+
+        int width = getWidth();
+        int height = getHeight();
+
+        // find world coordinate bounds of viewport
+        double worldLeft   = xPosition;
+        double worldTop    = yPosition;
+        double worldRight  = xPosition + width  / scale;
+        double worldBottom = yPosition + height / scale;
+
+        int startX = (int) Math.floor(worldLeft);
+        int endX = (int) Math.ceil(worldRight);
+        int startY = (int) Math.floor(worldTop);
+        int endY = (int) Math.ceil(worldBottom);
+
+        // draw vertical grid lines
+        for (int gx = startX; gx <= endX; gx++) {
+            int screenX = (int) ((gx - xPosition) * scale);
+            g.drawLine(screenX, 0, screenX, height);
         }
-        for (int y = (int) -scale; y <= getHeight() + (int) scale; y += gridSize) {
-            int screenY = (int) (y - scale * yPosition % gridSize);
-            g.drawLine(0, screenY, 1800, screenY);
+
+        // draw horizontal grid lines
+        for (int gy = startY; gy <= endY; gy++) {
+            int screenY = (int) ((gy - yPosition) * scale);
+            g.drawLine(0, screenY, width, screenY);
         }
 
         //Paint all DraggableEditorComponent objects
@@ -451,6 +469,7 @@ public class EditorArea extends JPanel {
         for (Wire wire : wires) {
             wire.draw((Graphics2D) g, this);
         }
+
     }
 
 

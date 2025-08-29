@@ -22,8 +22,8 @@ public enum ElectricalComponentIdentifier {
     TRANSFORMER("transformer", Transformer.class, "Miscellaneous"),
     PHOTORESISTOR("photoresistor", Photoresistor.class, "Miscellaneous"),
 
-
     GROUND("ground", Ground.class, "Power Components"),
+    POWERSUPPLY("powerSupply", PowerSupply.class, "Power Components"),
 
     WIRE_NODE("wirenode", WireNode.class, "Wiring");
 
