@@ -45,7 +45,7 @@ class Component {
     }
 
 
-    public static List<Component> findPath(Component start, Component end) {
+    public static List<Component> findPathOfLeastResistance(Component start, Component end) {
         Map<Component, Integer> dist = new HashMap<>();
         Map<Component, Component> prev = new HashMap<>();
         PriorityQueue<Component> pq = new PriorityQueue<>(Comparator.comparingInt(dist::get));
@@ -80,6 +80,34 @@ class Component {
         return path;
     }
 
+    public static List<List<Component>> findAllPaths(Component start, Component end) {
+        List<List<Component>> allPaths = new ArrayList<>();
+        Queue<List<Component>> queue = new LinkedList<>();
+
+        List<Component> initialPath = new ArrayList<>();
+        initialPath.add(start);
+        queue.add(initialPath);
+
+        while (!queue.isEmpty()) {
+            List<Component> path = queue.poll();
+            Component last = path.get(path.size() - 1);
+
+            if (last.equals(end)) {
+                allPaths.add(new ArrayList<>(path));
+            } else {
+                for (Component neighbor : last.getChildren()) {
+                    if (!path.contains(neighbor)) {
+                        List<Component> newPath = new ArrayList<>(path);
+                        newPath.add(neighbor);
+                        queue.add(newPath);
+                    }
+                }
+            }
+        }
+        return allPaths;
+    }
+
+
     public static char[] compListToCharList(List<Component> compList) {
         char[] output = new char[compList.size()];
         for (int i = 0; i < compList.size(); i++) {
@@ -92,69 +120,39 @@ class Component {
 
         // Component Structure
         //
-        //        a ---- b ---- e ---- i ---- m
-        //        |      |      |      |      |
-        //        c ---- r ---- g ---- j ---- n
-        //        |      |      |      |      |
-        //        t ---- f ---- h ---- k ---- o
-        //        |             |      |      |
-        //        x ---- y ---- z ---- l ---- p
-        //               |             |
-        //               q ------------w
-        //        s
-
+        //     a -- b -- c -- d
+        //     |    |         |
+        //     |    |         |
+        //     g -- h -- i -- j
+        //
 
         Component a = new Component(0, "A");
         Component b = new Component(1, "B");
-        Component c = new Component(2, "C");
-        Component e = new Component(2, "E");
-        Component f = new Component(1, "F");
-        Component g = new Component(2, "G");
+        Component c = new Component(1, "C");
+        Component d = new Component(1, "D");
+        Component g = new Component(1, "G");
         Component h = new Component(1, "H");
-        Component i = new Component(0, "I");
-        Component j = new Component(2, "J");
-        Component k = new Component(1, "K");
-        Component l = new Component(3, "L");
-        Component m = new Component(0, "M");
-        Component n = new Component(1, "N");
-        Component o = new Component(2, "O");
-        Component p = new Component(0, "P");
-        Component r = new Component(1, "R");
-        Component t = new Component(2, "T");
-        Component x = new Component(10, "X");
-        Component y = new Component(0, "Y");
-        Component z = new Component(2, "Z");
-        Component q = new Component(3, "Q");
-        Component w = new Component(1, "W");
-        Component s = new Component(1, "S");
+        Component i = new Component(1, "I");
+        Component j = new Component(1, "J");
 
-        a.connect(b); a.connect(c);
-        b.connect(e); b.connect(r);
-        c.connect(r); c.connect(t);
-
-        e.connect(i); e.connect(g);
-        f.connect(r); f.connect(t); f.connect(h);
-
-        g.connect(r); g.connect(j); g.connect(h);
-        h.connect(g); h.connect(f); h.connect(k);
-
-        i.connect(m); i.connect(j);
-        j.connect(n); j.connect(k);
-        k.connect(o); k.connect(l);
-
-        l.connect(p); l.connect(w);
-        m.connect(n);
-        n.connect(o);
-        o.connect(p);
-
-        t.connect(x);
-        x.connect(y);
-        y.connect(z); y.connect(q);
-        z.connect(h); z.connect(l);
-        q.connect(w);
+        a.connect(b);
+        b.connect(c);
+        c.connect(d);
+        a.connect(g);
+        g.connect(h);
+        h.connect(i);
+        i.connect(j);
+        b.connect(h);
+        d.connect(j);
 
 
-        List<Component> path = findPath(a, w);
-        System.out.println(Arrays.toString(compListToCharList(path)));
+//        List<Component> path = findPath(a, w);
+//        System.out.println(Arrays.toString(compListToCharList(path)));
+
+        List<List<Component>> allPaths = findAllPaths(a, j);
+        for (List<Component> path : allPaths) {
+            System.out.println(Arrays.toString(compListToCharList(path)));
+        }
+
     }
 }

@@ -1,6 +1,8 @@
 package Editor;
 
 // ---------------------- // Imports // ---------------------- //
+import Editor.History.History;
+import Editor.History.HistoryEntry;
 import ElectronicsBackend.*;
 
 import javax.swing.*;
@@ -28,6 +30,8 @@ public class DraggableEditorComponent extends JComponent {
     private final Image currentDisplayedImage;
     private final EditorArea editor;
     private final ElectricalComponent electricalComponent;
+    private double lastXLocationBeforeDrag;
+    private double lastYLocationBeforeDrag;
 
     // ---------------------- // Constructor // ---------------------- //
     public DraggableEditorComponent(EditorArea editor, Image image, Image selectedImage, double worldX, double worldY,
@@ -45,6 +49,9 @@ public class DraggableEditorComponent extends JComponent {
         this.boundsOverride = 1;
         this.orientation = 0;
 
+        this.lastXLocationBeforeDrag = worldX;
+        this.lastYLocationBeforeDrag = worldY;
+
         // ---- Swing Functions ---- //
         updateBounds();
         setOpaque(false);
@@ -57,6 +64,8 @@ public class DraggableEditorComponent extends JComponent {
 
                 // On press key "r" rotate this component
                 if (e.getKeyChar() == 'r') {
+                    editor.history.addEvent(History.Event.ROTATED_COMPONENT,
+                            getWorldX(), getWorldY(), electricalComponent);
                     orientation += 1;
                     if (orientation > 3) orientation = 0;
                     parentElectricalComponent.rotateConnectionPoints(orientation);
@@ -134,6 +143,8 @@ public class DraggableEditorComponent extends JComponent {
 
                     if (worldBounds.contains(worldPoint)) {
                         dragging = true;
+                        lastXLocationBeforeDrag = getWorldX();
+                        lastYLocationBeforeDrag = getWorldY();
                         offsetX = worldPoint.x - getWorldX();
                         offsetY = worldPoint.y - getWorldY();
                     } else {
@@ -145,6 +156,11 @@ public class DraggableEditorComponent extends JComponent {
             @Override
             public void mouseReleased(MouseEvent e) {
                 dragging = false;
+                if (lastXLocationBeforeDrag != getWorldX() && lastYLocationBeforeDrag != getWorldY())
+                    editor.history.addEvent(History.Event.MOVED_COMPONENT, lastXLocationBeforeDrag, lastYLocationBeforeDrag, electricalComponent);
+
+                lastXLocationBeforeDrag = getWorldX();
+                lastYLocationBeforeDrag = getWorldY();
                 dispatchToParent(e);
             }
         });

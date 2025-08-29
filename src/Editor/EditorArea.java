@@ -122,6 +122,7 @@ public class EditorArea extends JPanel {
                 // remove selected wire if delete key is pressed (if one is selected)
                 if (e.getKeyCode() == 127) { //delete key
                     Wire removedWire = wires.stream().filter(w -> w.isHighlighted).findAny().get();
+                    removedWire.endComponent.disconnect(removedWire.startComponent);
                     wires.remove(removedWire);
 
                     //update edit history
@@ -215,6 +216,16 @@ public class EditorArea extends JPanel {
             lastReleasedPositionY = yPosition;
             repaint();
         });
+
+        // do undo on ctrl-z
+        KeyStroke ctrlZ = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ctrlZ, "undoAction");
+        getActionMap().put("undoAction", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                undo();
+            }
+        });
     }
 
 
@@ -235,6 +246,7 @@ public class EditorArea extends JPanel {
     public void connectComponents(ElectricalComponent a, int aIndex, ElectricalComponent b, int bIndex) {
         Wire w = new Wire(a, aIndex, b, bIndex);
         wires.add(w);
+        a.connect(b);
         history.addEvent(History.Event.CREATED_WIRE, w.startIndex, w.endIndex, w);
         repaint();
     }
@@ -257,6 +269,7 @@ public class EditorArea extends JPanel {
                 .toList();
         for (Wire wire : removedWires) {
             wires.remove(wire);
+            wire.endComponent.disconnect(wire.startComponent);
             history.addEvent(History.Event.DELETED_WIRE, wire.startIndex, wire.endIndex, wire);
         }
         if (!removedWires.isEmpty())history.addEvent(History.Event.DELETED_CONNECTING_WIRES, eC.x, eC.y, eC);
@@ -286,51 +299,65 @@ public class EditorArea extends JPanel {
         HistoryEntry lastEvent = history.getLastAndRemove();
         if (lastEvent==null) return;
 
-        //undo deleting a component that was attached to wires
-        if (lastEvent.event == History.Event.DELETED_CONNECTING_WIRES) {
-            History.Event trackingEvent = null;
-            ArrayList<Wire> removedWires = new ArrayList<>();
-            do {
-                HistoryEntry historyEntry = history.getLastAndRemove();
-                trackingEvent = historyEntry.event;
-                if (trackingEvent == History.Event.DELETED_WIRE) {
-                    removedWires.add((Wire)(historyEntry.component));
-                }
-                if (trackingEvent == History.Event.DELETED_COMPONENT) {
-                    ElectricalComponent component = (ElectricalComponent) historyEntry.component;
-                    component.setDeleted(false);
-                    add(component.getDraggableEditorComponent());
-                    wires.addAll(removedWires);
-                }
-            } while (trackingEvent == History.Event.DELETED_WIRE);
-        }
+        switch (lastEvent.event) {
 
-        // undo deleting component
-        if (lastEvent.event == History.Event.DELETED_COMPONENT) {
-            ElectricalComponent component = (ElectricalComponent) lastEvent.component;
-            component.setDeleted(false);
-            add(component.getDraggableEditorComponent());
-        }
+            //undo deleting a component that was attached to wires
+            case History.Event.DELETED_CONNECTING_WIRES:
+                    History.Event trackingEvent = null;
+                    ArrayList<Wire> removedWires = new ArrayList<>();
+                    do {
+                        HistoryEntry historyEntry = history.getLastAndRemove();
+                        trackingEvent = historyEntry.event;
+                        if (trackingEvent == History.Event.DELETED_WIRE) {
+                            removedWires.add((Wire) (historyEntry.component));
+                            ((Wire) (historyEntry.component)).endComponent
+                                    .connect(((Wire) (historyEntry.component)).startComponent);
+                        }
+                        if (trackingEvent == History.Event.DELETED_COMPONENT) {
+                            ElectricalComponent component = (ElectricalComponent) historyEntry.component;
+                            component.setDeleted(false);
+                            add(component.getDraggableEditorComponent());
+                            wires.addAll(removedWires);
+                        }
+                    } while (trackingEvent == History.Event.DELETED_WIRE);
+            break;
 
-        // undo deleting wire
-        if (lastEvent.event == History.Event.DELETED_WIRE) {
-            Wire wire = (Wire) lastEvent.component;
-            wires.add(wire);
-        }
+            case History.Event.DELETED_COMPONENT:
+                ElectricalComponent component = (ElectricalComponent) lastEvent.component;
+                component.setDeleted(false);
+                add(component.getDraggableEditorComponent());
+            break;
 
-        // undo creating component
-        if (lastEvent.event == History.Event.CREATED_NEW_COMPONENT) {
-            ElectricalComponent component = (ElectricalComponent) lastEvent.component;
-            remove(component.getDraggableEditorComponent());
-            component.setDeleted(true);
-        }
+            case History.Event.DELETED_WIRE:
+                Wire wire = (Wire) lastEvent.component;
+                wires.add(wire);
+                ((Wire) lastEvent.component).endComponent.connect(((Wire) lastEvent.component).startComponent);
+            break;
 
-        // undo creating wire
-        if (lastEvent.event == History.Event.CREATED_WIRE) {
-            Wire wire = (Wire) lastEvent.component;
-            wires.remove(wire);
-        }
+            case History.Event.CREATED_NEW_COMPONENT:
+                ElectricalComponent component1 = (ElectricalComponent) lastEvent.component;
+                remove(component1.getDraggableEditorComponent());
+                component1.setDeleted(true);
+            break;
 
+            case History.Event.CREATED_WIRE:
+                Wire wire1 = (Wire) lastEvent.component;
+                ((Wire) lastEvent.component).endComponent.disconnect(((Wire) lastEvent.component).startComponent);
+                wires.remove(wire1);
+            break;
+
+            case History.Event.MOVED_COMPONENT:
+                ElectricalComponent component2 = (ElectricalComponent) lastEvent.component;
+                component2.getDraggableEditorComponent()
+                        .setWorldPosition(lastEvent.editLocationX, lastEvent.editLocationY);
+
+            case History.Event.ROTATED_COMPONENT:
+                DraggableEditorComponent component3 = ((ElectricalComponent) lastEvent.component)
+                        .getDraggableEditorComponent();
+                component3.orientation = lastEvent.rotation;
+                ((ElectricalComponent) lastEvent.component).rotateConnectionPoints(lastEvent.rotation);
+            break;
+        }
         repaint();
     }
 

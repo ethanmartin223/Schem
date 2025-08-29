@@ -13,6 +13,7 @@ public class HistoryEntry {
     public History.Event event;
     public Class componentType;
     public Object component;
+    public int rotation;
 
     // ---- private ---- //
     double editorXPosition;

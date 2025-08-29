@@ -1,7 +1,10 @@
 package Editor.History;
 
+import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
 import Editor.EditorHistoryTrackerList;
+import Editor.Wire;
+import ElectronicsBackend.ElectricalComponent;
 
 import java.util.ArrayList;
 
@@ -43,6 +46,9 @@ public class History {
         entry.editorYPress = mainEditor.mouseYLocation;
         entry.editorXDrag = mainEditor.xDrag;
         entry.editorYDrag = mainEditor.yDrag;
+
+        if (component.getClass() != Wire.class)
+            entry.rotation = ((ElectricalComponent)component).getDraggableEditorComponent().orientation;
 
         entry.event = ev;
         entry.editLocationX = x;
