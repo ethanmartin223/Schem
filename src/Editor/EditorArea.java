@@ -52,6 +52,8 @@ public class EditorArea extends JPanel {
     private Image creatingNewComponentImage;
     DraggableEditorComponent currentFocusedComponent;
 
+    private EditorQuickEntryField quickEntry;
+
     // ---------------------- // Constructor // ---------------------- //
     public EditorArea() {
         // ---- init vars ---- //
@@ -60,6 +62,8 @@ public class EditorArea extends JPanel {
         currentFocusedComponent = null;
 
         history = new History(this);
+        quickEntry = new EditorQuickEntryField(this);
+        add(quickEntry);
 
         // ---- Swing Functions ---- //
         setLayout(null);
@@ -132,6 +136,22 @@ public class EditorArea extends JPanel {
                     inWireMode = true;
                     setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                 }
+
+                //for quickEntry field
+                if (e.getKeyCode() >= KeyEvent.VK_A && e.getKeyCode() <= KeyEvent.VK_Z) {
+                    Point mouse = MouseInfo.getPointerInfo().getLocation();
+                    SwingUtilities.convertPointFromScreen(mouse, EditorArea.this);
+
+                    quickEntry.setBounds(mouse.x, mouse.y,
+                            quickEntry.getPreferredSize().width,
+                            quickEntry.getPreferredSize().height);
+
+                    quickEntry.setText(e.getKeyChar() + "");
+                    quickEntry.setCaretPosition(1);
+                    quickEntry.grabFocus();
+
+                    quickEntry.setVisible(true);
+                }
             }
 
             @Override
@@ -150,12 +170,12 @@ public class EditorArea extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 /* Check if mouse movement passed the threshold to be considered a drag and not a click,
                     prevents slight movement right before a click registering as a drag */
-
                 if (!isDragging) {
                     int dx = Math.abs(e.getX() - pressScreenX);
                     int dy = Math.abs(e.getY() - pressScreenY);
                     if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
                         isDragging = true;
+                        quickEntry.setVisible(false);
                     } else {
                         return;
                     }
