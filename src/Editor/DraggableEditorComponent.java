@@ -183,7 +183,6 @@ public class DraggableEditorComponent extends JComponent {
                 }
             }
 
-
             @Override
             public void mouseMoved(MouseEvent e) {
                 dispatchToParent(e);
