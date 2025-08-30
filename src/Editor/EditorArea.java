@@ -18,6 +18,10 @@ import java.util.Optional;
 // ---------------------- // Editor Area // ---------------------- //
 public class EditorArea extends JPanel {
 
+    //static shared vars
+    public static EditorBottomTaskbar taskbar;
+
+
     // ---- public ---- //
     public double scale = 80;
     public double xPosition = 0;
@@ -33,7 +37,7 @@ public class EditorArea extends JPanel {
     public int pressScreenX;
     public int wireStartIndex = 0;
 
-    public EditorSlectionArea selectedArea;
+    public EditorSelectionArea selectedArea;
     public EditorSaveManager saveManager;
     public JFrame mainWindow;
     public java.util.List<Wire> wires = new ArrayList<>();
@@ -50,7 +54,6 @@ public class EditorArea extends JPanel {
     private static final int DRAG_THRESHOLD = 8;
     private boolean isDragging = false;
 
-    private EditorBottomTaskbar taskbar;
     private EditorComponentInformationConfigurator informationConfigurator;
     private EditorHistoryTrackerList editorHistoryList;
 
@@ -68,7 +71,7 @@ public class EditorArea extends JPanel {
         currentlyEditingFile = null;
         mainWindow = parent;
 
-        selectedArea = new EditorSlectionArea(this);
+        selectedArea = new EditorSelectionArea(this);
         history = new History(this);
         quickEntry = new EditorQuickEntryField(this);
         add(quickEntry);
@@ -107,14 +110,16 @@ public class EditorArea extends JPanel {
 
                     /* handles clicks on wires, checks for mouse clicks to the closest wire and
                        determines if it falls within the click threshold */
-                    boolean foundWire = false;
-                    for (Wire wire : wires) {
-                        if (wire.isNear(screenToWorld(e.getX(), e.getY())) && !foundWire) {
-                            wire.setFocus();
-                            foundWire = true;
-                            continue;
+                    if (e.getButton()==1) {
+                        boolean foundWire = false;
+                        for (Wire wire : wires) {
+                            if (wire.isNear(screenToWorld(e.getX(), e.getY())) && !foundWire) {
+                                wire.setFocus();
+                                foundWire = true;
+                                continue;
+                            }
+                            wire.loseFocus();
                         }
-                        wire.loseFocus();
                     }
 
                     creatingNewComponent = false;
@@ -147,19 +152,21 @@ public class EditorArea extends JPanel {
                 }
 
                 //for quickEntry field
-                if (e.getKeyCode() >= KeyEvent.VK_A && e.getKeyCode() <= KeyEvent.VK_Z) {
-                    Point mouse = MouseInfo.getPointerInfo().getLocation();
-                    SwingUtilities.convertPointFromScreen(mouse, EditorArea.this);
+                if (!e.isShiftDown() && !e.isControlDown() && !e.isAltDown()) {
+                    if (e.getKeyCode() >= KeyEvent.VK_A && e.getKeyCode() <= KeyEvent.VK_Z) {
+                        Point mouse = MouseInfo.getPointerInfo().getLocation();
+                        SwingUtilities.convertPointFromScreen(mouse, EditorArea.this);
 
-                    quickEntry.setBounds(mouse.x, mouse.y,
-                            quickEntry.getPreferredSize().width,
-                            quickEntry.getPreferredSize().height);
+                        quickEntry.setBounds(mouse.x, mouse.y,
+                                quickEntry.getPreferredSize().width,
+                                quickEntry.getPreferredSize().height);
 
-                    quickEntry.setText(e.getKeyChar() + "");
-                    quickEntry.setCaretPosition(1);
-                    quickEntry.grabFocus();
+                        quickEntry.setText(e.getKeyChar() + "");
+                        quickEntry.setCaretPosition(1);
+                        quickEntry.grabFocus();
 
-                    quickEntry.setVisible(true);
+                        quickEntry.setVisible(true);
+                    }
                 }
             }
 
@@ -179,7 +186,6 @@ public class EditorArea extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 /* Check if mouse movement passed the threshold to be considered a drag and not a click,
                     prevents slight movement right before a click registering as a drag */
-                System.out.println(e.getButton());
                 if (!isDragging && (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
                     int dx = Math.abs(e.getX() - pressScreenX);
                     int dy = Math.abs(e.getY() - pressScreenY);
@@ -223,6 +229,7 @@ public class EditorArea extends JPanel {
                 // reset the component value editor to display nothing on canvas clicked
                 informationConfigurator.setComponent(null);
                 currentFocusedComponent = null;
+                repaint();
             }
 
             @Override
@@ -242,6 +249,7 @@ public class EditorArea extends JPanel {
 
         this.addMouseWheelListener(e -> {
             quickEntry.setVisible(false);
+            selectedArea.isDragging = false;
 
             //handle mouse wheel scroll on canvas
             double oldScale = scale;
@@ -337,7 +345,7 @@ public class EditorArea extends JPanel {
 
     // ---------------------- // Component Editing Methods // ---------------------- //
     public void connectComponents(ElectricalComponent a, int aIndex, ElectricalComponent b, int bIndex, boolean addHistory) {
-        Wire w = new Wire(a, aIndex, b, bIndex);
+        Wire w = new Wire(this, a, aIndex, b, bIndex);
         wires.add(w);
         a.connect(b);
         if (addHistory) history.addEvent(History.Event.CREATED_WIRE, w.startIndex, w.endIndex, w);
@@ -584,7 +592,6 @@ public class EditorArea extends JPanel {
 
         //needs to be last
         selectedArea.paint((Graphics2D)g);
-
     }
 
     // ---------------------- // Getter+Setter Methods // ---------------------- //
@@ -595,10 +602,6 @@ public class EditorArea extends JPanel {
 
     public EditorComponentInformationConfigurator getInformationConfigurator() {
         return informationConfigurator;
-    }
-
-    public void setTaskBar(EditorBottomTaskbar taskbar) {
-        this.taskbar = taskbar;
     }
 
     public void setInformationConfigurator(EditorComponentInformationConfigurator iC) {

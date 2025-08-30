@@ -64,21 +64,23 @@ class EditorQuickEntryField extends JPanel {
         entry.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (!listModel.isEmpty() && suggestionList.getSelectedIndex() >= 0) {
-                        String data = suggestionList.getModel().getElementAt(suggestionList.getSelectedIndex());
-                        editor.setCreatingNewComponent(data);
-                        editor.repaint();
+                if (!e.isShiftDown() && !e.isControlDown() && !e.isAltDown()) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (!listModel.isEmpty() && suggestionList.getSelectedIndex() >= 0) {
+                            String data = suggestionList.getModel().getElementAt(suggestionList.getSelectedIndex());
+                            editor.setCreatingNewComponent(data);
+                            editor.repaint();
+                        }
+                        setVisible(false);
+                    } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        setVisible(false);
+                    } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                        int i = suggestionList.getSelectedIndex();
+                        if (i < listModel.size() - 1) suggestionList.setSelectedIndex(i + 1);
+                    } else if (e.getKeyCode() == KeyEvent.VK_UP) {
+                        int i = suggestionList.getSelectedIndex();
+                        if (i > 0) suggestionList.setSelectedIndex(i - 1);
                     }
-                    setVisible(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    setVisible(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    int i = suggestionList.getSelectedIndex();
-                    if (i < listModel.size() - 1) suggestionList.setSelectedIndex(i + 1);
-                } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    int i = suggestionList.getSelectedIndex();
-                    if (i > 0) suggestionList.setSelectedIndex(i - 1);
                 }
             }
         });

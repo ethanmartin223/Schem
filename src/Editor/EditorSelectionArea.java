@@ -6,15 +6,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-class EditorSlectionArea {
-    private boolean isDragging;
+class EditorSelectionArea {
+    public boolean isDragging;
     private int startDragX, startDragY;
     private int currentX, currentY;
     private final Color selectColor = new Color(255, 153, 0, 128);
     private final Color selectBorderColor = new Color(255, 153, 0, 255);
     private final TexturePaint stipple;
 
-    public EditorSlectionArea(JPanel parent) {
+    public EditorSelectionArea(JPanel parent) {
         isDragging = false;
 
         BufferedImage stippleImage = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
@@ -52,8 +52,8 @@ class EditorSlectionArea {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton()==3) {
-                    isDragging = false;
-                    parent.repaint();
+                isDragging = false;
+                parent.repaint();
                 }
             }
         };

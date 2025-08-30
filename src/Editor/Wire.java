@@ -12,15 +12,17 @@ public class Wire {
     public ElectricalComponent startComponent;
     public ElectricalComponent endComponent;
 
+    public EditorArea editor;
     public boolean isHighlighted = false;
 
     public int startIndex, endIndex;
 
-    public Wire(ElectricalComponent start, int startIndex, ElectricalComponent end, int endIndex) {
+    public Wire(EditorArea parent, ElectricalComponent start, int startIndex, ElectricalComponent end, int endIndex) {
         this.startComponent = start;
         this.endComponent = end;
         this.startIndex = startIndex;
         this.endIndex = endIndex;
+        editor = parent;
     }
 
     public void setFocus() {
@@ -29,10 +31,6 @@ public class Wire {
 
     public void loseFocus() {
         isHighlighted = false;
-    }
-
-    public Wire deepCopy() {
-        return new Wire(this.startComponent, this.startIndex, this.endComponent, this.endIndex);
     }
 
     public void draw(Graphics2D g, EditorArea editor) {

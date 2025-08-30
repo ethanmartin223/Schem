@@ -46,13 +46,13 @@ public class MainWindow extends JFrame {
         EditorComponentInformationConfigurator detailsPane = new EditorComponentInformationConfigurator(mainEditor);
         mainEditor.setInformationConfigurator(detailsPane); // allow access to sidebar from within maineditor
 
-        EditorBottomTaskbar taskbar = new EditorBottomTaskbar(mainEditor);
-        mainEditor.setTaskBar(taskbar); // for coordinate tracking purposes
-        add(taskbar, BorderLayout.SOUTH);
+        EditorArea.taskbar = new EditorBottomTaskbar(mainEditor);
+        add(EditorArea.taskbar, BorderLayout.SOUTH);
 
         JSplitPane leftSidePanelSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, detailsPane, editorHistoryList);
         leftSidePanelSplitPane.setOneTouchExpandable(true);
         leftSidePanelSplitPane.setResizeWeight(.5);
+
 
         JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSidePanelSplitPane, mainEditor);
         sp.setOneTouchExpandable(true);
