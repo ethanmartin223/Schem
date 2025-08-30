@@ -91,6 +91,14 @@ public class History {
         return futureHistoryEntries.getFirst();
     }
 
+    public void clear() {
+        pastHistoryEntries.clear();
+        futureHistoryEntries.clear();
+
+        editorHistoryList.revalidate();
+        editorHistoryList.repaint();
+    }
+
 
     public static enum Event {
         CREATED_NEW_COMPONENT,

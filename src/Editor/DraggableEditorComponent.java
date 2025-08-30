@@ -192,10 +192,6 @@ public class DraggableEditorComponent extends JComponent {
     }
 
     // ---------------------- // Getter+Setter Methods // ---------------------- //
-    private DraggableEditorComponent getSelf() {
-        return this;
-    }
-
     private void dispatchToParent(MouseEvent e) {
         Component parent = getParent();
         if (parent != null) {

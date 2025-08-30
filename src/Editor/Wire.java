@@ -43,9 +43,9 @@ public class Wire {
         Point endScreen = editor.worldToScreen(endWorld.x, endWorld.y);
 
         if (isHighlighted) {
-            for (int i = 5; i >= 1; i--) {
-                float width = (float) (editor.scale * 0.03 * i);
-                float alpha = Math.max(0.10f, 0.65f / i);
+            for (int i = 25; i >= 1; i--) {
+                float width = (float) (editor.scale * 0.006 * i);
+                float alpha = Math.max(0.0001f, .7f / i);
                 g.setColor(new Color(
                         HIGHLIGHT_COLOR.getRed(),
                         HIGHLIGHT_COLOR.getGreen(),
@@ -92,6 +92,13 @@ public class Wire {
 
     public boolean isHighlighted() {
         return isHighlighted;
+    }
+
+    @Override
+    public String toString() {
+        return "Wire(a:"+ElectricalComponent.allComponents.indexOf(startComponent)+"|b:"+
+                ElectricalComponent.allComponents.indexOf(endComponent)+"|sI:"+startIndex+
+                "|eI:"+endIndex+")";
     }
 
     public ElectricalComponent getStartComponent() {

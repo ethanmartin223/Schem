@@ -81,6 +81,12 @@ public class MainWindow extends JFrame {
 
     // ---------------------- // Main // ---------------------- //
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         MainWindowSplashScreen splash = new MainWindowSplashScreen("resources/generalAssets/wireworkssplash.png");
 
         //do loading shit after splash is already up

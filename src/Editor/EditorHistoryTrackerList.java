@@ -37,5 +37,4 @@ public class EditorHistoryTrackerList extends JPanel {
         historyList.revalidate();
         revalidate();
     }
-
 }

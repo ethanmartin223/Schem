@@ -22,13 +22,13 @@ public class ElectricalComponent {
 
     protected EditorArea editorArea;
     protected DraggableEditorComponent draggableEditorComponent;
-    private boolean isDeleted;
+    public boolean isDeleted;
     
     // ----------------------------------------------------- comp shit
     public static ArrayList<ElectricalComponent> allComponents = new ArrayList<>();
 
     private int resistance;
-    private ArrayList<ElectricalComponent> children;
+    public ArrayList<ElectricalComponent> children;
 
 
     public void connect(ElectricalComponent other) {
@@ -49,11 +49,6 @@ public class ElectricalComponent {
 
     public ArrayList<ElectricalComponent> getChildren() {
         return children;
-    }
-
-    @Override
-    public String toString() {
-        return "ElectricalComponent(" + id + "::"+allComponents.indexOf(this)+")";
     }
 
     public static void printConnectionMap() {
@@ -211,6 +206,14 @@ public class ElectricalComponent {
 
     public JPanel getInfoCard() {
         return infoCard;
+    }
+
+    @Override
+    public String toString() {
+         int[] c = new int[children.size()];
+         for (int i=0; i<children.size(); i++) c[i] = allComponents.indexOf(children.get(i));
+         return "ElectricalComponent(compId:"+allComponents.indexOf(this)+"|type:"+id+"|x:"+x+"|y:"+y+"|isDead:"+isDeleted+
+                 "|rot:"+draggableEditorComponent.orientation+"|children:"+Arrays.toString(c).replace(" ", "")+")";
     }
 
     // ---------- // INFO CARD METHODS // --------- //

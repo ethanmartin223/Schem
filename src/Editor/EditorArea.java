@@ -32,6 +32,7 @@ public class EditorArea extends JPanel {
     public int pressScreenX;
     public int wireStartIndex = 0;
 
+    public EditorSaveManager saveManager;
     public java.util.List<Wire> wires = new ArrayList<>();
     public ElectricalComponent wireStartComponent = null;
     public String creatingComponentID;
@@ -64,6 +65,7 @@ public class EditorArea extends JPanel {
         history = new History(this);
         quickEntry = new EditorQuickEntryField(this);
         add(quickEntry);
+        saveManager = new EditorSaveManager(this);
 
         // ---- Swing Functions ---- //
         setLayout(null);
@@ -231,6 +233,8 @@ public class EditorArea extends JPanel {
         });
 
         this.addMouseWheelListener(e -> {
+            quickEntry.setVisible(false);
+
             //handle mouse wheel scroll on canvas
             double oldScale = scale;
             double zoomFactor = e.getPreciseWheelRotation() < 0 ? 1.1 : 1 / 1.1;
@@ -324,12 +328,16 @@ public class EditorArea extends JPanel {
     }
 
     // ---------------------- // Component Editing Methods // ---------------------- //
-    public void connectComponents(ElectricalComponent a, int aIndex, ElectricalComponent b, int bIndex) {
+    public void connectComponents(ElectricalComponent a, int aIndex, ElectricalComponent b, int bIndex, boolean addHistory) {
         Wire w = new Wire(a, aIndex, b, bIndex);
         wires.add(w);
         a.connect(b);
-        history.addEvent(History.Event.CREATED_WIRE, w.startIndex, w.endIndex, w);
+        if (addHistory) history.addEvent(History.Event.CREATED_WIRE, w.startIndex, w.endIndex, w);
         repaint();
+    }
+
+    public void connectComponents(ElectricalComponent a, int aIndex, ElectricalComponent b, int bIndex) {
+        connectComponents(a, aIndex, b, bIndex, true);
     }
 
     public void enableWireMode() {
@@ -357,25 +365,41 @@ public class EditorArea extends JPanel {
         if (!removedWires.isEmpty())history.addEvent(History.Event.DELETED_CONNECTING_WIRES, eC.x, eC.y, eC);
         repaint();
     }
-
     //TODO: fix loading images into memory at random fuck-ass places. All images should be static and loaded
     // once, then shared
+
     public void setCreatingNewComponent(String id) {
         grabFocus();
         creatingNewComponent = true;
         creatingComponentID = id;
         creatingNewComponentImage = new ImageIcon("resources/"+id+".png").getImage();
     }
-
     //TODO: This shits as fucked as it looks. Should find a better way to do this
-    public void createNewComponent(double worldX, double worldY) throws
+
+    public DraggableEditorComponent createNewComponent(double worldX, double worldY, boolean addHistory) throws
             NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class compClass = ElectricalComponentIdentifier.findClassFromID(creatingComponentID);
-        history.addEvent(History.Event.CREATED_NEW_COMPONENT, worldX, worldY,
-                compClass.getDeclaredConstructor(EditorArea.class, double.class, double.class)
-                .newInstance(this, worldX, worldY));
+        ElectricalComponent component =  (ElectricalComponent) compClass.getDeclaredConstructor(EditorArea.class, double.class, double.class)
+                .newInstance(this, worldX, worldY);
+        if (addHistory) history.addEvent(History.Event.CREATED_NEW_COMPONENT, worldX, worldY, component);
+        return component.getDraggableEditorComponent();
     }
 
+    public DraggableEditorComponent createNewComponent(double worldX, double worldY) throws
+            NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        return createNewComponent(worldX, worldY, true);
+    }
+
+    public DraggableEditorComponent createNewComponent(String compId, double x, double y) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        return createNewComponent(compId, x, y, true);
+    }
+
+    public DraggableEditorComponent createNewComponent(String compId, double x, double y, boolean addHistory) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        this.creatingComponentID = compId;
+        DraggableEditorComponent c = createNewComponent(x, y, addHistory);
+        this.creatingComponentID = null;
+        return c;
+    }
 
     public void undo() {
         HistoryEntry lastEvent = history.getLastAndRemove();
@@ -495,8 +519,8 @@ public class EditorArea extends JPanel {
     }
 
 
-
     // ---------------------- // Draw all graphics // ---------------------- //
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -552,8 +576,8 @@ public class EditorArea extends JPanel {
 
     }
 
-
     // ---------------------- // Getter+Setter Methods // ---------------------- //
+
     public boolean getInWireMode() {
         return inWireMode;
     }
@@ -589,4 +613,5 @@ public class EditorArea extends JPanel {
             repaint();
         }
     }
+
 }

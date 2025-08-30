@@ -2,9 +2,11 @@ package Editor;
 
 import Editor.History.History;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.Optional;
 
 public class EditorTopToolBar extends JPanel {
@@ -109,6 +111,22 @@ public class EditorTopToolBar extends JPanel {
                         mainEditor.repaint();
                     } else if (text.equals("zoomfit")) {
                         mainEditor.zoomFit();
+                    } else if (text.equals("open")) {
+                        JFileChooser fileChooser = new JFileChooser();
+                        FileNameExtensionFilter filter = new FileNameExtensionFilter("WireWorks Save Files (*.wws)", "wws");
+                        fileChooser.setFileFilter(filter);
+                        fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+                        int result = fileChooser.showOpenDialog(null);
+                        if (result == JFileChooser.APPROVE_OPTION) {
+                            File f = fileChooser.getSelectedFile();
+                            mainEditor.saveManager.loadFileToEditor(f);
+                        }
+                    }else if (text.equals("run")) {
+                        System.out.println("Running Sim");
+                    }else if (text.equals("stop")) {
+                        System.out.println("Stopping Sim");
+                    }else if (text.equals("save")) {
+                        mainEditor.saveManager.saveFile("save.wws");
                     }
                 }
             });
