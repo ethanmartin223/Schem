@@ -119,6 +119,7 @@ public class EditorTopToolBar extends JPanel {
                         int result = fileChooser.showOpenDialog(null);
                         if (result == JFileChooser.APPROVE_OPTION) {
                             File f = fileChooser.getSelectedFile();
+                            mainEditor.currentlyEditingFile = f;
                             mainEditor.saveManager.loadFileToEditor(f);
                         }
                     }else if (text.equals("run")) {
@@ -126,7 +127,20 @@ public class EditorTopToolBar extends JPanel {
                     }else if (text.equals("stop")) {
                         System.out.println("Stopping Sim");
                     }else if (text.equals("save")) {
-                        mainEditor.saveManager.saveFile("save.wws");
+                        if (mainEditor.currentlyEditingFile == null){
+                            JFileChooser fileChooser = new JFileChooser();
+                            FileNameExtensionFilter filter = new FileNameExtensionFilter("WireWorks Save Files (*.wws)", "wws");
+                            fileChooser.setFileFilter(filter);
+                            fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+                            int result = fileChooser.showSaveDialog(null);
+                            if (result == JFileChooser.APPROVE_OPTION) {
+                                File f = fileChooser.getSelectedFile();
+                                mainEditor.currentlyEditingFile = f;
+                                mainEditor.saveManager.saveFile(f.getPath());
+                            }
+                        } else {
+                            mainEditor.saveManager.saveFile(mainEditor.currentlyEditingFile.getPath());
+                        }
                     }
                 }
             });

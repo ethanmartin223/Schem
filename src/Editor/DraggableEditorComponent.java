@@ -87,7 +87,7 @@ public class DraggableEditorComponent extends JComponent {
                 EditorComponentInformationConfigurator componentValueEditor = editor.getInformationConfigurator();
                 componentValueEditor.setComponent(parentElectricalComponent);
                 editor.currentFocusedComponent = electricalComponent.getDraggableEditorComponent();
-
+                editor.repaint();
             }
 
             @Override

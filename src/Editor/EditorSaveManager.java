@@ -71,8 +71,6 @@ public class EditorSaveManager {
     }
 
     public void loadFileToEditor(File file) {
-        ElectricalComponent.allComponents.clear();
-
         String data;
         try {data = getDataFromFile(file);}
         catch (IOException e) {throw new RuntimeException(e);}
@@ -104,6 +102,7 @@ public class EditorSaveManager {
                 try {
                     DraggableEditorComponent component = editor.createNewComponent(type, x, y, false);
                     component.orientation = rot;
+                    component.getElectricalComponent().rotateConnectionPoints(rot);
                 } catch (Exception ignored){
                     ignored.printStackTrace();
                 };
@@ -137,6 +136,9 @@ public class EditorSaveManager {
                 editor.connectComponents(a, aStart, b, bStart, false);
             }
         }
+        editor.mainWindow.setTitle("WireWorks V1.0 - "+editor.currentlyEditingFile.getName());
+        editor.zoomFit();
+        editor.repaint();
     }
 
     private int[] parseIntegerArray(String strArray) {
@@ -164,5 +166,6 @@ public class EditorSaveManager {
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write(compressed);
         } catch (IOException ignored) {}
+        editor.mainWindow.setTitle("WireWorks V1.0 - "+editor.currentlyEditingFile.getName());
     }
 }

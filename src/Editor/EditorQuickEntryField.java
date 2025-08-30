@@ -165,7 +165,10 @@ class EditorQuickEntryField extends JPanel {
         revalidate();
         repaint();
         Container p = getParent();
-        if (p != null) { p.revalidate(); p.repaint(); }
+        if (p != null) {
+            p.revalidate();
+            p.repaint();
+        }
     }
 
     public void setText(String s) { entry.setText(s); }

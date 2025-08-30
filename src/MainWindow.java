@@ -34,7 +34,7 @@ public class MainWindow extends JFrame {
 
         setJMenuBar(new EditorTopMenuBar());
 
-        EditorArea mainEditor = new EditorArea();
+        EditorArea mainEditor = new EditorArea(this);
         EditorSidebar sidebar = new EditorSidebar(mainEditor);
 
         EditorTopToolBar editorToolbar = new EditorTopToolBar(mainEditor);

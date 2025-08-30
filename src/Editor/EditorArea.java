@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +33,16 @@ public class EditorArea extends JPanel {
     public int pressScreenX;
     public int wireStartIndex = 0;
 
+    public EditorSlectionArea selectedArea;
     public EditorSaveManager saveManager;
+    public JFrame mainWindow;
     public java.util.List<Wire> wires = new ArrayList<>();
     public ElectricalComponent wireStartComponent = null;
     public String creatingComponentID;
 
     public boolean inWireMode = false;
     public boolean creatingNewComponent;
+    public File currentlyEditingFile;
 
     // ---- private ---- //
     protected History history;
@@ -56,12 +60,15 @@ public class EditorArea extends JPanel {
     private EditorQuickEntryField quickEntry;
 
     // ---------------------- // Constructor // ---------------------- //
-    public EditorArea() {
+    public EditorArea(JFrame parent) {
         // ---- init vars ---- //
         creatingNewComponent = false;
         creatingNewComponentImage = null;
         currentFocusedComponent = null;
+        currentlyEditingFile = null;
+        mainWindow = parent;
 
+        selectedArea = new EditorSlectionArea(this);
         history = new History(this);
         quickEntry = new EditorQuickEntryField(this);
         add(quickEntry);
@@ -172,7 +179,8 @@ public class EditorArea extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 /* Check if mouse movement passed the threshold to be considered a drag and not a click,
                     prevents slight movement right before a click registering as a drag */
-                if (!isDragging) {
+                System.out.println(e.getButton());
+                if (!isDragging && (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
                     int dx = Math.abs(e.getX() - pressScreenX);
                     int dy = Math.abs(e.getY() - pressScreenY);
                     if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
@@ -573,6 +581,9 @@ public class EditorArea extends JPanel {
         for (Wire wire : wires) {
             wire.draw((Graphics2D) g, this);
         }
+
+        //needs to be last
+        selectedArea.paint((Graphics2D)g);
 
     }
 
