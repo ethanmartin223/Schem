@@ -124,16 +124,23 @@ public class EditorArea extends JPanel {
 
                 // remove selected wire if delete key is pressed (if one is selected)
                 if (e.getKeyCode() == 127) { //delete key
-                    Optional<Wire> removedWire = wires.stream().filter(w -> w.isHighlighted).findAny();
-                    if (removedWire.isPresent()) {
-                        Wire rmWire = removedWire.get();
-                        rmWire.endComponent.disconnect(rmWire.startComponent);
-                        wires.remove(rmWire);
+                    deleteSelectedWires();
+                }
 
-                        //update edit history
-                        history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
-                        repaint();
-                    }
+                //if crtl (17) held do wire mode
+                if (e.getKeyCode() == 17) {
+                    inWireMode = true;
+                    setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                if (e.getKeyCode() == 17) {
+                    inWireMode = false;
+                    wireStartComponent = null;
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
             }
         });
@@ -143,6 +150,7 @@ public class EditorArea extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 /* Check if mouse movement passed the threshold to be considered a drag and not a click,
                     prevents slight movement right before a click registering as a drag */
+
                 if (!isDragging) {
                     int dx = Math.abs(e.getX() - pressScreenX);
                     int dy = Math.abs(e.getY() - pressScreenY);
@@ -154,11 +162,13 @@ public class EditorArea extends JPanel {
                 }
 
                 // update drag+canvas position variables
-                xDrag = (int) (xPosition + e.getX());
-                yDrag = (int) (yPosition + e.getY());
-                xPosition = lastReleasedPositionX - (xDrag - pressScreenX) / scale;
-                yPosition = lastReleasedPositionY - (yDrag - pressScreenY) / scale;
-                repaint();
+                if (isDragging) {
+                    xDrag = (int) (xPosition + e.getX());
+                    yDrag = (int) (yPosition + e.getY());
+                    xPosition = lastReleasedPositionX - (xDrag - pressScreenX) / scale;
+                    yPosition = lastReleasedPositionY - (yDrag - pressScreenY) / scale;
+                    repaint();
+                }
             }
 
             @Override
@@ -234,6 +244,49 @@ public class EditorArea extends JPanel {
                 undo();
             }
         });
+    }
+
+    public void zoomFit(){
+        //fits all components onto the screen and centers
+        double top = Double.MAX_VALUE;
+        double bottom = Double.MIN_VALUE;
+        double left = Double.MAX_VALUE;
+        double right = Double.MIN_VALUE;
+        if (getComponents().length == 0) return;
+        for (Component c : getComponents()) {
+            if (c instanceof DraggableEditorComponent) {
+                DraggableEditorComponent dec = ((DraggableEditorComponent)c);
+                double cx = dec.getWorldX();
+                double cy = dec.getWorldY();
+                left = Math.min(left, cx);
+                right = Math.max(right, cx+dec.getWidth()/ scale);
+                top = Math.min(top, cy);
+                bottom = Math.max(bottom, cy+(dec.getHeight()/ scale));
+            }
+        }
+        if (left==right && bottom==top) {
+            xPosition = left - (getWidth() / (2.0 * scale));
+            yPosition = top - (getHeight() / (2.0 * scale));
+
+            lastReleasedPositionY = yPosition;
+            lastReleasedPositionX = xPosition;
+        }
+        double worldWidth = (right - left) * 1.05;
+        double worldHeight = (bottom - top)* 1.05;
+
+        double scaleX = (getWidth()) / worldWidth;
+        double scaleY = (getHeight()) / worldHeight;
+        scale = Math.min(scaleX, scaleY);
+
+        double worldCenterX = (left + right) / 2.0;
+        double worldCenterY = (top + bottom) / 2.0;
+
+        xPosition = worldCenterX - (getWidth() / (2.0 * scale));
+        yPosition = worldCenterY - (getHeight() / (2.0 * scale));
+
+        lastReleasedPositionY = yPosition;
+        lastReleasedPositionX = xPosition;
+        repaint();
     }
 
 
@@ -504,5 +557,16 @@ public class EditorArea extends JPanel {
 
     public DraggableEditorComponent getFocusedComponent() {
         return currentFocusedComponent;
+    }
+
+    public void deleteSelectedWires() {
+        Optional<Wire> removedWire = wires.stream().filter(w -> w.isHighlighted).findAny();
+        if (removedWire.isPresent()) {
+            Wire rmWire = removedWire.get();
+            wires.remove(rmWire);
+            rmWire.endComponent.disconnect(rmWire.startComponent);
+            history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
+            repaint();
+        }
     }
 }

@@ -133,7 +133,7 @@ public class DraggableEditorComponent extends JComponent {
             public void mousePressed(MouseEvent e) {
 
                 // On mouse dragging this component move the component to the mouse
-                if (!editor.creatingNewComponent) {
+                if (!editor.creatingNewComponent && !editor.inWireMode) {
                     Point panelPoint = SwingUtilities.convertPoint(DraggableEditorComponent.this, e.getPoint(), editor);
                     Point2D.Double worldPoint = screenToWorld(panelPoint.x, panelPoint.y);
 
@@ -171,14 +171,16 @@ public class DraggableEditorComponent extends JComponent {
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (dragging) {
-                    Point panelPoint = SwingUtilities.convertPoint(DraggableEditorComponent.this, e.getPoint(), editor);
-                    Point2D.Double worldPoint = screenToWorld(panelPoint.x, panelPoint.y);
-                    setWorldPosition(worldPoint.x - offsetX, worldPoint.y - offsetY);
-                } else {
-                    dispatchToParent(e);
+                if (!editor.inWireMode){
+                    if (dragging) {
+                        Point panelPoint = SwingUtilities.convertPoint(DraggableEditorComponent.this, e.getPoint(), editor);
+                        Point2D.Double worldPoint = screenToWorld(panelPoint.x, panelPoint.y);
+                        setWorldPosition(worldPoint.x - offsetX, worldPoint.y - offsetY);
+                    } else {
+                        dispatchToParent(e);
+                    }
+                    editor.repaint();
                 }
-                editor.repaint();
             }
 
 

@@ -98,15 +98,7 @@ public class EditorTopToolBar extends JPanel {
                         if (removeComponent!=null) {
                             mainEditor.deleteComponent(removeComponent.getElectricalComponent());
                         }
-                        //duplicated from EditorArea under key 127 (wires)
-                        Optional<Wire> removedWire = mainEditor.wires.stream().filter(w -> w.isHighlighted).findAny();
-                        if (removedWire.isPresent()) {
-                            Wire rmWire = removedWire.get();
-                            mainEditor.wires.remove(rmWire);
-                            rmWire.endComponent.disconnect(rmWire.startComponent);
-                            mainEditor.history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
-                            mainEditor.repaint();
-                        }
+                        mainEditor.deleteSelectedWires();
                     } else if (text.equals("zoomcenter")) {
                         //resets zoom to starting values
                         mainEditor.xPosition = 0;
@@ -116,47 +108,7 @@ public class EditorTopToolBar extends JPanel {
                         mainEditor.lastReleasedPositionY = mainEditor.yPosition;
                         mainEditor.repaint();
                     } else if (text.equals("zoomfit")) {
-                        //fits all components onto the screen and centers
-                        double top = Double.MAX_VALUE;
-                        double bottom = Double.MIN_VALUE;
-                        double left = Double.MAX_VALUE;
-                        double right = Double.MIN_VALUE;
-                        if (mainEditor.getComponents().length == 0) return;
-                        for (Component c : mainEditor.getComponents()) {
-                            if (c instanceof DraggableEditorComponent) {
-                                System.out.println(c);
-                                DraggableEditorComponent dec = ((DraggableEditorComponent)c);
-                                double cx = dec.getWorldX();
-                                double cy = dec.getWorldY();
-                                left = Math.min(left, cx);
-                                right = Math.max(right, cx+dec.getWidth()/ mainEditor.scale);
-                                top = Math.min(top, cy);
-                                bottom = Math.max(bottom, cy+(dec.getHeight()/ mainEditor.scale));
-                            }
-                        }
-                        if (left==right && bottom==top) {
-                            mainEditor.xPosition = left - (mainEditor.getWidth() / (2.0 * mainEditor.scale));
-                            mainEditor.yPosition = top - (mainEditor.getHeight() / (2.0 * mainEditor.scale));
-
-                            mainEditor.lastReleasedPositionY = mainEditor.yPosition;
-                            mainEditor.lastReleasedPositionX = mainEditor.xPosition;
-                        }
-                        double worldWidth = (right - left) * 1.05;
-                        double worldHeight = (bottom - top)* 1.05;
-
-                        double scaleX = (mainEditor.getWidth()) / worldWidth;
-                        double scaleY = (mainEditor.getHeight()) / worldHeight;
-                        mainEditor.scale = Math.min(scaleX, scaleY);
-
-                        double worldCenterX = (left + right) / 2.0;
-                        double worldCenterY = (top + bottom) / 2.0;
-
-                        mainEditor.xPosition = worldCenterX - (mainEditor.getWidth() / (2.0 * mainEditor.scale));
-                        mainEditor.yPosition = worldCenterY - (mainEditor.getHeight() / (2.0 * mainEditor.scale));
-
-                        mainEditor.lastReleasedPositionY = mainEditor.yPosition;
-                        mainEditor.lastReleasedPositionX = mainEditor.xPosition;
-                        mainEditor.repaint();
+                        mainEditor.zoomFit();
                     }
                 }
             });
