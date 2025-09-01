@@ -46,8 +46,9 @@ public class MainWindow extends JFrame {
         EditorComponentInformationConfigurator detailsPane = new EditorComponentInformationConfigurator(mainEditor);
         mainEditor.setInformationConfigurator(detailsPane); // allow access to sidebar from within maineditor
 
-        EditorArea.taskbar = new EditorBottomTaskbar(mainEditor);
-        add(EditorArea.taskbar, BorderLayout.SOUTH);
+        EditorBottomTaskbar taskbar = new EditorBottomTaskbar(mainEditor);
+        mainEditor.setBottomTaskbar(taskbar);
+        add(taskbar, BorderLayout.SOUTH);
 
         JSplitPane leftSidePanelSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, detailsPane, editorHistoryList);
         leftSidePanelSplitPane.setOneTouchExpandable(true);
@@ -91,6 +92,8 @@ public class MainWindow extends JFrame {
 
         //do loading shit after splash is already up
         System.setProperty("sun.java2d.opengl", "true");
+//        System.setProperty("Dsun.java2d.ddscale", "true");
+
         MainWindow mw = new MainWindow();
 
         splash.setVisible(false);// hide splash after main window constructor finishes

@@ -19,8 +19,15 @@ import java.util.Optional;
 public class EditorArea extends JPanel {
 
     //static shared vars
-    public static EditorBottomTaskbar taskbar;
+    public EditorBottomTaskbar taskbar;
 
+    // ---- FPS Tracking ---- //
+    private long lastTime = System.nanoTime();
+    private double fps = 0;
+    private final double smoothing = 0.9; // higher = smoother/slower updates
+
+
+    public boolean DEBUG_REAL_TIME_RENDERING = true;
 
     // ---- public ---- //
     public double scale = 80;
@@ -203,6 +210,7 @@ public class EditorArea extends JPanel {
                     yDrag = (int) (yPosition + e.getY());
                     xPosition = lastReleasedPositionX - (xDrag - pressScreenX) / scale;
                     yPosition = lastReleasedPositionY - (yDrag - pressScreenY) / scale;
+
                     repaint();
                 }
             }
@@ -254,9 +262,9 @@ public class EditorArea extends JPanel {
             //handle mouse wheel scroll on canvas
             double oldScale = scale;
             double zoomFactor = e.getPreciseWheelRotation() < 0 ? 1.1 : 1 / 1.1;
-            scale *= zoomFactor;
-            if (scale < 1) scale = 1; // lock scroll to positive values
-
+            scale*=zoomFactor;
+            if (scale < 10) scale = 10; // lock scroll to positive values
+            if (scale >= 800) scale = 800;
 
             //I forget what this does. Its probably important tho
             //      - 8/29/25 im pretty sure it centers the zoom
@@ -540,6 +548,15 @@ public class EditorArea extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        //fps
+        long currentTime = System.nanoTime();
+        double deltaSeconds = (currentTime - lastTime) / 1_000_000_000.0;
+        lastTime = currentTime;
+
+        double currentFPS = 1.0 / deltaSeconds;
+        fps = smoothing * fps + (1 - smoothing) * currentFPS; // exponential smoothing
+
         g.setColor(Color.LIGHT_GRAY);
 
         int width = getWidth();
@@ -592,7 +609,14 @@ public class EditorArea extends JPanel {
 
         //needs to be last
         selectedArea.paint((Graphics2D)g);
-    }
+
+        // --- draw FPS ---
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+        g.drawString(String.format("%.1f FPS", fps), 10, getHeight() - 10);
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        toolkit.sync();
+}
 
     // ---------------------- // Getter+Setter Methods // ---------------------- //
 
@@ -626,6 +650,10 @@ public class EditorArea extends JPanel {
             history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
             repaint();
         }
+    }
+
+    public void setBottomTaskbar(EditorBottomTaskbar taskbar) {
+        this.taskbar = taskbar;
     }
 
 }

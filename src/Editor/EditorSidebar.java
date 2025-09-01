@@ -2,8 +2,10 @@ package Editor;
 
 import ElectronicsBackend.ElectricalComponentIdentifier;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -64,8 +66,8 @@ public class EditorSidebar extends JPanel {
 
         JLabel iconLabel;
         try {
-            ImageIcon icon = new ImageIcon("resources/" + id + ".png");
-            Image scaled = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+            Image scaled =  ImageIO.read(new File("resources/"+id+".png"))
+                    .getScaledInstance(20, 20, Image.SCALE_SMOOTH);
             iconLabel = new JLabel(new ImageIcon(scaled));
         } catch (Exception e) {
             iconLabel = new JLabel("•");

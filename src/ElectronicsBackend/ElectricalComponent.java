@@ -3,9 +3,12 @@ package ElectronicsBackend;
 import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -133,8 +136,12 @@ public class ElectricalComponent {
 
     public ElectricalComponent(EditorArea eA, String stringId, double worldX, double worldY) {
         id = stringId;
-        baseImage = new ImageIcon("resources/"+stringId+".png").getImage();
-        selectedImage = new ImageIcon("resources/"+stringId+"Selected.png").getImage();
+        try {
+            baseImage = ImageIO.read(new File("resources/"+stringId+".png"));
+            selectedImage = ImageIO.read(new File("resources/"+stringId+"Selected.png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         x = worldX;
         y = worldY;
