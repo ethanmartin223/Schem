@@ -656,4 +656,13 @@ public class EditorArea extends JPanel {
         this.taskbar = taskbar;
     }
 
+    public void reset() {
+        for (Component c : getComponents()) {
+            if (c instanceof DraggableEditorComponent) {
+                deleteComponent(((DraggableEditorComponent) c).getElectricalComponent());
+            }
+        }
+        history.clear();
+        editorHistoryList.removeAllItems();
+    }
 }

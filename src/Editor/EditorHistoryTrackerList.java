@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 public class EditorHistoryTrackerList extends JPanel {
@@ -37,4 +38,13 @@ public class EditorHistoryTrackerList extends JPanel {
         historyList.revalidate();
         revalidate();
     }
+
+    public void removeAllItems() {
+        historyData.clear();
+        futureHistoryData.clear();
+        historyList.setListData(historyData.toArray(new String[historyData.size()]));
+        futureHistoryList.setListData(futureHistoryData.toArray(new String[futureHistoryData.size()]));
+        revalidate();
+
+     }
 }

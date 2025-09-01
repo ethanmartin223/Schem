@@ -71,6 +71,7 @@ public class EditorSaveManager {
     }
 
     public void loadFileToEditor(File file) {
+        editor.reset();
         String data;
         try {data = getDataFromFile(file);}
         catch (IOException e) {throw new RuntimeException(e);}

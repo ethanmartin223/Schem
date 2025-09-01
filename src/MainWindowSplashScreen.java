@@ -18,6 +18,7 @@ public class MainWindowSplashScreen extends JFrame {
         setVisible(true);
     }
 
+
     static class ImagePanel extends JPanel {
         private BufferedImage image;
 
