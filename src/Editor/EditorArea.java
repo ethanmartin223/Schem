@@ -3,6 +3,8 @@ package Editor;
 // ---------------------- // Imports // ---------------------- //
 import Editor.History.History;
 import Editor.History.HistoryEntry;
+import ElectricalComponents.Ground;
+import ElectricalComponents.PowerSupply;
 import ElectronicsBackend.*;
 
 import javax.swing.*;
@@ -14,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 // ---------------------- // Editor Area // ---------------------- //
 public class EditorArea extends JPanel {
@@ -684,4 +687,30 @@ public class EditorArea extends JPanel {
         history.clear();
         editorHistoryList.removeAllItems();
     }
+
+    public void highlightBestPath() {
+        Stream<ElectricalComponent> powerSupplies = ElectricalComponent.allComponents.stream().filter(e -> e instanceof PowerSupply);
+        Stream<ElectricalComponent> grounds = ElectricalComponent.allComponents.stream().filter(e -> e instanceof Ground);
+
+        for (ElectricalComponent p : powerSupplies.toList()) {
+            for (ElectricalComponent g : grounds.toList()) {
+                highlight(p, g);
+            }
+        }
+    }
+
+    private void highlight(ElectricalComponent start, ElectricalComponent end) {
+        java.util.List<ElectricalComponent> bestPath = ElectricalComponent.findPathOfLeastResistance(start, end);
+
+
+        for (ElectricalComponent c : bestPath) {
+            c.getDraggableEditorComponent().setBackground(new Color(144, 238, 144)); // light green
+            c.getDraggableEditorComponent().setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+        }
+
+        repaint();
+    }
+
 }
+
+
