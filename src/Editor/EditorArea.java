@@ -109,10 +109,10 @@ public class EditorArea extends JPanel {
                     if (creatingNewComponent) {
                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                         try {
-                            double x = ((pressScreenX - (scale / 2)) / scale) + xPosition;
-                            double y = ((pressScreenY - (scale / 2)) / scale) + yPosition;
+                            double x = ((e.getX() - (scale / 2)) / scale) + xPosition;
+                            double y = ((e.getY() - (scale / 2)) / scale) + yPosition;
                             createNewComponent(x, y);
-                        } catch (Exception ignored) {} // needed because of how fucked createNewComponent is
+                        } catch (Exception ignored) {}
                     }
 
                     /* handles clicks on wires, checks for mouse clicks to the closest wire and
@@ -496,51 +496,68 @@ public class EditorArea extends JPanel {
 
     public void redo() {
         HistoryEntry lastEvent = history.getFutureAndRemove();
-        if (lastEvent==null) return;
-        System.out.println(lastEvent.event);
-        //redo deleting a component that was attached to wires
-        //TODO: this shit don't fucking work
-        if (history.getLastFromFuture().event== History.Event.DELETED_CONNECTING_WIRES) {
-            ElectricalComponent component = (ElectricalComponent) lastEvent.component;
-            component.setDeleted(true);
-            remove(component.getDraggableEditorComponent());
+        if (lastEvent == null) return;
 
-            List<Wire> removedWires = wires.stream()
-                    .filter(w -> w.endComponent == component || w.startComponent == component)
-                    .toList();
-            wires.removeAll(removedWires);
+        switch (lastEvent.event) {
 
+            case History.Event.DELETED_CONNECTING_WIRES:
+                ElectricalComponent deletedComp = (ElectricalComponent) lastEvent.component;
+                deletedComp.setDeleted(true);
+                remove(deletedComp.getDraggableEditorComponent());
+
+                List<Wire> removedWires = wires.stream()
+                        .filter(w -> w.endComponent == deletedComp || w.startComponent == deletedComp)
+                        .toList();
+                for (Wire w : removedWires) {
+                    wires.remove(w);
+                    w.endComponent.disconnect(w.startComponent);
+                }
+                break;
+
+            case History.Event.DELETED_COMPONENT:
+                ElectricalComponent comp = (ElectricalComponent) lastEvent.component;
+                comp.setDeleted(true);
+                remove(comp.getDraggableEditorComponent());
+                ElectricalComponent.allComponents.remove(comp);
+                break;
+
+            case History.Event.DELETED_WIRE:
+                Wire wire = (Wire) lastEvent.component;
+                wires.remove(wire);
+                wire.endComponent.disconnect(wire.startComponent);
+                break;
+
+            case History.Event.CREATED_NEW_COMPONENT:
+                ElectricalComponent newComp = (ElectricalComponent) lastEvent.component;
+                newComp.setDeleted(false);
+                ElectricalComponent.allComponents.add(newComp);
+                add(newComp.getDraggableEditorComponent());
+                break;
+
+            case History.Event.CREATED_WIRE:
+                Wire newWire = (Wire) lastEvent.component;
+                wires.add(newWire);
+                newWire.endComponent.connect(newWire.startComponent);
+                break;
+
+            case History.Event.MOVED_COMPONENT:
+                ElectricalComponent movedComp = (ElectricalComponent) lastEvent.component;
+                movedComp.getDraggableEditorComponent()
+                        .setWorldPosition(lastEvent.editLocationX, lastEvent.editLocationY);
+                break;
+
+            case History.Event.ROTATED_COMPONENT:
+                DraggableEditorComponent rotated = ((ElectricalComponent) lastEvent.component)
+                        .getDraggableEditorComponent();
+                rotated.orientation = lastEvent.rotation;
+                ((ElectricalComponent) lastEvent.component).rotateConnectionPoints(lastEvent.rotation);
+                break;
         }
 
-        // redo deleting component
-        if (lastEvent.event == History.Event.DELETED_COMPONENT) {
-            ElectricalComponent component = (ElectricalComponent) lastEvent.component;
-            component.setDeleted(true);
-            remove(component.getDraggableEditorComponent());
-        }
-
-        // redo deleting wire
-        if (lastEvent.event == History.Event.DELETED_WIRE) {
-            Wire wire = (Wire) lastEvent.component;
-            wires.remove(wire);
-        }
-
-        // redo creating component
-        if (lastEvent.event == History.Event.CREATED_NEW_COMPONENT) {
-            ElectricalComponent component = (ElectricalComponent) lastEvent.component;
-            component.setDeleted(false);
-            add(component.getDraggableEditorComponent());
-        }
-
-        // redo creating wire
-        if (lastEvent.event == History.Event.CREATED_WIRE) {
-            Wire wire = (Wire) lastEvent.component;
-            wires.add(wire);
-        }
-
-        editorHistoryList.addEntry(lastEvent.event+" " +lastEvent.componentType.getCanonicalName());
+        editorHistoryList.addEntry("REDO " + lastEvent.event + " " + lastEvent.componentType.getCanonicalName());
         repaint();
     }
+
 
 
     // ---------------------- // Draw all graphics // ---------------------- //
@@ -555,7 +572,7 @@ public class EditorArea extends JPanel {
         lastTime = currentTime;
 
         double currentFPS = 1.0 / deltaSeconds;
-        fps = smoothing * fps + (1 - smoothing) * currentFPS; // exponential smoothing
+        fps = smoothing * fps + (1 - smoothing) * currentFPS;
 
         g.setColor(Color.LIGHT_GRAY);
 
