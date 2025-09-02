@@ -394,6 +394,8 @@ public class EditorArea extends JPanel {
 
     public void setCreatingNewComponent(String id) {
         grabFocus();
+        inWireMode = false;
+        wireStartComponent = null;
         creatingNewComponent = true;
         creatingComponentID = id;
         creatingNewComponentImage = new ImageIcon("resources/"+id+".png").getImage();
