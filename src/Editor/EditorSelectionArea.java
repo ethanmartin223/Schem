@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.HashSet;
+import java.util.Set;
 
 class EditorSelectionArea {
     public boolean isDragging;
@@ -13,9 +15,15 @@ class EditorSelectionArea {
     private final Color selectColor = new Color(255, 153, 0, 128);
     private final Color selectBorderColor = new Color(255, 153, 0, 255);
     private final TexturePaint stipple;
+    private EditorArea editor;
 
-    public EditorSelectionArea(JPanel parent) {
+    public HashSet<DraggableEditorComponent> multiselected;
+
+    public EditorSelectionArea(EditorArea editorArea) {
         isDragging = false;
+        editor = editorArea;
+
+        multiselected = new HashSet<>();
 
         BufferedImage stippleImage = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < stippleImage.getHeight(); y++) {
@@ -36,7 +44,7 @@ class EditorSelectionArea {
                     startDragY = e.getY();
                     currentX = startDragX;
                     currentY = startDragY;
-                    parent.repaint();
+                    editor.repaint();
                 }
             }
 
@@ -45,7 +53,7 @@ class EditorSelectionArea {
                 if (isDragging) {
                     currentX = e.getX();
                     currentY = e.getY();
-                    parent.repaint();
+                    editor.repaint();
                 }
             }
 
@@ -53,13 +61,41 @@ class EditorSelectionArea {
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton()==3) {
                 isDragging = false;
-                parent.repaint();
+                Rectangle bounds = new Rectangle(startDragX, startDragY,
+                        currentX-startDragX, currentY-startDragY);
+                clearMultiSelected();
+                for (Component c : editor.getComponents()) {
+                    if (c instanceof DraggableEditorComponent component) {
+                        if (bounds.getBounds().contains(component.getX()+component.getWidth()/2,
+                                component.getY()+component.getHeight()/2)) {
+                            component.isMultiSelected = true;
+                            multiselected.add(component);
+                        }
+                    }
+                }
+//                for (Wire w : (editor.wires)) {
+//                    DraggableEditorComponent a = w.getStartComponent().getDraggableEditorComponent();
+//                    DraggableEditorComponent b = w.getEndComponent().getDraggableEditorComponent()
+//                    if (bounds.getBounds().contains(
+//                            w.startComponent.getX()+w.startComponent.getY())) {
+//                         w.isMultiSelected = true;
+//                    }
+//                }
+
+                editor.repaint();
                 }
             }
         };
 
-        parent.addMouseListener(mouseHandler);
-        parent.addMouseMotionListener(mouseHandler);
+        editor.addMouseListener(mouseHandler);
+        editor.addMouseMotionListener(mouseHandler);
+    }
+
+    public void clearMultiSelected() {
+        for (DraggableEditorComponent component : multiselected) {
+            component.isMultiSelected = false;
+        }
+        multiselected.clear();
     }
 
     public void paint(Graphics2D g2d) {

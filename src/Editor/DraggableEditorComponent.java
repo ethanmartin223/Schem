@@ -33,6 +33,8 @@ public class DraggableEditorComponent extends JComponent {
     private double lastXLocationBeforeDrag;
     private double lastYLocationBeforeDrag;
 
+    public boolean isMultiSelected;
+
     // ---------------------- // Constructor // ---------------------- //
     public DraggableEditorComponent(EditorArea editor, Image image, Image selectedImage, double worldX, double worldY,
                                     ElectricalComponent parentElectricalComponent) {
@@ -52,6 +54,8 @@ public class DraggableEditorComponent extends JComponent {
 
         this.lastXLocationBeforeDrag = worldX;
         this.lastYLocationBeforeDrag = worldY;
+
+        this.isMultiSelected = false;
 
         // ---- Swing Functions ---- //
         updateBounds();
@@ -272,9 +276,10 @@ public class DraggableEditorComponent extends JComponent {
         electricalComponent.y = worldY;
     }
 
+
     @Override
     protected void paintComponent(Graphics g) {
-        Image imgToDraw = isFocusOwner() ? selectedImage : image;
+        Image imgToDraw = isFocusOwner()||isMultiSelected? selectedImage : image;
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);

@@ -17,12 +17,16 @@ public class Wire {
 
     public int startIndex, endIndex;
 
+    public boolean isMultiSelected;
+
     public Wire(EditorArea parent, ElectricalComponent start, int startIndex, ElectricalComponent end, int endIndex) {
         this.startComponent = start;
         this.endComponent = end;
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         editor = parent;
+
+        isMultiSelected = false;
     }
 
     public void setFocus() {
@@ -45,7 +49,7 @@ public class Wire {
         Point startScreen = editor.worldToScreen(startWorld.x, startWorld.y);
         Point endScreen = editor.worldToScreen(endWorld.x, endWorld.y);
 
-        if (isHighlighted) {
+        if (isHighlighted || isMultiSelected) {
             for (int i = 25; i >= 1; i--) {
                 float width = (float) (editor.scale * 0.006 * i);
                 float alpha = Math.max(0.0001f, .7f / i);

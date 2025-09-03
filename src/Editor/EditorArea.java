@@ -240,6 +240,11 @@ public class EditorArea extends JPanel {
                 // reset the component value editor to display nothing on canvas clicked
                 informationConfigurator.setComponent(null);
                 currentFocusedComponent = null;
+                for (Component c : getComponents()) {
+                    if (c instanceof DraggableEditorComponent component) {
+                        component.isMultiSelected = false;
+                    }
+                }
                 repaint();
             }
 
