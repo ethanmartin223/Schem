@@ -19,9 +19,13 @@ public class PowerSupply extends ElectricalComponent {
     }
 
     @Override
-    public void initInfoCard() {
+    public void initInfoCard() { // Power Supply
         styleInfoCard();
-        addEntryToInfoCard("Supply Voltage", 5);
-        addDropdownToInfoCard("Power Supply Type", new String[] {"AC", "DC"});
+        addEntryToInfoCard("Voltage (V)", 6);
+        addEntryToInfoCard("Current Limit (mA)", 6);
+        addEntryToInfoCard("Ripple Voltage (mV)", 6);
+        addEntryToInfoCard("Internal Resistance (Ω)", 6);
+        addCheckboxToInfoCard("Enable Noise Simulation");
     }
+
 }

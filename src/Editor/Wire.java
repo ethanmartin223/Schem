@@ -34,6 +34,11 @@ public class Wire {
     }
 
     public void draw(Graphics2D g, EditorArea editor) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
         Point2D.Double startWorld = startComponent.getConnectionPointsAsWorldPoints().get(startIndex);
         Point2D.Double endWorld = endComponent.getConnectionPointsAsWorldPoints().get(endIndex);
 
@@ -44,20 +49,20 @@ public class Wire {
             for (int i = 25; i >= 1; i--) {
                 float width = (float) (editor.scale * 0.006 * i);
                 float alpha = Math.max(0.0001f, .7f / i);
-                g.setColor(new Color(
+                g2d.setColor(new Color(
                         HIGHLIGHT_COLOR.getRed(),
                         HIGHLIGHT_COLOR.getGreen(),
                         HIGHLIGHT_COLOR.getBlue(),
                         Math.min(255, (int)(alpha * 255))
                 ));
-                g.setStroke(new BasicStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                g.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
+                g2d.setStroke(new BasicStroke(width,  BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
             }
         }
 
-        g.setColor(Color.BLACK);
-        g.setStroke(new BasicStroke((float) (editor.scale * 0.040)));
-        g.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke((float) (editor.scale * 0.040), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
     }
 
 

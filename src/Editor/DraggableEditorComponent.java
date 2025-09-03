@@ -73,6 +73,13 @@ public class DraggableEditorComponent extends JComponent {
                     editor.repaint(); // to avoid wire not getting repainted
                 }
 
+                if (e.getKeyCode() == 17) { // on wire mode grab focus
+                    editor.grabFocus();
+                    editor.inWireMode = true;
+                    editor.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                    editor.repaint();
+                }
+
                 // On press key "del" delete this component
                 if (e.getKeyCode() == 127) { //delete key
                     editor.deleteComponent(parentElectricalComponent);

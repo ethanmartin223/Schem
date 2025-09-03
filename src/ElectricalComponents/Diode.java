@@ -20,8 +20,12 @@ public class Diode extends ElectricalComponent {
     @Override
     public void initInfoCard() {
         styleInfoCard();
-        addEntryToInfoCard("Base Bias", 10);
+        addEntryToInfoCard("Forward Voltage (V)", 6);
+        addEntryToInfoCard("Reverse Breakdown Voltage (V)", 8);
+        addEntryToInfoCard("Max Current (mA)", 6);
         addCheckboxToInfoCard("Is Shorted");
         addCheckboxToInfoCard("Is Open");
+        addCheckboxToInfoCard("Reverse Leakage Enabled");
     }
+
 }

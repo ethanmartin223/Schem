@@ -20,8 +20,12 @@ public class ZenerDiode extends ElectricalComponent {
     @Override
     public void initInfoCard() {
         styleInfoCard();
-        addEntryToInfoCard("Base Bias", 10);
+        addEntryToInfoCard("Zener Voltage (V)", 6);
+        addEntryToInfoCard("Max Current (mA)", 6);
+        addEntryToInfoCard("Dynamic Resistance (Ω)", 6);
+        addCheckboxToInfoCard("Temperature Compensation Enabled");
         addCheckboxToInfoCard("Is Shorted");
         addCheckboxToInfoCard("Is Open");
     }
+
 }

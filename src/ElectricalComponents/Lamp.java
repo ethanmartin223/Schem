@@ -17,4 +17,14 @@ public class Lamp extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addEntryToInfoCard("Rated Voltage (V)", 6);
+        addEntryToInfoCard("Current Draw (mA)", 6);
+        addEntryToInfoCard("Brightness (%)", 4);
+        addCheckboxToInfoCard("Is Burnt Out");
+        addCheckboxToInfoCard("Is Flickering");
+    }
+
 }

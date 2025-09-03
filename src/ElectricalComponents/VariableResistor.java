@@ -17,4 +17,14 @@ public class VariableResistor extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() { // Variable Resistor
+        styleInfoCard();
+        addEntryToInfoCard("Resistance (Ω)", 8);
+        addEntryToInfoCard("Wiper Position (%)", 4);
+        addEntryToInfoCard("Tolerance (%)", 4);
+        addDropdownToInfoCard("Type", new String[]{"Potentiometer", "Rheostat", "Trimpot"});
+    }
+
+
 }

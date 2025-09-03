@@ -19,12 +19,13 @@ public class Resistor extends ElectricalComponent {
     }
 
     @Override
-    public void initInfoCard() {
+    public void initInfoCard() { // Resistor
         styleInfoCard();
-        addEntryToInfoCard("Resistance", 10);
-        addEntryToInfoCard("Tolerance", 10);
-        addDropdownToInfoCard("Resistor Type", new String[] {"Ceramic", "Carbon", "Foil"});
-        addCheckboxToInfoCard("Is Shorted");
-        addCheckboxToInfoCard("Is Open");
+        addEntryToInfoCard("Resistance (Ω)", 8);
+        addEntryToInfoCard("Tolerance (%)", 4);
+        addEntryToInfoCard("Power Rating (W)", 5);
+        addDropdownToInfoCard("Material", new String[] {"Carbon Film", "Metal Film", "Wirewound"});
+        addCheckboxToInfoCard("Is Burnt Out");
     }
+
 }

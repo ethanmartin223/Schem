@@ -18,4 +18,13 @@ public class NANDGate extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addCheckboxToInfoCard("Inverted Output");
+        addCheckboxToInfoCard("Enable Propagation Delay");
+        addEntryToInfoCard("Propagation Delay (ns)", 5);
+        addEntryToInfoCard("Fan-In Limit", 4);
+    }
+
 }

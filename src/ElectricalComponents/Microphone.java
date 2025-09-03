@@ -17,4 +17,15 @@ public class Microphone extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addEntryToInfoCard("Sensitivity (mV/Pa)", 6);
+        addEntryToInfoCard("Impedance (Ω)", 8);
+        addEntryToInfoCard("Frequency Response Low (Hz)", 6);
+        addEntryToInfoCard("Frequency Response High (Hz)", 6);
+        addCheckboxToInfoCard("Is Muted");
+    }
+
+
 }

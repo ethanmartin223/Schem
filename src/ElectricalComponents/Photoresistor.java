@@ -17,4 +17,13 @@ public class Photoresistor extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addEntryToInfoCard("Resistance in Dark (Ω)", 8);
+        addEntryToInfoCard("Resistance in Light (Ω)", 8);
+        addEntryToInfoCard("Response Time (ms)", 6);
+        addCheckboxToInfoCard("Temperature Dependent");
+    }
+
 }

@@ -18,4 +18,18 @@ public class PnpTransistor extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addEntryToInfoCard("Base Bias (V)", 6);
+        addEntryToInfoCard("Emitter Current (mA)", 6);
+        addEntryToInfoCard("Gain (hFE)", 6);
+        addEntryToInfoCard("Leakage Current (μA)", 6);
+        addDropdownToInfoCard("Mode", new String[] {"Cutoff", "Active", "Saturation"});
+        addCheckboxToInfoCard("Thermal Runaway Protection");
+        addCheckboxToInfoCard("Is Shorted");
+        addCheckboxToInfoCard("Is Open");
+    }
+
+
 }

@@ -16,4 +16,12 @@ public class Ground extends ElectricalComponent {
         pins.add(new Point2D.Double(0.1, .5));
         setConnectionPoints(pins);
     }
+
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addCheckboxToInfoCard("Reference Enabled");
+        addEntryToInfoCard("Ground Offset (mV)", 6);
+    }
+
 }

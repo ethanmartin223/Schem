@@ -155,7 +155,7 @@ public class EditorArea extends JPanel {
                     deleteSelectedWires();
                 }
 
-                //if crtl (17) held do wire mode
+                //if ctrl (17) held do wire mode
                 if (e.getKeyCode() == 17) {
                     inWireMode = true;
                     setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));

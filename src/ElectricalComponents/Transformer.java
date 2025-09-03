@@ -19,4 +19,14 @@ public class Transformer extends ElectricalComponent {
         setConnectionPoints(pins);
     }
 
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+        addEntryToInfoCard("Primary Turns", 6);
+        addEntryToInfoCard("Secondary Turns", 6);
+        addEntryToInfoCard("Core Material", 12);
+        addEntryToInfoCard("Efficiency (%)", 4);
+        addCheckboxToInfoCard("Has Center Tap");
+    }
+
 }
