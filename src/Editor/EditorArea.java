@@ -121,6 +121,7 @@ public class EditorArea extends JPanel {
                     /* handles clicks on wires, checks for mouse clicks to the closest wire and
                        determines if it falls within the click threshold */
                     if (e.getButton()==1) {
+                        selectedArea.clearMultiSelected();
                         boolean foundWire = false;
                         for (Wire wire : wires) {
                             if (wire.isNear(screenToWorld(e.getX(), e.getY())) && !foundWire) {

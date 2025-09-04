@@ -1,12 +1,10 @@
 package Editor;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
-import java.util.Set;
 
 class EditorSelectionArea {
     public boolean isDragging;
@@ -17,13 +15,17 @@ class EditorSelectionArea {
     private final TexturePaint stipple;
     private EditorArea editor;
 
-    public HashSet<DraggableEditorComponent> multiselected;
+    public HashSet<DraggableEditorComponent> multiSelected;
 
     public EditorSelectionArea(EditorArea editorArea) {
         isDragging = false;
         editor = editorArea;
+        startDragX = Integer.MAX_VALUE;
+        startDragY = Integer.MAX_VALUE;
+        currentX = Integer.MAX_VALUE;
+        currentY = Integer.MAX_VALUE;
 
-        multiselected = new HashSet<>();
+        multiSelected = new HashSet<>();
 
         BufferedImage stippleImage = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < stippleImage.getHeight(); y++) {
@@ -39,6 +41,7 @@ class EditorSelectionArea {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == 3) {
+                    editor.grabFocus();
                     isDragging = true;
                     startDragX = e.getX();
                     startDragY = e.getY();
@@ -59,30 +62,34 @@ class EditorSelectionArea {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.getButton()==3) {
-                isDragging = false;
-                Rectangle bounds = new Rectangle(startDragX, startDragY,
-                        currentX-startDragX, currentY-startDragY);
-                clearMultiSelected();
-                for (Component c : editor.getComponents()) {
-                    if (c instanceof DraggableEditorComponent component) {
-                        if (bounds.getBounds().contains(component.getX()+component.getWidth()/2,
-                                component.getY()+component.getHeight()/2)) {
-                            component.isMultiSelected = true;
-                            multiselected.add(component);
+                if (e.getButton()==3 && isDragging) {
+                    clearMultiSelected();
+                    for (Wire w : (editor.wires)) {
+                        w.loseFocus();
+                    }
+
+                    isDragging = false;
+                    Rectangle bounds = new Rectangle(startDragX, startDragY,
+                            currentX-startDragX, currentY-startDragY);
+                    for (Component c : editor.getComponents()) {
+                        if (c instanceof DraggableEditorComponent component) {
+                            if (bounds.getBounds().contains(component.getX()+component.getWidth()/2,
+                                    component.getY()+component.getHeight()/2)) {
+                                component.isMultiSelected = true;
+                                multiSelected.add(component);
+                            }
                         }
                     }
-                }
-//                for (Wire w : (editor.wires)) {
-//                    DraggableEditorComponent a = w.getStartComponent().getDraggableEditorComponent();
-//                    DraggableEditorComponent b = w.getEndComponent().getDraggableEditorComponent()
-//                    if (bounds.getBounds().contains(
-//                            w.startComponent.getX()+w.startComponent.getY())) {
-//                         w.isMultiSelected = true;
-//                    }
-//                }
+                    for (Wire w : (editor.wires)) {
+                        DraggableEditorComponent a = w.getStartComponent().getDraggableEditorComponent();
+                        DraggableEditorComponent b = w.getEndComponent().getDraggableEditorComponent();
+                        if (bounds.getBounds().contains(a.getX()+a.getWidth()/2,a.getY()+a.getHeight()/2) &&
+                            (bounds.getBounds().contains(b.getX()+b.getWidth()/2,b.getY()+b.getHeight()/2))){
+                             w.isMultiSelected = true;
+                        }
+                    }
 
-                editor.repaint();
+                    editor.repaint();
                 }
             }
         };
@@ -92,10 +99,14 @@ class EditorSelectionArea {
     }
 
     public void clearMultiSelected() {
-        for (DraggableEditorComponent component : multiselected) {
+        for (DraggableEditorComponent component : multiSelected) {
             component.isMultiSelected = false;
         }
-        multiselected.clear();
+        for (Wire w : editor.wires) {
+            w.isMultiSelected = false;
+        }
+        multiSelected.clear();
+        editor.paintImmediately(0,0,editor.getWidth(), editor.getHeight());
     }
 
     public void paint(Graphics2D g2d) {
