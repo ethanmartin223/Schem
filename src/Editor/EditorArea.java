@@ -322,8 +322,11 @@ public class EditorArea extends JPanel {
         });
     }
 
+    /**
+     * Fits all components onto the screen and centers the zoom
+     * @apiNote Method Repaints EditorArea
+     */
     public void zoomFit(){
-        //fits all components onto the screen and centers
         double top = Double.MAX_VALUE;
         double bottom = Double.MIN_VALUE;
         double left = Double.MAX_VALUE;
@@ -380,6 +383,15 @@ public class EditorArea extends JPanel {
     }
 
     // ---------------------- // Component Editing Methods // ---------------------- //
+
+    /**
+     * Connects two ElectricalComponents with a wire and adds them to each other's children nodelist
+     * @param a start component
+     * @param aIndex component a's wire index to connect to
+     * @param b end component
+     * @param bIndex component b's wire index to connect to
+     * @apiNote This operation may be logged in History (based on param addHistory)
+     */
     public void connectComponents(ElectricalComponent a, int aIndex, ElectricalComponent b, int bIndex, boolean addHistory) {
         Wire w = new Wire(this, a, aIndex, b, bIndex);
         wires.add(w);
@@ -392,6 +404,7 @@ public class EditorArea extends JPanel {
         connectComponents(a, aIndex, b, bIndex, true);
     }
 
+    /** Enables wire placement mode in the editor (to place one singular wire */
     public void enableWireMode() {
         inWireMode = true;
         creatingNewComponent = false;
@@ -400,6 +413,11 @@ public class EditorArea extends JPanel {
         grabFocus();
     }
 
+    /**
+     * Removes a component based off of its ElectricalComponent
+     * @param eC the ElectricalComponent to be deleted
+     * @apiNote This operation is logged in History
+     */
     public void deleteComponent(ElectricalComponent eC) {
         grabFocus();
         history.addEvent(History.Event.DELETED_COMPONENT, eC.x, eC.y, eC);
@@ -420,6 +438,11 @@ public class EditorArea extends JPanel {
     //TODO: fix loading images into memory at random fuck-ass places. All images should be static and loaded
     // once, then shared
 
+    /**
+     * Set the editor to start creating a new component. This component will be locked to the mouse pointer until
+     * the user clicks, when it will be actually created
+     * @param id the id from ElectricalComponentIdentifier enum that corresponds to the component
+     */
     public void setCreatingNewComponent(String id) {
         grabFocus();
         inWireMode = false;
@@ -429,8 +452,15 @@ public class EditorArea extends JPanel {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         creatingNewComponentImage = new ImageIcon("resources/"+id+".png").getImage();
     }
-    //TODO: This shits as fucked as it looks. Should find a better way to do this
 
+    /**
+     * TODO: This shits as fucked as it looks. Should find a better way to do this
+     * @param worldX x coordinate in world units
+     * @param worldY y coordinate in world units
+     * @param addHistory if true is logged to history, and therefore can be undone,
+     *                   leave false for creations like loading from a file or internal editor calls
+     * @apiNote This operation may be logged in History (based on addHistory param)
+     */
     public DraggableEditorComponent createNewComponent(double worldX, double worldY, boolean addHistory) throws
             NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class compClass = ElectricalComponentIdentifier.findClassFromID(creatingComponentID);
@@ -457,6 +487,10 @@ public class EditorArea extends JPanel {
         return c;
     }
 
+    /**
+     * Undo the last movement, deletion, or creation done in the editor from History
+     * @apiNote This operation is logged in History
+     */
     public void undo() {
         HistoryEntry lastEvent = history.getLastAndRemove();
         if (lastEvent==null) return;
@@ -526,6 +560,10 @@ public class EditorArea extends JPanel {
         repaint();
     }
 
+    /**
+     * Redo the last movement, deletion, or creation done in the editor from History
+     * @apiNote This operation is logged in History
+     */
     public void redo() {
         HistoryEntry lastEvent = history.getFutureAndRemove();
         if (lastEvent == null) return;
@@ -683,6 +721,13 @@ public class EditorArea extends JPanel {
         toolkit.sync();
     }
 
+    /**
+     * Helper for getting the transparency channel on the lines being drawn in the editor
+     * @param scale the current editor scale
+     * @param minScale the scale that the lines should appear at
+     * @param maxScale the scale at which the lines are fully visible
+     * @return int of alpha value
+     */
     private int calcAlpha(double scale, float minScale, float maxScale) {
         if (scale <= minScale) return 0;             // fully transparent
         if (scale >= maxScale) return 255;           // fully opaque
@@ -692,6 +737,10 @@ public class EditorArea extends JPanel {
 
     // ---------------------- // Getter+Setter Methods // ---------------------- //
 
+    /**
+     * Checks to see if the editor is currently in wire mode
+     * @return boolean inWireMode
+     */
     public boolean getInWireMode() {
         return inWireMode;
     }
@@ -700,19 +749,36 @@ public class EditorArea extends JPanel {
         return informationConfigurator;
     }
 
+    /**
+     * Setter for the InformationConfigurator to be used in the editor
+     * @param iC InformationConfigurator to be used
+     */
     public void setInformationConfigurator(EditorComponentInformationConfigurator iC) {
         informationConfigurator = iC;
     }
 
+    /**
+     * Set Editor History Tracker to be used in this editor
+     * @param editorHistoryList tracker to be used in the editor
+     */
     public void setEditorHistoryList(EditorHistoryTrackerList editorHistoryList) {
         this.editorHistoryList =editorHistoryList;
         history.setEditorHistoryList(editorHistoryList);
     }
 
+    /**
+     * Getter for the currently selected component
+     * @return DraggableEditorComponent that has focus in this EditorArea
+     */
     public DraggableEditorComponent getFocusedComponent() {
         return currentFocusedComponent;
     }
 
+    /**
+     * Deletes any currently selected wire
+     * @apiNote Method Repaints EditorArea
+     *          This operation is logged in History
+     */
     public void deleteSelectedWires() {
         Optional<Wire> removedWire = wires.stream().filter(w -> w.isHighlighted).findAny();
         if (removedWire.isPresent()) {
@@ -724,10 +790,15 @@ public class EditorArea extends JPanel {
         }
     }
 
+    /**
+     * Setter for linking taskbar
+     * @param taskbar taskbar to be linked to the editor
+     */
     public void setBottomTaskbar(EditorBottomTaskbar taskbar) {
         this.taskbar = taskbar;
     }
 
+    /** Completely reset the editor window and remove all current wires and component */
     public void reset() {
         for (Component c : getComponents()) {
             if (c instanceof DraggableEditorComponent) {
@@ -751,12 +822,17 @@ public class EditorArea extends JPanel {
         return new Point2D.Double(snappedX, snappedY);
     }
 
-
+    /**
+     * Snap world coordinates to nearest grid point
+     * @param worldX X-coordinate in world space
+     * @param worldY Y-coordinate in world space
+     * @return Point2D.Double of snapped coordinates
+     */
     public Point2D.Double snapToGrid(double worldX, double worldY) {
         return snapToGrid(worldX, worldY, 1.0);
     }
 
-
+    /** TODO: METHOD IS GOING TO BE USED IN ELECTRICAL SIMULATION */
     public void highlightBestPath() {
         Stream<ElectricalComponent> powerSupplies = ElectricalComponent.allComponents.stream().filter(e -> e instanceof PowerSupply);
         Stream<ElectricalComponent> grounds = ElectricalComponent.allComponents.stream().filter(e -> e instanceof Ground);
@@ -768,6 +844,8 @@ public class EditorArea extends JPanel {
         }
     }
 
+
+    /** TODO: METHOD IS GOING TO BE USED IN ELECTRICAL SIMULATION */
     private void highlight(ElectricalComponent start, ElectricalComponent end) {
         java.util.List<ElectricalComponent> bestPath = ElectricalComponent.findPathOfLeastResistance(start, end);
 
