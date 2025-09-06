@@ -91,7 +91,7 @@ public class EditorSidebar extends JPanel {
             }
 
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
+            public void mouseReleased(java.awt.event.MouseEvent e) {
                 if (id.equals("Wire")) {
                     mainEditor.enableWireMode();
                 }
