@@ -21,6 +21,8 @@ public enum ElectricalComponentIdentifier {
     MICROPHONE("microphone", Microphone.class, "Miscellaneous"),
     TRANSFORMER("transformer", Transformer.class, "Miscellaneous"),
     PHOTORESISTOR("photoresistor", Photoresistor.class, "Miscellaneous"),
+    CAPACITOR("capacitor", Capacitor.class, "Miscellaneous"),
+    SPEAKER("speaker", Speaker.class, "Miscellaneous"),
 
     GROUND("ground", Ground.class, "Power Components"),
     POWERSUPPLY("powerSupply", PowerSupply.class, "Power Components"),

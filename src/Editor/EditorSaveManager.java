@@ -2,6 +2,7 @@ package Editor;
 
 import ElectronicsBackend.ElectricalComponent;
 
+import javax.tools.Diagnostic;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -114,7 +115,11 @@ public class EditorSaveManager {
             int[] arr = childrenList.get(i);
             ElectricalComponent eC = ElectricalComponent.allComponents.get(i);
             for (int o : arr) {
-                eC.children.add(ElectricalComponent.allComponents.get(o));
+                if (ElectricalComponent.allComponents.contains(o))
+                    eC.children.add(ElectricalComponent.allComponents.get(o));
+                else {
+                    System.out.println("SAVE FILE CONTAINED UNFIXABLE ERROR; THIS MAY CAUSE PROBLEMS LATER");
+                }
             }
         }
         editor.creatingComponentID = null;

@@ -72,6 +72,11 @@ public class EditorArea extends JPanel {
 
     private EditorQuickEntryField quickEntry;
 
+    //grid sub-divider lines (less than 1.0 world unit lines)
+    private double tolerance = 1e-6; // floating-point tolerance
+    private float minScaleForGridLinesAppearing = 80f;    // scale at which lines start appearing
+    private float maxScaleForGridLinesAppearing = 200f;   // scale at which lines are fully visible
+
     // ---------------------- // Constructor // ---------------------- //
     public EditorArea(JFrame parent) {
         // ---- init vars ---- //
@@ -116,8 +121,12 @@ public class EditorArea extends JPanel {
                             double y = ((e.getY() - (scale / 2)) / scale) + yPosition;
 
                             // Snap coordinates
-                            Point2D.Double snapped = snapToGrid(x, y);
+                            Point2D.Double snapped;
+                            //TODO: this NEEDS to be removed
+                            if (!creatingComponentID.equals("wirenode")) snapped = snapToGrid(x, y);
+                            else snapped = snapToGrid(x, y, .1);
                             createNewComponent(snapped.x, snapped.y);
+
                         } catch (Exception ignored) {}
                     }
 
@@ -149,10 +158,15 @@ public class EditorArea extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 // exit wiring mode if escape key is pressed
-                if (inWireMode && e.getKeyCode() == 27) { //escape key
-                    inWireMode = false;
-                    wireStartComponent = null;
+                if (e.getKeyCode() == 27) {//escape key
+                    if (inWireMode) {
+                        inWireMode = false;
+                        wireStartComponent = null;
+                    }
+                    creatingNewComponent = false;
+                    creatingComponentID = null;
                     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    repaint();
                 }
 
                 // remove selected wire if delete key is pressed (if one is selected)
@@ -163,6 +177,7 @@ public class EditorArea extends JPanel {
                 //if ctrl (17) held do wire mode
                 if (e.getKeyCode() == 17) {
                     inWireMode = true;
+                    selectedArea.clearMultiSelected();
                     setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                 }
 
@@ -411,6 +426,7 @@ public class EditorArea extends JPanel {
         wireStartComponent = null;
         creatingNewComponent = true;
         creatingComponentID = id;
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         creatingNewComponentImage = new ImageIcon("resources/"+id+".png").getImage();
     }
     //TODO: This shits as fucked as it looks. Should find a better way to do this
@@ -609,12 +625,9 @@ public class EditorArea extends JPanel {
         int startY = (int) Math.floor(worldTop);
         int endY = (int) Math.ceil(worldBottom);
 
-        double tolerance = 1e-6; // floating-point tolerance
-        float minScale = 80f;    // scale at which lines start appearing
-        float maxScale = 200f;   // scale at which lines are fully visible
         for (double gx = startX; gx <= endX; gx += 0.1) {
             int screenX = (int) ((gx - xPosition) * scale);
-            int alpha = calcAlpha(scale, minScale, maxScale);
+            int alpha = calcAlpha(scale, minScaleForGridLinesAppearing, maxScaleForGridLinesAppearing);
 
             if (Math.abs(gx - Math.round(gx)) < tolerance) {
                 g.setColor(Color.LIGHT_GRAY);
@@ -627,7 +640,7 @@ public class EditorArea extends JPanel {
 
         for (double gy = startY; gy <= endY; gy += 0.1) {
             int screenY = (int) ((gy - yPosition) * scale);
-            int alpha = calcAlpha(scale, minScale, maxScale);
+            int alpha = calcAlpha(scale, minScaleForGridLinesAppearing, maxScaleForGridLinesAppearing);
 
             if (Math.abs(gy - Math.round(gy)) < tolerance) {
                 g.setColor(Color.LIGHT_GRAY);
@@ -637,8 +650,6 @@ public class EditorArea extends JPanel {
                 g2d.drawLine(0, screenY, width, screenY);
             }
         }
-
-
 
         //Paint all DraggableEditorComponent objects
         for (Component c : getComponents()) {
@@ -653,7 +664,6 @@ public class EditorArea extends JPanel {
                 g.drawImage(creatingNewComponentImage, (int) (getMousePosition().x - (scale / 2)),
                         (int) (getMousePosition().y - scale / 2), (int) scale, (int) scale, this);
             } catch (NullPointerException ignored) {} //the cursor goes off the screen
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         }
 
         //Paint all wires

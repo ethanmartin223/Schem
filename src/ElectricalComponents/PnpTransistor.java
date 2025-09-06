@@ -12,8 +12,8 @@ public class PnpTransistor extends ElectricalComponent {
         super(ea, "pnptransistor", x, y);
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
-        pins.add(new Point2D.Double(0.628, .08));
-        pins.add(new Point2D.Double(0.628, .92));
+        pins.add(new Point2D.Double(0.625d, .08));
+        pins.add(new Point2D.Double(0.625d, .92));
         pins.add(new Point2D.Double(0.1, .5));
         setConnectionPoints(pins);
     }

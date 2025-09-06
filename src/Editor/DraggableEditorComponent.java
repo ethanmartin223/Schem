@@ -88,6 +88,11 @@ public class DraggableEditorComponent extends JComponent {
                 if (e.getKeyCode() == 127) { //delete key
                     editor.deleteComponent(parentElectricalComponent);
                 }
+
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    editor.inWireMode = false;
+                    editor.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                }
             }
         });
 
@@ -171,9 +176,14 @@ public class DraggableEditorComponent extends JComponent {
             public void mouseReleased(MouseEvent e) {
                 System.out.println("TRIED");
                 dragging = false;
-
-                Point2D.Double snappedPos = editor.snapToGrid(getWorldX(), getWorldY());
-                setWorldPosition(snappedPos.x, snappedPos.y);
+                Point2D.Double snappedPos;
+                if (!electricalComponent.id.equals("wirenode")) {
+                    snappedPos = editor.snapToGrid(getWorldX(), getWorldY());
+                    setWorldPosition(snappedPos.x, snappedPos.y);
+                } else {
+                    snappedPos = editor.snapToGrid(getWorldX(), getWorldY(), .1);
+                    setWorldPosition(snappedPos.x, snappedPos.y);
+                }
 
                 if (lastXLocationBeforeDrag != getWorldX() || lastYLocationBeforeDrag != getWorldY()) {
                     editor.history.addEvent(History.Event.MOVED_COMPONENT, snappedPos.x, snappedPos.y, electricalComponent);

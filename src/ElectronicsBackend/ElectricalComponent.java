@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ElectricalComponent {
     protected Image baseImage, selectedImage;
-    protected String id;
+    public String id;
     public double x, y;
 
     protected JPanel infoCard;
