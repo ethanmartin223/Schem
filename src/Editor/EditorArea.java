@@ -114,9 +114,13 @@ public class EditorArea extends JPanel {
                         try {
                             double x = ((e.getX() - (scale / 2)) / scale) + xPosition;
                             double y = ((e.getY() - (scale / 2)) / scale) + yPosition;
-                            createNewComponent(x, y);
+
+                            // Snap coordinates
+                            Point2D.Double snapped = snapToGrid(x, y);
+                            createNewComponent(snapped.x, snapped.y);
                         } catch (Exception ignored) {}
                     }
+
 
                     /* handles clicks on wires, checks for mouse clicks to the closest wire and
                        determines if it falls within the click threshold */
@@ -417,6 +421,7 @@ public class EditorArea extends JPanel {
         ElectricalComponent component =  (ElectricalComponent) compClass.getDeclaredConstructor(EditorArea.class, double.class, double.class)
                 .newInstance(this, worldX, worldY);
         if (addHistory) history.addEvent(History.Event.CREATED_NEW_COMPONENT, worldX, worldY, component);
+
         return component.getDraggableEditorComponent();
     }
 
@@ -577,6 +582,8 @@ public class EditorArea extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        Graphics2D g2d = (Graphics2D) g;
+
         //fps
         long currentTime = System.nanoTime();
         double deltaSeconds = (currentTime - lastTime) / 1_000_000_000.0;
@@ -584,7 +591,8 @@ public class EditorArea extends JPanel {
 
         double currentFPS = 1.0 / deltaSeconds;
         fps = smoothing * fps + (1 - smoothing) * currentFPS;
-
+        BasicStroke thinLines = new BasicStroke(1, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
+        BasicStroke thickerLines = new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
         g.setColor(Color.LIGHT_GRAY);
 
         int width = getWidth();
@@ -601,17 +609,36 @@ public class EditorArea extends JPanel {
         int startY = (int) Math.floor(worldTop);
         int endY = (int) Math.ceil(worldBottom);
 
-        // draw vertical grid lines
-        for (int gx = startX; gx <= endX; gx++) {
+        double tolerance = 1e-6; // floating-point tolerance
+        float minScale = 80f;    // scale at which lines start appearing
+        float maxScale = 200f;   // scale at which lines are fully visible
+        for (double gx = startX; gx <= endX; gx += 0.1) {
             int screenX = (int) ((gx - xPosition) * scale);
-            g.drawLine(screenX, 0, screenX, height);
+            int alpha = calcAlpha(scale, minScale, maxScale);
+
+            if (Math.abs(gx - Math.round(gx)) < tolerance) {
+                g.setColor(Color.LIGHT_GRAY);
+                g2d.drawLine(screenX, 0, screenX, height);
+            } else {
+                g2d.setColor(new Color(204, 204, 204, alpha / 2));
+                g2d.drawLine(screenX, 0, screenX, height);
+            }
         }
 
-        // draw horizontal grid lines
-        for (int gy = startY; gy <= endY; gy++) {
+        for (double gy = startY; gy <= endY; gy += 0.1) {
             int screenY = (int) ((gy - yPosition) * scale);
-            g.drawLine(0, screenY, width, screenY);
+            int alpha = calcAlpha(scale, minScale, maxScale);
+
+            if (Math.abs(gy - Math.round(gy)) < tolerance) {
+                g.setColor(Color.LIGHT_GRAY);
+                g2d.drawLine(0, screenY, width, screenY);
+            } else {
+                g2d.setColor(new Color(204, 204, 204, alpha / 2));
+                g2d.drawLine(0, screenY, width, screenY);
+            }
         }
+
+
 
         //Paint all DraggableEditorComponent objects
         for (Component c : getComponents()) {
@@ -644,7 +671,14 @@ public class EditorArea extends JPanel {
         g.drawString(String.format("%.1f FPS", fps), 10, getHeight() - 10);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         toolkit.sync();
-}
+    }
+
+    private int calcAlpha(double scale, float minScale, float maxScale) {
+        if (scale <= minScale) return 0;             // fully transparent
+        if (scale >= maxScale) return 255;           // fully opaque
+        return (int) (255 * (scale - minScale) / (maxScale - minScale));
+    }
+
 
     // ---------------------- // Getter+Setter Methods // ---------------------- //
 
@@ -694,6 +728,25 @@ public class EditorArea extends JPanel {
         editorHistoryList.removeAllItems();
     }
 
+    /**
+     * Snap world coordinates to nearest grid point
+     * @param worldX X-coordinate in world space
+     * @param worldY Y-coordinate in world space
+     * @param gridSize Grid size in world units (default = 1.0)
+     * @return Point2D.Double of snapped coordinates
+     */
+    public Point2D.Double snapToGrid(double worldX, double worldY, double gridSize) {
+        double snappedX = Math.round(worldX / gridSize) * gridSize;
+        double snappedY = Math.round(worldY / gridSize) * gridSize;
+        return new Point2D.Double(snappedX, snappedY);
+    }
+
+
+    public Point2D.Double snapToGrid(double worldX, double worldY) {
+        return snapToGrid(worldX, worldY, 1.0);
+    }
+
+
     public void highlightBestPath() {
         Stream<ElectricalComponent> powerSupplies = ElectricalComponent.allComponents.stream().filter(e -> e instanceof PowerSupply);
         Stream<ElectricalComponent> grounds = ElectricalComponent.allComponents.stream().filter(e -> e instanceof Ground);
@@ -707,7 +760,6 @@ public class EditorArea extends JPanel {
 
     private void highlight(ElectricalComponent start, ElectricalComponent end) {
         java.util.List<ElectricalComponent> bestPath = ElectricalComponent.findPathOfLeastResistance(start, end);
-
 
         for (ElectricalComponent c : bestPath) {
             c.getDraggableEditorComponent().setBackground(new Color(144, 238, 144)); // light green

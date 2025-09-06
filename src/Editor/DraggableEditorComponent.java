@@ -169,12 +169,17 @@ public class DraggableEditorComponent extends JComponent {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                System.out.println("TRIED");
                 dragging = false;
-                if (lastXLocationBeforeDrag != getWorldX() && lastYLocationBeforeDrag != getWorldY())
-                    editor.history.addEvent(History.Event.MOVED_COMPONENT, lastXLocationBeforeDrag, lastYLocationBeforeDrag, electricalComponent);
 
-                lastXLocationBeforeDrag = getWorldX();
-                lastYLocationBeforeDrag = getWorldY();
+                Point2D.Double snappedPos = editor.snapToGrid(getWorldX(), getWorldY());
+                setWorldPosition(snappedPos.x, snappedPos.y);
+
+                if (lastXLocationBeforeDrag != getWorldX() || lastYLocationBeforeDrag != getWorldY()) {
+                    editor.history.addEvent(History.Event.MOVED_COMPONENT, snappedPos.x, snappedPos.y, electricalComponent);
+                }
+                lastXLocationBeforeDrag = snappedPos.x;
+                lastYLocationBeforeDrag = snappedPos.y;
                 dispatchToParent(e);
             }
         });
