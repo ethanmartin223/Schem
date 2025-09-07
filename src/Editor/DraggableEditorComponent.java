@@ -175,7 +175,6 @@ public class DraggableEditorComponent extends JComponent {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                System.out.println("TRIED");
                 dragging = false;
                 Point2D.Double snappedPos;
                 if (!electricalComponent.id.equals("wirenode")) {
@@ -297,6 +296,8 @@ public class DraggableEditorComponent extends JComponent {
         Image imgToDraw = isFocusOwner()||isMultiSelected? selectedImage : image;
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         int size = (int) editor.scale;
 
@@ -308,9 +309,16 @@ public class DraggableEditorComponent extends JComponent {
         }
 
         if (EditorArea.DEBUG_USE_NATIVE_DRAW) {
-            ComponentRenderer.drawComponent(g2d, getWidth()/2, getHeight()/2, size, electricalComponent.id);
-        } else
+            if (EditorArea.DEBUG_USE_BLIT) {
+                g.drawImage(
+                        ComponentRenderer.render(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id),
+                        0, 0, this);
+            } else {
+                ComponentRenderer.renderDirect(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id);
+            }
+        } else {
             g2d.drawImage(imgToDraw, drawX, drawY, size, size, this);
+        }
     }
 
     //color the components

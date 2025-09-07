@@ -3,31 +3,93 @@ package Editor;
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
+import java.util.HashMap;
+
 import static ElectronicsBackend.ElectricalComponentIdentifier.*;
 
 public class ComponentRenderer {
+    static HashMap<String, BufferedImage> buffer;
 
-    public static void drawComponent(Graphics2D g2d, int cx, int cy, int size, String id){
-        if (id.equals(AND_GATE.id)) drawAND(g2d, cx, cy, size);
-        else if (id.equals(CAPACITOR.id)) drawCapacitor(g2d, cx, cy, size);
-        else if (id.equals(DIODE.id)) drawDiode(g2d, cx, cy, size);
-        else if (id.equals(GROUND.id)) drawGround(g2d, cx, cy, size);
-        else if (id.equals(NAND_GATE.id)) drawNAND(g2d, cx, cy, size);
-        else if (id.equals(NPN_TRANSISTOR.id)) drawNPNTransistor(g2d, cx, cy, size);
-        else if (id.equals(OR_GATE.id)) drawOR(g2d, cx, cy, size);
-        else if (id.equals(PNP_TRANSISTOR.id)) drawPNPTransistor(g2d, cx, cy, size);
-        else if (id.equals(POWERSUPPLY.id)) drawPowerSupply(g2d, cx, cy, size);
-        else if (id.equals(RESISTOR.id)) drawResistor(g2d, cx, cy, size);
-        else if (id.equals(TRANSFORMER.id)) drawTransformer(g2d, cx, cy, size);
-        else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
-        else if (id.equals(XOR_GATE.id)) drawXOR(g2d, cx, cy, size);
-        else if (id.equals(ZENER_DIODE.id)) drawZenerDiode(g2d, cx, cy, size);
+    //this method is expensive AF because it forces regenerating all assets,
+    // try to avoid calling at all costs
+    static void clearBuffer() {
+        buffer.clear();
+    }
+
+    static {
+        buffer = new HashMap<>();
+
+    }
+    static void updateBuffer(String id, BufferedImage buff) {
+        if (!existsInBuffer(id)) {
+
+        }
+    }
+
+    static void setHints(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    }
+
+    static boolean existsInBuffer(String id) {
+        return buffer.containsKey(id);
     }
 
 
-    private static void drawAND(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+    public static void renderDirect(Graphics2D g2d, int cx, int cy, int size, String id) {
+        if (id.equals(AND_GATE.id))               drawAND(g2d, cx, cy, size);
+        else if (id.equals(CAPACITOR.id))         drawCapacitor(g2d, cx, cy, size);
+        else if (id.equals(DIODE.id))             drawDiode(g2d, cx, cy, size);
+        else if (id.equals(GROUND.id))            drawGround(g2d, cx, cy, size);
+        else if (id.equals(NAND_GATE.id))         drawNAND(g2d, cx, cy, size);
+        else if (id.equals(NPN_TRANSISTOR.id))    drawNPNTransistor(g2d, cx, cy, size);
+        else if (id.equals(OR_GATE.id))           drawOR(g2d, cx, cy, size);
+        else if (id.equals(PNP_TRANSISTOR.id))    drawPNPTransistor(g2d, cx, cy, size, id);
+        else if (id.equals(POWERSUPPLY.id))       drawPowerSupply(g2d, cx, cy, size);
+        else if (id.equals(RESISTOR.id))          drawResistor(g2d, cx, cy, size);
+        else if (id.equals(TRANSFORMER.id))       drawTransformer(g2d, cx, cy, size);
+        else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
+        else if (id.equals(XOR_GATE.id))          drawXOR(g2d, cx, cy, size);
+        else if (id.equals(ZENER_DIODE.id))       drawZenerDiode(g2d, cx, cy, size);
+    }
 
+    public static BufferedImage render(Graphics2D g, int cx, int cy, int size, String id) {
+        String key = id + "_" + size;
+        if (buffer.containsKey(key)) return buffer.get(key);
+
+        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+        setHints(g2d);
+        g2d.setColor(Color.BLACK);
+
+        // Call the drawing method
+        if (id.equals(AND_GATE.id))               drawAND(g2d, cx, cy, size);
+        else if (id.equals(CAPACITOR.id))         drawCapacitor(g2d, cx, cy, size);
+        else if (id.equals(DIODE.id))             drawDiode(g2d, cx, cy, size);
+        else if (id.equals(GROUND.id))            drawGround(g2d, cx, cy, size);
+        else if (id.equals(NAND_GATE.id))         drawNAND(g2d, cx, cy, size);
+        else if (id.equals(NPN_TRANSISTOR.id))    drawNPNTransistor(g2d, cx, cy, size);
+        else if (id.equals(OR_GATE.id))           drawOR(g2d, cx, cy, size);
+        else if (id.equals(PNP_TRANSISTOR.id))    drawPNPTransistor(g2d, cx, cy, size, id);
+        else if (id.equals(POWERSUPPLY.id))       drawPowerSupply(g2d, cx, cy, size);
+        else if (id.equals(RESISTOR.id))          drawResistor(g2d, cx, cy, size);
+        else if (id.equals(TRANSFORMER.id))       drawTransformer(g2d, cx, cy, size);
+        else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
+        else if (id.equals(XOR_GATE.id))          drawXOR(g2d, cx, cy, size);
+        else if (id.equals(ZENER_DIODE.id))       drawZenerDiode(g2d, cx, cy, size);
+
+        g2d.dispose();
+        buffer.put(key, img);
+        return img;
+    }
+
+
+    private static BufferedImage drawAND(Graphics2D g2d, int cx, int cy, int size) {
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(Color.BLACK);
         // Proportions
         double width = size * 0.5;       // total width of AND gate
         double height = size * 0.5;      // total height
@@ -65,9 +127,10 @@ public class ComponentRenderer {
         // Output line (right)
         int rightX = leftX + (int)width;
         g2d.drawLine(rightX, centerY, rightX + (int)(size * 0.15), centerY);
+        return null;
     }
 
-    private static void drawCapacitor(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawCapacitor(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int half = size / 10;
         g2d.drawLine(cx - half, cy - size / 4, cx - half, cy + size / 4);
@@ -75,9 +138,10 @@ public class ComponentRenderer {
 
         g2d.drawLine((int) (cx - size / 2.5), cy, cx - half, cy);
         g2d.drawLine(cx + half, cy, (int) (cx + size / 2.5), cy);
+        return null;
     }
 
-    private static void drawDiode(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawDiode(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int pinLength = (int) (size * 0.2);
         int bodyLength = (int) (size * 0.4);
@@ -90,9 +154,10 @@ public class ComponentRenderer {
         triangle.addPoint(cx + bodyLength / 2, cy);
         g2d.drawPolygon(triangle);
         g2d.drawLine(cx + bodyLength / 2, cy - halfHeight, cx + bodyLength / 2, cy + halfHeight);
+        return null;
     }
 
-    private static void drawGround(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawGround(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
         int step = size / 8;
@@ -101,9 +166,10 @@ public class ComponentRenderer {
         g2d.drawLine(cx - width, cy + step, cx + width, cy + step);
         g2d.drawLine(cx - width / 2, cy + 2 * step, cx + width / 2, cy + 2 * step);
         g2d.drawLine(cx - width / 4, cy + 3 * step, cx + width / 4, cy + 3 * step);
+        return null;
     }
 
-    private static void drawNAND(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawNAND(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
         // Proportions
@@ -151,9 +217,10 @@ public class ComponentRenderer {
         int circleX = rightX + negRad;
         int circleY = centerY;
         g2d.drawOval(circleX - negRad, circleY - negRad, 2 * negRad, 2 * negRad);
+        return null;
     }
 
-    private static void drawNPNTransistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawNPNTransistor(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
         double r = size * 0.3;        // circle radius
@@ -196,9 +263,10 @@ public class ComponentRenderer {
         g2d.drawLine(emitterBendX, emitterBendY, arrowX1, arrowY1);
         g2d.drawLine(emitterBendX, emitterBendY, arrowX2, arrowY2);
 
+        return null;
     }
 
-    private static void drawOR(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawOR(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -242,9 +310,11 @@ public class ComponentRenderer {
         // Output lead
         int rightX = leftX + mainArcWidth;
         g2d.drawLine(rightX, centerY, rightX + (int)(inputLength), centerY);
+        return null;
     }
 
-    private static void drawPNPTransistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawPNPTransistor(Graphics2D g2d, int cx, int cy, int size, String id) {
+        g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
         // Proportions
@@ -297,9 +367,10 @@ public class ComponentRenderer {
         int arrowY2 = (int)(arrowBaseY + arrowLength * Math.sin(angle + Math.PI/6));
         g2d.drawLine(arrowBaseX, arrowBaseY, arrowX1, arrowY1);
         g2d.drawLine(arrowBaseX, arrowBaseY, arrowX2, arrowY2);
+        return null;
     }
 
-    private static void drawPowerSupply(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawPowerSupply(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -318,9 +389,10 @@ public class ComponentRenderer {
         String label = "5V";
         int textWidth = fm.stringWidth(label);
         g2d.drawString(label, cx - textWidth / 2, cy - (int)(size * 0.05));
+        return null;
     }
 
-    private static void drawResistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawResistor(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -358,9 +430,10 @@ public class ComponentRenderer {
         }
 
         g2d.draw(path);
+        return null;
     }
 
-    private static void drawTransformer(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawTransformer(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -406,9 +479,10 @@ public class ComponentRenderer {
         // Right side leads
         g2d.drawLine((int)(rightCoilX + coilWidth), (int)(topY + offsetY), (int)(rightCoilX + coilWidth + leadLength), (int)(topY + offsetY));
         g2d.drawLine((int)(rightCoilX + coilWidth), (int)(bottomY - offsetY), (int)(rightCoilX + coilWidth + leadLength), (int)(bottomY - offsetY));
+        return null;
     }
 
-    private static void drawVariableResistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawVariableResistor(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -469,9 +543,10 @@ public class ComponentRenderer {
         int rx = (int)(arrowX2 - arrowHeadLength * cos - arrowHeadLength * sin);
         int ry = (int)(arrowY2 - arrowHeadLength * sin + arrowHeadLength * cos);
         g2d.drawLine(arrowX2, arrowY2, rx, ry);
+        return null;
     }
 
-    private static void drawXOR(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawXOR(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(
                 Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -526,9 +601,10 @@ public class ComponentRenderer {
         // Output
         int rightX = leftX + arcWidth;
         g2d.drawLine(rightX, centerY, rightX + inputLength, centerY);
+        return null;
     }
 
-    private static void drawZenerDiode(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawZenerDiode(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -558,5 +634,6 @@ public class ComponentRenderer {
 
         // Bottom Zener horizontal lead (goes right)
         g2d.drawLine(cx + bodyLength / 2, cy + halfHeight, cx + bodyLength / 2 + leadLength, cy + halfHeight);
+        return null;
     }
 }

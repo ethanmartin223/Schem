@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
+import java.awt.image.VolatileImage;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -18,8 +19,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static Editor.ComponentRenderer.clearBuffer;
+
 // ---------------------- // Editor Area // ---------------------- //
 public class EditorArea extends JPanel {
+    private VolatileImage buffer;
+
+    private static final Font FPS_FONT = new Font("Arial", Font.BOLD, 14);
 
     //static shared vars
     public EditorBottomTaskbar taskbar;
@@ -31,7 +37,8 @@ public class EditorArea extends JPanel {
 
     public boolean DEBUG_REAL_TIME_RENDERING = true;
     public static float DEBUG_NATIVE_DRAW_SIZE = .03f;
-    public static boolean DEBUG_USE_NATIVE_DRAW = true;
+    public static boolean DEBUG_USE_NATIVE_DRAW = false;
+    public static boolean DEBUG_USE_BLIT = false;
 
     // ---- public ---- //
     public double scale = 80;
@@ -199,6 +206,21 @@ public class EditorArea extends JPanel {
                         quickEntry.setVisible(true);
                     }
                 }
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    if (!DEBUG_USE_NATIVE_DRAW && !DEBUG_USE_BLIT) {
+                        DEBUG_USE_NATIVE_DRAW = true;
+                        DEBUG_USE_BLIT = true;
+                        System.out.println("---- BLIT RENDERER ----\nDEBUG_USE_NATIVE_DRAW=true\nDEBUG_USE_BLIT=true");
+                    } else if (DEBUG_USE_NATIVE_DRAW && DEBUG_USE_BLIT) {
+                        DEBUG_USE_BLIT = false;
+                        System.out.println("---- NATIVE RENDERER ----\nDEBUG_USE_NATIVE_DRAW=true\nDEBUG_USE_BLIT=false");
+                    } else if (DEBUG_USE_NATIVE_DRAW && !DEBUG_USE_BLIT) {
+                        DEBUG_USE_NATIVE_DRAW = false;
+                        DEBUG_USE_BLIT = false;
+                        System.out.println("---- OLD RENDERER ----\nDEBUG_USE_NATIVE_DRAW=false\nDEBUG_USE_BLIT=false");
+                    }
+                    repaint();
+                }
             }
 
             @Override
@@ -294,7 +316,7 @@ public class EditorArea extends JPanel {
             scale*=zoomFactor;
             scale = ((int) scale);
             if (scale < 10) scale = 10; // lock scroll to positive values
-            if (scale >= 800) scale = 800;
+            if (scale >= 1200) scale = 1200;
 
             //I forget what this does. Its probably important tho
             //      - 8/29/25 im pretty sure it centers the zoom
@@ -310,6 +332,7 @@ public class EditorArea extends JPanel {
 
             lastReleasedPositionX = xPosition;
             lastReleasedPositionY = yPosition;
+            clearBuffer(); // regenerate components with new scale
             repaint();
         });
 
@@ -638,92 +661,116 @@ public class EditorArea extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2d = (Graphics2D) g;
-
-        //fps
-        long currentTime = System.nanoTime();
-        double deltaSeconds = (currentTime - lastTime) / 1_000_000_000.0;
-        lastTime = currentTime;
-
-        double currentFPS = 1.0 / deltaSeconds;
-        fps = smoothing * fps + (1 - smoothing) * currentFPS;
-        g.setColor(Color.LIGHT_GRAY);
-
         int width = getWidth();
         int height = getHeight();
 
-        // find world coordinate bounds of viewport
-        double worldLeft   = xPosition;
-        double worldTop    = yPosition;
-        double worldRight  = xPosition + width  / scale;
-        double worldBottom = yPosition + height / scale;
-
-        int startX = (int) Math.floor(worldLeft);
-        int endX = (int) Math.ceil(worldRight);
-        int startY = (int) Math.floor(worldTop);
-        int endY = (int) Math.ceil(worldBottom);
-
-        for (double gx = startX; gx <= endX; gx += 0.1) {
-            int screenX = (int) ((gx - xPosition) * scale);
-            int alpha = calcAlpha(scale, minScaleForGridLinesAppearing, maxScaleForGridLinesAppearing);
-
-            if (Math.abs(gx - Math.round(gx)) < tolerance) {
-                g.setColor(Color.LIGHT_GRAY);
-                g2d.drawLine(screenX, 0, screenX, height);
-            } else {
-                g2d.setColor(new Color(204, 204, 204, alpha / 2));
-                g2d.drawLine(screenX, 0, screenX, height);
-            }
+        // --- Ensure buffer exists and is valid ---
+        if (buffer == null || buffer.getWidth() != width || buffer.getHeight() != height) {
+            if (buffer != null) buffer.flush();
+            GraphicsConfiguration gc = getGraphicsConfiguration();
+            buffer = gc.createCompatibleVolatileImage(width, height, Transparency.OPAQUE);
         }
 
-        for (double gy = startY; gy <= endY; gy += 0.1) {
-            int screenY = (int) ((gy - yPosition) * scale);
-            int alpha = calcAlpha(scale, minScaleForGridLinesAppearing, maxScaleForGridLinesAppearing);
-
-            if (Math.abs(gy - Math.round(gy)) < tolerance) {
-                g.setColor(Color.LIGHT_GRAY);
-                g2d.drawLine(0, screenY, width, screenY);
-            } else {
-                g2d.setColor(new Color(204, 204, 204, alpha / 2));
-                g2d.drawLine(0, screenY, width, screenY);
+        do {
+            int valid = buffer.validate(getGraphicsConfiguration());
+            if (valid == VolatileImage.IMAGE_INCOMPATIBLE) {
+                buffer.flush();
+                buffer = getGraphicsConfiguration().createCompatibleVolatileImage(width, height, Transparency.OPAQUE);
             }
-        }
 
-        //Paint all DraggableEditorComponent objects
-        for (Component c : getComponents()) {
-            if (c instanceof DraggableEditorComponent) {
-                ((DraggableEditorComponent) c).updateFromEditor();
-            }
-        }
+            Graphics2D g2d = buffer.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // if currently creating a new component, draw that component on the mouse and set cursor to plus
-        if (creatingNewComponent) {
-            try {
-                if (!DEBUG_USE_NATIVE_DRAW)
-                    g.drawImage(creatingNewComponentImage, (int) (getMousePosition().x - (scale / 2)),
-                        (int) (getMousePosition().y - scale / 2), (int) scale, (int) scale, this);
-                else {
+            // ---- Clear background ----
+            g2d.setColor(getBackground());
+            g2d.fillRect(0, 0, width, height);
 
+            // ---- FPS update ----
+            long currentTime = System.nanoTime();
+            double deltaSeconds = (currentTime - lastTime) / 1_000_000_000.0;
+            lastTime = currentTime;
+
+            double currentFPS = 1.0 / deltaSeconds;
+            fps = smoothing * fps + (1 - smoothing) * currentFPS;
+
+            // ---- Grid drawing ----
+            double worldLeft   = xPosition;
+            double worldTop    = yPosition;
+            double worldRight  = xPosition + width  / scale;
+            double worldBottom = yPosition + height / scale;
+
+            int startX = (int) Math.floor(worldLeft);
+            int endX = (int) Math.ceil(worldRight);
+            int startY = (int) Math.floor(worldTop);
+            int endY = (int) Math.ceil(worldBottom);
+
+            for (double gx = startX; gx <= endX; gx += 0.1) {
+                int screenX = (int) ((gx - xPosition) * scale);
+                int alpha = calcAlpha(scale, minScaleForGridLinesAppearing, maxScaleForGridLinesAppearing);
+
+                if (Math.abs(gx - Math.round(gx)) < tolerance) {
+                    g2d.setColor(Color.LIGHT_GRAY);
+                } else {
+                    g2d.setColor(new Color(204, 204, 204, alpha / 2));
                 }
-            } catch (NullPointerException ignored) {} //the cursor goes off the screen
-        }
+                g2d.drawLine(screenX, 0, screenX, height);
+            }
 
-        //Paint all wires
-        g.setColor(Color.BLACK);
-        for (Wire wire : wires) {
-            wire.draw((Graphics2D) g, this);
-        }
+            for (double gy = startY; gy <= endY; gy += 0.1) {
+                int screenY = (int) ((gy - yPosition) * scale);
+                int alpha = calcAlpha(scale, minScaleForGridLinesAppearing, maxScaleForGridLinesAppearing);
 
-        //needs to be last
-        selectedArea.paint((Graphics2D)g);
+                if (Math.abs(gy - Math.round(gy)) < tolerance) {
+                    g2d.setColor(Color.LIGHT_GRAY);
+                } else {
+                    g2d.setColor(new Color(204, 204, 204, alpha / 2));
+                }
+                g2d.drawLine(0, screenY, width, screenY);
+            }
 
-        // --- draw FPS ---
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Arial", Font.BOLD, 14));
-        g.drawString(String.format("%.1f FPS", fps), 10, getHeight() - 10);
+            // ---- Draw components ----
+            for (Component c : getComponents()) {
+                if (c instanceof DraggableEditorComponent) {
+                    ((DraggableEditorComponent) c).updateFromEditor();
+                }
+            }
 
+            // ---- Ghost new component ----
+            if (creatingNewComponent) {
+                try {
+                    Point mouse = getMousePosition();
+                    if (mouse != null) {
+                        g2d.drawImage(creatingNewComponentImage,
+                                (int) (mouse.x - (scale / 2)),
+                                (int) (mouse.y - (scale / 2)),
+                                (int) scale, (int) scale, this);
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            // ---- Wires ----
+            g2d.setColor(Color.BLACK);
+            for (Wire wire : wires) {
+                wire.draw(g2d, this);
+            }
+
+            // ---- Selection ----
+            selectedArea.paint(g2d);
+
+            // ---- FPS counter ----
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(new Font("Arial", Font.BOLD, 14));
+            g2d.drawString(String.format("%.1f FPS", fps), 10, height - 10);
+
+            g2d.dispose();
+
+        } while (buffer.contentsLost());
+
+        // --- Blit final buffer to screen ---
+        g.drawImage(buffer, 0, 0, null);
         Toolkit.getDefaultToolkit().sync();
     }
+
 
     /**
      * Helper for getting the transparency channel on the lines being drawn in the editor

@@ -37,10 +37,8 @@ public class Wire {
         isHighlighted = false;
     }
 
-    public void draw(Graphics2D g, EditorArea editor) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public void draw(Graphics2D g2d, EditorArea editor) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         Point2D.Double startWorld = startComponent.getConnectionPointsAsWorldPoints().get(startIndex);
@@ -51,12 +49,7 @@ public class Wire {
 
         if (isHighlighted || isMultiSelected) {
             float width = (float) (editor.scale * .06);
-            g2d.setColor(new Color(
-                    HIGHLIGHT_COLOR.getRed(),
-                    HIGHLIGHT_COLOR.getGreen(),
-                    HIGHLIGHT_COLOR.getBlue(),
-                    128)
-            );
+            g2d.setColor(HIGHLIGHT_COLOR);
             g2d.setStroke(new BasicStroke(width,  BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
         }
