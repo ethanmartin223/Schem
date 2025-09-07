@@ -22,11 +22,6 @@ public class ComponentRenderer {
         buffer = new HashMap<>();
 
     }
-    static void updateBuffer(String id, BufferedImage buff) {
-        if (!existsInBuffer(id)) {
-
-        }
-    }
 
     static void setHints(Graphics2D g2d) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -40,6 +35,7 @@ public class ComponentRenderer {
 
 
     public static void renderDirect(Graphics2D g2d, int cx, int cy, int size, String id) {
+        g2d.setColor(Color.BLACK);
         if (id.equals(AND_GATE.id))               drawAND(g2d, cx, cy, size);
         else if (id.equals(CAPACITOR.id))         drawCapacitor(g2d, cx, cy, size);
         else if (id.equals(DIODE.id))             drawDiode(g2d, cx, cy, size);
@@ -54,38 +50,28 @@ public class ComponentRenderer {
         else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
         else if (id.equals(XOR_GATE.id))          drawXOR(g2d, cx, cy, size);
         else if (id.equals(ZENER_DIODE.id))       drawZenerDiode(g2d, cx, cy, size);
+        else if (id.equals(SPEAKER.id))           drawSpeaker(g2d, cx, cy, size);
+        else if (id.equals(LAMP.id))              drawLamp(g2d, cx, cy, size);
+    }
+
+    private static void drawSpeaker(Graphics2D g2d, int cx, int cy, int size) {
     }
 
     public static BufferedImage render(Graphics2D g, int cx, int cy, int size, String id) {
         String key = id + "_" + size;
         if (buffer.containsKey(key)) return buffer.get(key);
-
+        System.out.println("BUFFER: "+buffer.size());
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
         setHints(g2d);
         g2d.setColor(Color.BLACK);
 
-        // Call the drawing method
-        if (id.equals(AND_GATE.id))               drawAND(g2d, cx, cy, size);
-        else if (id.equals(CAPACITOR.id))         drawCapacitor(g2d, cx, cy, size);
-        else if (id.equals(DIODE.id))             drawDiode(g2d, cx, cy, size);
-        else if (id.equals(GROUND.id))            drawGround(g2d, cx, cy, size);
-        else if (id.equals(NAND_GATE.id))         drawNAND(g2d, cx, cy, size);
-        else if (id.equals(NPN_TRANSISTOR.id))    drawNPNTransistor(g2d, cx, cy, size);
-        else if (id.equals(OR_GATE.id))           drawOR(g2d, cx, cy, size);
-        else if (id.equals(PNP_TRANSISTOR.id))    drawPNPTransistor(g2d, cx, cy, size, id);
-        else if (id.equals(POWERSUPPLY.id))       drawPowerSupply(g2d, cx, cy, size);
-        else if (id.equals(RESISTOR.id))          drawResistor(g2d, cx, cy, size);
-        else if (id.equals(TRANSFORMER.id))       drawTransformer(g2d, cx, cy, size);
-        else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
-        else if (id.equals(XOR_GATE.id))          drawXOR(g2d, cx, cy, size);
-        else if (id.equals(ZENER_DIODE.id))       drawZenerDiode(g2d, cx, cy, size);
+        renderDirect(g2d, cx, cy, size, id);
 
         g2d.dispose();
         buffer.put(key, img);
         return img;
     }
-
 
     private static BufferedImage drawAND(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -140,6 +126,38 @@ public class ComponentRenderer {
         g2d.drawLine(cx + half, cy, (int) (cx + size / 2.5), cy);
         return null;
     }
+
+    private static void drawLamp(Graphics2D g2d, int cx, int cy, int size) {
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(Color.BLACK);
+
+        // Total lamp width
+        double width = size * 0.8;
+        double height = size * 0.5;
+
+        // Left and right lead positions
+        int leftX = (int) (cx - width / 2);
+        int rightX = (int) (cx + width / 2);
+        int centerY = cy;
+
+        // Circle radius (slightly smaller than half height)
+        int circleRadius = (int) (height * 0.4);
+
+        // Draw leads
+        g2d.drawLine(leftX, centerY, cx - circleRadius, centerY);  // left lead
+        g2d.drawLine(cx + circleRadius, centerY, rightX, centerY); // right lead
+
+        // Draw circle in the center
+        int circleX = cx - circleRadius;
+        int circleY = cy - circleRadius;
+        g2d.drawOval(circleX, circleY, circleRadius * 2, circleRadius * 2);
+
+        // Draw X inside the circle (centered)
+        g2d.drawLine(cx - circleRadius, cy - circleRadius, cx + circleRadius, cy + circleRadius); // \
+        g2d.drawLine(cx - circleRadius, cy + circleRadius, cx + circleRadius, cy - circleRadius); // /
+    }
+
 
     private static BufferedImage drawDiode(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

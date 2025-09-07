@@ -295,6 +295,7 @@ public class DraggableEditorComponent extends JComponent {
     protected void paintComponent(Graphics g) {
         Image imgToDraw = isFocusOwner()||isMultiSelected? selectedImage : image;
         Graphics2D g2d = (Graphics2D) g;
+
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -308,17 +309,9 @@ public class DraggableEditorComponent extends JComponent {
             g2d.rotate(Math.toRadians(orientation * -90), getWidth() / 2.0, getHeight() / 2.0);
         }
 
-        if (EditorArea.DEBUG_USE_NATIVE_DRAW) {
-            if (EditorArea.DEBUG_USE_BLIT) {
-                g.drawImage(
-                        ComponentRenderer.render(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id),
-                        0, 0, this);
-            } else {
-                ComponentRenderer.renderDirect(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id);
-            }
-        } else {
-            g2d.drawImage(imgToDraw, drawX, drawY, size, size, this);
-        }
+        g2d.drawImage(
+                ComponentRenderer.render(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id),
+                0, 0, this);
     }
 
     //color the components

@@ -16,7 +16,6 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         setLayout(new BorderLayout());
-
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -87,7 +86,14 @@ public class MainWindow extends JFrame {
 
     // ---------------------- // Main // ---------------------- //
     static{
+        //enable opengl pipeline for fast vectors
         System.setProperty("sun.java2d.opengl", "true");
+
+        //Remove windows' FUCK ASS SCALING. Thats 5 hours of my weekend trying to figure
+        // out where the "SCALING" bug in my code is. Turns out windows is a bitch and
+        // scales bufferedimages that are in memory to make them "look better" (Look blurry
+        // and render like dog shit). Thanks windows
+        System.setProperty("sun.java2d.uiScale", "1.0");
     }
 
     public static void main(String[] args) {

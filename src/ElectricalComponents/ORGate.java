@@ -13,8 +13,8 @@ public class ORGate extends ElectricalComponent {
         super(ea, "or", x, y);
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
-        pins.add(new Point2D.Double(0.1, .33));
-        pins.add(new Point2D.Double(0.1, .67));
+        pins.add(new Point2D.Double(0.1, .3));
+        pins.add(new Point2D.Double(0.1, .7));
         pins.add(new Point2D.Double(0.9, .5));
         setConnectionPoints(pins);
     }

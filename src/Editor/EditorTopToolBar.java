@@ -94,6 +94,9 @@ public class EditorTopToolBar extends JPanel {
                         mainEditor.lastReleasedPositionY = mainEditor.yPosition;
 
                         mainEditor.repaint();
+
+                    }  else if (text.equals("newfile")) {
+                        mainEditor.reset();
                     } else if (text.equals("delete")) {
                         //if it's a component needed to be deleted
                         DraggableEditorComponent removeComponent = mainEditor.getFocusedComponent();

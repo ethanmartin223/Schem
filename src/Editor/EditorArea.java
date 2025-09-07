@@ -35,10 +35,7 @@ public class EditorArea extends JPanel {
     private double fps = 0;
     private final double smoothing = .6; // higher = smoother/slower updates
 
-    public boolean DEBUG_REAL_TIME_RENDERING = true;
-    public static float DEBUG_NATIVE_DRAW_SIZE = .03f;
-    public static boolean DEBUG_USE_NATIVE_DRAW = false;
-    public static boolean DEBUG_USE_BLIT = false;
+    public static float DEBUG_NATIVE_DRAW_SIZE = .01f;
 
     // ---- public ---- //
     public double scale = 80;
@@ -182,6 +179,19 @@ public class EditorArea extends JPanel {
                     deleteSelectedWires();
                 }
 
+                if (e.getKeyCode() == KeyEvent.VK_EQUALS) {
+                    DEBUG_NATIVE_DRAW_SIZE += .01F;
+                    DEBUG_NATIVE_DRAW_SIZE = DEBUG_NATIVE_DRAW_SIZE>.04?.04F:DEBUG_NATIVE_DRAW_SIZE;
+                    ComponentRenderer.clearBuffer();
+                    repaint();
+                }
+                if (e.getKeyCode() == KeyEvent.VK_MINUS) {
+                    DEBUG_NATIVE_DRAW_SIZE -= .01F;
+                    DEBUG_NATIVE_DRAW_SIZE = DEBUG_NATIVE_DRAW_SIZE<.01?.01F:DEBUG_NATIVE_DRAW_SIZE;
+                    ComponentRenderer.clearBuffer();
+                    repaint();
+                }
+
                 //if ctrl (17) held do wire mode
                 if (e.getKeyCode() == 17) {
                     inWireMode = true;
@@ -205,21 +215,6 @@ public class EditorArea extends JPanel {
 
                         quickEntry.setVisible(true);
                     }
-                }
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    if (!DEBUG_USE_NATIVE_DRAW && !DEBUG_USE_BLIT) {
-                        DEBUG_USE_NATIVE_DRAW = true;
-                        DEBUG_USE_BLIT = true;
-                        System.out.println("---- BLIT RENDERER ----\nDEBUG_USE_NATIVE_DRAW=true\nDEBUG_USE_BLIT=true");
-                    } else if (DEBUG_USE_NATIVE_DRAW && DEBUG_USE_BLIT) {
-                        DEBUG_USE_BLIT = false;
-                        System.out.println("---- NATIVE RENDERER ----\nDEBUG_USE_NATIVE_DRAW=true\nDEBUG_USE_BLIT=false");
-                    } else if (DEBUG_USE_NATIVE_DRAW && !DEBUG_USE_BLIT) {
-                        DEBUG_USE_NATIVE_DRAW = false;
-                        DEBUG_USE_BLIT = false;
-                        System.out.println("---- OLD RENDERER ----\nDEBUG_USE_NATIVE_DRAW=false\nDEBUG_USE_BLIT=false");
-                    }
-                    repaint();
                 }
             }
 
@@ -740,10 +735,8 @@ public class EditorArea extends JPanel {
                 try {
                     Point mouse = getMousePosition();
                     if (mouse != null) {
-                        g2d.drawImage(creatingNewComponentImage,
-                                (int) (mouse.x - (scale / 2)),
-                                (int) (mouse.y - (scale / 2)),
-                                (int) scale, (int) scale, this);
+                        ComponentRenderer.renderDirect(g2d,mouse.x,mouse.y,
+                                (int)(scale),creatingComponentID);
                     }
                 } catch (Exception ignored) {}
             }
