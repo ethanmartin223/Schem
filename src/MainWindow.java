@@ -63,6 +63,11 @@ public class MainWindow extends JFrame {
         sp2.setResizeWeight(0.93);
         add(sp2, BorderLayout.CENTER);
 
+//        Timer r = new Timer(1, e->{
+//            mainEditor.paintImmediately(0,0,mainEditor.getWidth(),mainEditor.getHeight());
+//        });
+//        r.setRepeats(true);
+//        r.start();
         setVisible(true);
     }
 
@@ -81,6 +86,10 @@ public class MainWindow extends JFrame {
     }
 
     // ---------------------- // Main // ---------------------- //
+    static{
+        System.setProperty("sun.java2d.opengl", "true");
+    }
+
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -90,13 +99,9 @@ public class MainWindow extends JFrame {
 
         MainWindowSplashScreen splash = new MainWindowSplashScreen("resources/generalAssets/wireworkssplash.png");
 
-        //do loading shit after splash is already up
-        System.setProperty("sun.java2d.opengl", "true");
-//        System.setProperty("Dsun.java2d.ddscale", "true");
-
         MainWindow mw = new MainWindow();
-
         splash.setVisible(false);// hide splash after main window constructor finishes
-
     }
+
+
 }

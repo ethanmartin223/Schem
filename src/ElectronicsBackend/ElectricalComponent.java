@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
 
@@ -94,6 +95,10 @@ public class ElectricalComponent {
             }
         }
         return path;
+    }
+
+    public boolean hasNativeDraw() {
+        return false;
     }
 
     public static List<List<ElectricalComponent>> findAllPaths(ElectricalComponent start, ElectricalComponent end) {
@@ -201,11 +206,14 @@ public class ElectricalComponent {
         double baseY = draggableEditorComponent.getWorldY();
 
         for (Point2D.Double local : connectionPoints) {
-            worldPoints.add(new Point2D.Double(baseX + local.x, baseY + local.y));
+            worldPoints.add(new Point2D.Double(
+                    (baseX + local.x),
+                    (baseY + local.y)));
         }
 
         return worldPoints;
     }
+
 
     public DraggableEditorComponent getDraggableEditorComponent() {
         return draggableEditorComponent;
@@ -272,4 +280,5 @@ public class ElectricalComponent {
     public void setDeleted(boolean b) {
         isDeleted = b;
     }
+
 }

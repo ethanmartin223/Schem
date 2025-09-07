@@ -3,6 +3,7 @@ package ElectricalComponents;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 

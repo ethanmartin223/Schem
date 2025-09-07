@@ -3,6 +3,7 @@ package ElectricalComponents;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -12,9 +13,9 @@ public class PnpTransistor extends ElectricalComponent {
         super(ea, "pnptransistor", x, y);
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
-        pins.add(new Point2D.Double(0.625d, .08));
-        pins.add(new Point2D.Double(0.625d, .92));
-        pins.add(new Point2D.Double(0.1, .5));
+        pins.add(new Point2D.Double(0.6d, .1d));
+        pins.add(new Point2D.Double(0.6d, .9d));
+        pins.add(new Point2D.Double(0.1d, .5d));
         setConnectionPoints(pins);
     }
 

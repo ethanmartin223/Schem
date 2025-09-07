@@ -4,6 +4,7 @@ import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -14,7 +15,7 @@ public class PowerSupply extends ElectricalComponent {
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
 
-        pins.add(new Point2D.Double(0.1, .5));
+        pins.add(new Point2D.Double(0.5, .8));
         setConnectionPoints(pins);
     }
 
@@ -27,5 +28,6 @@ public class PowerSupply extends ElectricalComponent {
         addEntryToInfoCard("Internal Resistance (Ω)", 6);
         addCheckboxToInfoCard("Enable Noise Simulation");
     }
+
 
 }

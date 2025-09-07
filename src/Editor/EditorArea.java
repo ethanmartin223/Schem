@@ -27,10 +27,11 @@ public class EditorArea extends JPanel {
     // ---- FPS Tracking ---- //
     private long lastTime = System.nanoTime();
     private double fps = 0;
-    private final double smoothing = 0.9; // higher = smoother/slower updates
-
+    private final double smoothing = .6; // higher = smoother/slower updates
 
     public boolean DEBUG_REAL_TIME_RENDERING = true;
+    public static float DEBUG_NATIVE_DRAW_SIZE = .03f;
+    public static boolean DEBUG_USE_NATIVE_DRAW = true;
 
     // ---- public ---- //
     public double scale = 80;
@@ -291,6 +292,7 @@ public class EditorArea extends JPanel {
             double oldScale = scale;
             double zoomFactor = e.getPreciseWheelRotation() < 0 ? 1.1 : 1 / 1.1;
             scale*=zoomFactor;
+            scale = ((int) scale);
             if (scale < 10) scale = 10; // lock scroll to positive values
             if (scale >= 800) scale = 800;
 
@@ -645,8 +647,6 @@ public class EditorArea extends JPanel {
 
         double currentFPS = 1.0 / deltaSeconds;
         fps = smoothing * fps + (1 - smoothing) * currentFPS;
-        BasicStroke thinLines = new BasicStroke(1, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
-        BasicStroke thickerLines = new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
         g.setColor(Color.LIGHT_GRAY);
 
         int width = getWidth();
@@ -699,8 +699,12 @@ public class EditorArea extends JPanel {
         // if currently creating a new component, draw that component on the mouse and set cursor to plus
         if (creatingNewComponent) {
             try {
-                g.drawImage(creatingNewComponentImage, (int) (getMousePosition().x - (scale / 2)),
+                if (!DEBUG_USE_NATIVE_DRAW)
+                    g.drawImage(creatingNewComponentImage, (int) (getMousePosition().x - (scale / 2)),
                         (int) (getMousePosition().y - scale / 2), (int) scale, (int) scale, this);
+                else {
+
+                }
             } catch (NullPointerException ignored) {} //the cursor goes off the screen
         }
 
@@ -717,8 +721,8 @@ public class EditorArea extends JPanel {
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 14));
         g.drawString(String.format("%.1f FPS", fps), 10, getHeight() - 10);
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        toolkit.sync();
+
+        Toolkit.getDefaultToolkit().sync();
     }
 
     /**
@@ -843,7 +847,6 @@ public class EditorArea extends JPanel {
             }
         }
     }
-
 
     /** TODO: METHOD IS GOING TO BE USED IN ELECTRICAL SIMULATION */
     private void highlight(ElectricalComponent start, ElectricalComponent end) {

@@ -3,6 +3,7 @@ package ElectricalComponents;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -26,6 +27,5 @@ public class ANDGate extends ElectricalComponent {
         addEntryToInfoCard("Propagation Delay (ns)", 5);
         addEntryToInfoCard("Fan-In Limit", 4);
     }
-
 
 }

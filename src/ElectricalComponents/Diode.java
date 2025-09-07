@@ -3,6 +3,7 @@ package ElectricalComponents;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -27,5 +28,6 @@ public class Diode extends ElectricalComponent {
         addCheckboxToInfoCard("Is Open");
         addCheckboxToInfoCard("Reverse Leakage Enabled");
     }
+
 
 }

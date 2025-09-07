@@ -18,3 +18,5 @@ Steps to reproduce:
 
 * Redo doesnt work
   - Its just fucking broken there are no steps to reproduce, just click the button and you will see its fucked.
+
+* Moving a Wire Node doesn't tigger history callbacks (Not undo-able)

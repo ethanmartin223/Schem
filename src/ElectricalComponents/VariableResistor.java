@@ -1,8 +1,11 @@
 package ElectricalComponents;
+import javax.swing.*;
 
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
+import java.awt.*;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 

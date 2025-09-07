@@ -50,22 +50,19 @@ public class Wire {
         Point endScreen = editor.worldToScreen(endWorld.x, endWorld.y);
 
         if (isHighlighted || isMultiSelected) {
-            for (int i = 25; i >= 1; i--) {
-                float width = (float) (editor.scale * 0.006 * i);
-                float alpha = Math.max(0.0001f, .7f / i);
-                g2d.setColor(new Color(
-                        HIGHLIGHT_COLOR.getRed(),
-                        HIGHLIGHT_COLOR.getGreen(),
-                        HIGHLIGHT_COLOR.getBlue(),
-                        Math.min(255, (int)(alpha * 255))
-                ));
-                g2d.setStroke(new BasicStroke(width,  BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
-            }
+            float width = (float) (editor.scale * .06);
+            g2d.setColor(new Color(
+                    HIGHLIGHT_COLOR.getRed(),
+                    HIGHLIGHT_COLOR.getGreen(),
+                    HIGHLIGHT_COLOR.getBlue(),
+                    128)
+            );
+            g2d.setStroke(new BasicStroke(width,  BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
         }
 
         g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke((float) (editor.scale * 0.040), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setStroke(new BasicStroke((float) (editor.scale * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
     }
 
