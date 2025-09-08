@@ -1,6 +1,6 @@
 package ElectronicsBackend;
 
-import Editor.WireNode;
+import ElectricalComponents.WireNode;
 import ElectricalComponents.*;
 
 public enum ElectricalComponentIdentifier {
@@ -23,6 +23,7 @@ public enum ElectricalComponentIdentifier {
     PHOTORESISTOR("photoresistor", Photoresistor.class, "Miscellaneous"),
     CAPACITOR("capacitor", Capacitor.class, "Miscellaneous"),
     SPEAKER("speaker", Speaker.class, "Miscellaneous"),
+    INTEGRATED_CIRCUIT("ic", IntegratedCircuit.class, "Miscellaneous"),
 
     GROUND("ground", Ground.class, "Power Components"),
     POWERSUPPLY("powerSupply", PowerSupply.class, "Power Components"),

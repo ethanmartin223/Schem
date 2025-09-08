@@ -1,13 +1,12 @@
-package Editor;
+package ElectricalComponents;
 
+import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class WireNode extends ElectricalComponent {
-
-
     public WireNode(EditorArea eA, double worldX, double worldY) {
         super(eA, "wirenode", worldX, worldY);
         ArrayList<Point2D.Double> pins = new ArrayList<>();

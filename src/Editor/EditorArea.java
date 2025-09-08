@@ -10,6 +10,8 @@ import ElectronicsBackend.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Area;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.VolatileImage;
 import java.io.File;
@@ -81,6 +83,7 @@ public class EditorArea extends JPanel {
     private double tolerance = 1e-6; // floating-point tolerance
     private float minScaleForGridLinesAppearing = 80f;    // scale at which lines start appearing
     private float maxScaleForGridLinesAppearing = 200f;   // scale at which lines are fully visible
+    boolean debugDrawMode = false;
 
     // ---------------------- // Constructor // ---------------------- //
     public EditorArea(JFrame parent) {
@@ -197,6 +200,11 @@ public class EditorArea extends JPanel {
                     inWireMode = true;
                     selectedArea.clearMultiSelected();
                     setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_BACK_SLASH) {
+                    debugDrawMode = !debugDrawMode;
+                    repaint();
                 }
 
                 //for quickEntry field
@@ -750,10 +758,7 @@ public class EditorArea extends JPanel {
             // ---- Selection ----
             selectedArea.paint(g2d);
 
-            // ---- FPS counter ----
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(new Font("Arial", Font.BOLD, 14));
-            g2d.drawString(String.format("%.1f FPS", fps), 10, height - 10);
+            if (debugDrawMode) debugGraphics(g2d);
 
             g2d.dispose();
 
@@ -762,6 +767,46 @@ public class EditorArea extends JPanel {
         // --- Blit final buffer to screen ---
         g.drawImage(buffer, 0, 0, null);
         Toolkit.getDefaultToolkit().sync();
+    }
+
+    private void debugGraphics(Graphics2D g2d) {
+        g2d.setColor(Color.red);
+
+        g2d.setFont(new Font("Arial", Font.BOLD, 14));
+        g2d.drawString(String.format("%.1f FPS", fps), 10, getHeight() - 10);
+        g2d.drawString(String.format("%s BUFFER OBJECTS", ComponentRenderer.buffer.size()), 10, getHeight() - 30);
+        g2d.drawString(String.format("%s TOTAL OBJECTS", ElectricalComponent.allComponents.size()),
+                10, getHeight() - 50);
+        g2d.drawString(String.format("%s TOTAL WIRES", wires.size()),
+                10, getHeight() - 70);
+
+        g2d.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        for (Component c : getComponents()) {
+            if (c instanceof DraggableEditorComponent) {
+                Rectangle bounds = c.getBounds();
+                g2d.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+        }
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2d.setStroke(new BasicStroke(6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        for (Wire w : wires) {
+            Point2D.Double startWorld = w.startComponent.getConnectionPointsAsWorldPoints().get(w.startIndex);
+            Point2D.Double endWorld = w.endComponent.getConnectionPointsAsWorldPoints().get(w.endIndex);
+
+            Point startScreen = worldToScreen(startWorld.x, startWorld.y);
+            Point endScreen = worldToScreen(endWorld.x, endWorld.y);
+            Shape path = new Line2D.Double(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
+
+            BasicStroke outer = new BasicStroke((float) (.1*scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            BasicStroke inner = new BasicStroke((float) (scale * .06), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // effectively the original path width
+
+            Area strokeArea = new Area(outer.createStrokedShape(path));
+            strokeArea.subtract(new Area(inner.createStrokedShape(path)));
+
+            g2d.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2d.draw(strokeArea);
+        }
     }
 
 

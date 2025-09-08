@@ -78,6 +78,11 @@ public class DraggableEditorComponent extends JComponent {
                     editor.repaint(); // to avoid wire not getting repainted
                 }
 
+                if (e.getKeyCode() == KeyEvent.VK_BACK_SLASH) {
+                    editor.debugDrawMode = !editor.debugDrawMode;
+                    editor.repaint();
+                }
+
                 if (e.getKeyCode() == 17) { // on wire mode grab focus
                     editor.grabFocus();
                     editor.inWireMode = true;

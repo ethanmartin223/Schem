@@ -1,8 +1,11 @@
 package Editor;
 
+import ElectricalComponents.IntegratedCircuit;
+
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.util.HashMap;
@@ -52,10 +55,84 @@ public class ComponentRenderer {
         else if (id.equals(ZENER_DIODE.id))       drawZenerDiode(g2d, cx, cy, size);
         else if (id.equals(SPEAKER.id))           drawSpeaker(g2d, cx, cy, size);
         else if (id.equals(LAMP.id))              drawLamp(g2d, cx, cy, size);
+        else if (id.equals(WIRE_NODE.id))         drawWireNode(g2d, cx, cy, size);
+        else if (id.equals(INTEGRATED_CIRCUIT.id))drawIC(g2d, cx, cy, size, 8, true);
+    }
+
+    private static void drawIC(Graphics2D g2d, int cx, int cy, int size, int leadCount, boolean showPinNumbers) {
+        // Calculate IC body dimensions
+        double bodyWidth = size;
+        double bodyHeight = (leadCount / 2) * (size * 0.2);
+        bodyHeight = Math.max(bodyHeight, size * 0.8); // Minimum height
+
+        // Calculate lead parameters
+        double leadLength = size * 0.2;
+        double leadSpacing = bodyHeight / (leadCount / 2);
+
+        // Draw IC body
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(2));
+        Rectangle2D body = new Rectangle2D.Double(
+                cx - bodyWidth / 2,
+                cy - bodyHeight / 2,
+                bodyWidth,
+                bodyHeight
+        );
+        g2d.draw(body);
+
+        // Draw notch at top to indicate orientation
+        int notchSize = size / 10;
+        g2d.drawOval((int)(cx + bodyWidth / 2 - notchSize*2), (int)(cy - bodyHeight / 2+notchSize*1.5),
+                notchSize, notchSize);
+
+        // Draw left leads
+        for (int i = 0; i < leadCount / 2; i++) {
+            double y = cy - bodyHeight / 2 + (i + 0.5) * leadSpacing;
+            g2d.drawLine((int)(cx - bodyWidth / 2), (int)y,
+                    (int)(cx - bodyWidth / 2 - leadLength), (int)y);
+
+            if (showPinNumbers) {
+                drawPinNumber(g2d, (int)(cx - bodyWidth / 2 - leadLength - 5), (int)y, i + 1);
+            }
+        }
+
+        // Draw right leads
+        for (int i = 0; i < leadCount / 2; i++) {
+            double y = cy + bodyHeight / 2 - (i + 0.5) * leadSpacing;
+            g2d.drawLine((int)(cx + bodyWidth / 2), (int)y,
+                    (int)(cx + bodyWidth / 2 + leadLength), (int)y);
+
+            if (showPinNumbers) {
+                drawPinNumber(g2d, (int)(cx + bodyWidth / 2 + leadLength + 5), (int)y, leadCount - i);
+            }
+        }
+    }
+
+    private static void drawPinNumber(Graphics2D g2d, int x, int y, int number) {
+        String text = Integer.toString(number);
+        FontMetrics fm = g2d.getFontMetrics();
+        int textWidth = fm.stringWidth(text);
+        int textHeight = fm.getHeight();
+
+        g2d.drawString(text, x - textWidth / 2, y + textHeight / 4);
     }
 
     private static void drawSpeaker(Graphics2D g2d, int cx, int cy, int size) {
+
     }
+
+    private static void drawWireNode(Graphics2D g2d, int cx, int cy, int size) {
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(Color.BLACK);
+
+        // Radius of the dot
+        int radius = (int) (size * 0.025);
+
+        // Draw centered filled circle
+        g2d.fillOval(cx - radius, cy - radius, radius * 2, radius * 2);
+    }
+
 
     public static BufferedImage render(Graphics2D g, int cx, int cy, int size, String id) {
         String key = id + "_" + size;
@@ -153,11 +230,23 @@ public class ComponentRenderer {
         int circleY = cy - circleRadius;
         g2d.drawOval(circleX, circleY, circleRadius * 2, circleRadius * 2);
 
-        // Draw X inside the circle (centered)
-        g2d.drawLine(cx - circleRadius, cy - circleRadius, cx + circleRadius, cy + circleRadius); // \
-        g2d.drawLine(cx - circleRadius, cy + circleRadius, cx + circleRadius, cy - circleRadius); // /
-    }
+        // Calculate the actual radius to keep X within the circle
+        double effectiveRadius = circleRadius;
 
+        // Draw X inside the circle using trigonometric positioning
+        double angle = Math.PI / 4; // 45 degrees in radians
+        int x1 = cx + (int) (effectiveRadius * Math.cos(angle));
+        int y1 = cy + (int) (effectiveRadius * Math.sin(angle));
+        int x2 = cx - (int) (effectiveRadius * Math.cos(angle));
+        int y2 = cy - (int) (effectiveRadius * Math.sin(angle));
+        int x3 = cx + (int) (effectiveRadius * Math.cos(angle));
+        int y3 = cy - (int) (effectiveRadius * Math.sin(angle));
+        int x4 = cx - (int) (effectiveRadius * Math.cos(angle));
+        int y4 = cy + (int) (effectiveRadius * Math.sin(angle));
+
+        g2d.drawLine(x1, y1, x2, y2);
+        g2d.drawLine(x3, y3, x4, y4);
+    }
 
     private static BufferedImage drawDiode(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
