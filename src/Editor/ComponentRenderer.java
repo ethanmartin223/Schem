@@ -14,6 +14,7 @@ import static ElectronicsBackend.ElectricalComponentIdentifier.*;
 
 public class ComponentRenderer {
     static HashMap<String, BufferedImage> buffer;
+    public static final Color HIGHLIGHT_COLOR = new Color(255,153,0);
 
     //this method is expensive AF because it forces regenerating all assets,
     // try to avoid calling at all costs
@@ -38,25 +39,24 @@ public class ComponentRenderer {
 
 
     public static void renderDirect(Graphics2D g2d, int cx, int cy, int size, String id) {
-        g2d.setColor(Color.BLACK);
-        if (id.equals(AND_GATE.id))               drawAND(g2d, cx, cy, size);
-        else if (id.equals(CAPACITOR.id))         drawCapacitor(g2d, cx, cy, size);
-        else if (id.equals(DIODE.id))             drawDiode(g2d, cx, cy, size);
-        else if (id.equals(GROUND.id))            drawGround(g2d, cx, cy, size);
-        else if (id.equals(NAND_GATE.id))         drawNAND(g2d, cx, cy, size);
-        else if (id.equals(NPN_TRANSISTOR.id))    drawNPNTransistor(g2d, cx, cy, size);
-        else if (id.equals(OR_GATE.id))           drawOR(g2d, cx, cy, size);
-        else if (id.equals(PNP_TRANSISTOR.id))    drawPNPTransistor(g2d, cx, cy, size, id);
-        else if (id.equals(POWERSUPPLY.id))       drawPowerSupply(g2d, cx, cy, size);
-        else if (id.equals(RESISTOR.id))          drawResistor(g2d, cx, cy, size);
-        else if (id.equals(TRANSFORMER.id))       drawTransformer(g2d, cx, cy, size);
+        if (id.equals(AND_GATE.id)) drawAND(g2d, cx, cy, size);
+        else if (id.equals(CAPACITOR.id)) drawCapacitor(g2d, cx, cy, size);
+        else if (id.equals(DIODE.id)) drawDiode(g2d, cx, cy, size);
+        else if (id.equals(GROUND.id)) drawGround(g2d, cx, cy, size);
+        else if (id.equals(NAND_GATE.id)) drawNAND(g2d, cx, cy, size);
+        else if (id.equals(NPN_TRANSISTOR.id)) drawNPNTransistor(g2d, cx, cy, size);
+        else if (id.equals(OR_GATE.id)) drawOR(g2d, cx, cy, size);
+        else if (id.equals(PNP_TRANSISTOR.id)) drawPNPTransistor(g2d, cx, cy, size, id);
+        else if (id.equals(POWERSUPPLY.id)) drawPowerSupply(g2d, cx, cy, size);
+        else if (id.equals(RESISTOR.id)) drawResistor(g2d, cx, cy, size);
+        else if (id.equals(TRANSFORMER.id)) drawTransformer(g2d, cx, cy, size);
         else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
-        else if (id.equals(XOR_GATE.id))          drawXOR(g2d, cx, cy, size);
-        else if (id.equals(ZENER_DIODE.id))       drawZenerDiode(g2d, cx, cy, size);
-        else if (id.equals(SPEAKER.id))           drawSpeaker(g2d, cx, cy, size);
-        else if (id.equals(LAMP.id))              drawLamp(g2d, cx, cy, size);
-        else if (id.equals(WIRE_NODE.id))         drawWireNode(g2d, cx, cy, size);
-        else if (id.equals(INTEGRATED_CIRCUIT.id))drawIC(g2d, cx, cy, size, 8, true);
+        else if (id.equals(XOR_GATE.id)) drawXOR(g2d, cx, cy, size);
+        else if (id.equals(ZENER_DIODE.id)) drawZenerDiode(g2d, cx, cy, size);
+        else if (id.equals(SPEAKER.id)) drawSpeaker(g2d, cx, cy, size);
+        else if (id.equals(LAMP.id)) drawLamp(g2d, cx, cy, size);
+        else if (id.equals(WIRE_NODE.id)) drawWireNode(g2d, cx, cy, size);
+        else if (id.equals(INTEGRATED_CIRCUIT.id)) drawIC(g2d, cx, cy, size, 8, true);
     }
 
     private static void drawIC(Graphics2D g2d, int cx, int cy, int size, int leadCount, boolean showPinNumbers) {
@@ -82,28 +82,28 @@ public class ComponentRenderer {
 
         // Draw notch at top to indicate orientation
         int notchSize = size / 10;
-        g2d.drawOval((int)(cx + bodyWidth / 2 - notchSize*2), (int)(cy - bodyHeight / 2+notchSize*1.5),
+        g2d.drawOval((int) (cx + bodyWidth / 2 - notchSize * 2), (int) (cy - bodyHeight / 2 + notchSize * 1.5),
                 notchSize, notchSize);
 
         // Draw left leads
         for (int i = 0; i < leadCount / 2; i++) {
             double y = cy - bodyHeight / 2 + (i + 0.5) * leadSpacing;
-            g2d.drawLine((int)(cx - bodyWidth / 2), (int)y,
-                    (int)(cx - bodyWidth / 2 - leadLength), (int)y);
+            g2d.drawLine((int) (cx - bodyWidth / 2), (int) y,
+                    (int) (cx - bodyWidth / 2 - leadLength), (int) y);
 
             if (showPinNumbers) {
-                drawPinNumber(g2d, (int)(cx - bodyWidth / 2 - leadLength - 5), (int)y, i + 1);
+                drawPinNumber(g2d, (int) (cx - bodyWidth / 2 - leadLength - 5), (int) y, i + 1);
             }
         }
 
         // Draw right leads
         for (int i = 0; i < leadCount / 2; i++) {
             double y = cy + bodyHeight / 2 - (i + 0.5) * leadSpacing;
-            g2d.drawLine((int)(cx + bodyWidth / 2), (int)y,
-                    (int)(cx + bodyWidth / 2 + leadLength), (int)y);
+            g2d.drawLine((int) (cx + bodyWidth / 2), (int) y,
+                    (int) (cx + bodyWidth / 2 + leadLength), (int) y);
 
             if (showPinNumbers) {
-                drawPinNumber(g2d, (int)(cx + bodyWidth / 2 + leadLength + 5), (int)y, leadCount - i);
+                drawPinNumber(g2d, (int) (cx + bodyWidth / 2 + leadLength + 5), (int) y, leadCount - i);
             }
         }
     }
@@ -133,16 +133,21 @@ public class ComponentRenderer {
         g2d.fillOval(cx - radius, cy - radius, radius * 2, radius * 2);
     }
 
-
-    public static BufferedImage render(Graphics2D g, int cx, int cy, int size, String id) {
-        String key = id + "_" + size;
+    public static BufferedImage render(Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight) {
+        String key = id + "_" + size+"_"+isHighlight;
         if (buffer.containsKey(key)) return buffer.get(key);
-        System.out.println("BUFFER: "+buffer.size());
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
         setHints(g2d);
-        g2d.setColor(Color.BLACK);
 
+        if (isHighlight) {
+            g2d.setColor(HIGHLIGHT_COLOR);
+            g2d.setStroke(new BasicStroke((float) Math.max(.06 * size, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            renderDirect(g2d, cx, cy, size, id);
+        }
+
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(Color.BLACK);
         renderDirect(g2d, cx, cy, size, id);
 
         g2d.dispose();
@@ -151,8 +156,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawAND(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.setColor(Color.BLACK);
         // Proportions
         double width = size * 0.5;       // total width of AND gate
         double height = size * 0.5;      // total height
@@ -194,7 +197,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawCapacitor(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int half = size / 10;
         g2d.drawLine(cx - half, cy - size / 4, cx - half, cy + size / 4);
         g2d.drawLine(cx + half, cy - size / 4, cx + half, cy + size / 4);
@@ -205,9 +207,7 @@ public class ComponentRenderer {
     }
 
     private static void drawLamp(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.setColor(Color.BLACK);
+
 
         // Total lamp width
         double width = size * 0.8;
@@ -249,7 +249,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawDiode(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int pinLength = (int) (size * 0.2);
         int bodyLength = (int) (size * 0.4);
         int halfHeight = (int) (size * 0.2);
@@ -265,8 +264,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawGround(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         int step = size / 8;
         int width = size / 5;
         g2d.drawLine(cx, cy, cx, cy + step);
@@ -277,8 +274,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawNAND(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Proportions
         double width = size * 0.5;       // total width of gate
         double height = size * 0.5;      // total height
@@ -328,8 +323,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawNPNTransistor(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         double r = size * 0.3;        // circle radius
         double leadLength = size * 0.4;
         double arrowLength = size * 0.08;
@@ -374,9 +367,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawOR(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Proportions
         double width = size * 0.5;       // total width of OR gate
         double height = size * 0.5;      // total height
@@ -421,9 +411,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawPNPTransistor(Graphics2D g2d, int cx, int cy, int size, String id) {
-        g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Proportions
         double r = size * 0.3;        // circle radius
         double leadLength = size * 0.4;
@@ -478,9 +465,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawPowerSupply(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         int verticalLength = (int)(size * 0.3);   // length of vertical part of T
         int horizontalLength = (int)(size * 0.2); // half-length of horizontal part of T
 
@@ -500,9 +484,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawResistor(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Resistor dimensions
         double bodyWidth = size * 0.6;    // width of zig-zag body
         double amplitude = size * 0.2;    // vertical height of zig-zag (peak to center)
@@ -541,9 +522,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawTransformer(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Transformer dimensions
         double coilWidth = size * 0.15;   // horizontal width of each vertical loop
         double coilHeight = size * 0.5;   // vertical height of each coil
@@ -590,9 +568,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawVariableResistor(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Resistor body dimensions
         double bodyWidth = size * 0.6;
         double amplitude = size * 0.2;
@@ -654,10 +629,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawXOR(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(
-                Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         // Proportions
         double width = size * 0.6;   // total width of XOR gate
         double height = size * 0.5;  // total height
@@ -712,9 +683,6 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawZenerDiode(Graphics2D g2d, int cx, int cy, int size) {
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
-                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
         int pinLength = (int)(size * 0.2);
         int bodyLength = (int)(size * 0.4);
         int halfHeight = (int)(size * 0.2);

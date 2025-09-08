@@ -315,7 +315,8 @@ public class DraggableEditorComponent extends JComponent {
         }
 
         g2d.drawImage(
-                ComponentRenderer.render(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id),
+                ComponentRenderer.render(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id,
+                        isFocusOwner()||isMultiSelected),
                 0, 0, this);
     }
 
