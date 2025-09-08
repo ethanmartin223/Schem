@@ -117,9 +117,6 @@ public class EditorSaveManager {
             for (int o : arr) {
                 if (ElectricalComponent.allComponents.contains(o))
                     eC.children.add(ElectricalComponent.allComponents.get(o));
-                else {
-                    System.out.println("SAVE FILE CONTAINED UNFIXABLE ERROR; THIS MAY CAUSE PROBLEMS LATER");
-                }
             }
         }
         editor.creatingComponentID = null;

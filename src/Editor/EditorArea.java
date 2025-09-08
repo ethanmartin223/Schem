@@ -178,8 +178,22 @@ public class EditorArea extends JPanel {
                 }
 
                 // remove selected wire if delete key is pressed (if one is selected)
-                if (e.getKeyCode() == 127) { //delete key
+                if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode()==KeyEvent.VK_BACK_SPACE) { //delete key
                     deleteSelectedWires();
+                    for (Wire rmWire : wires.stream().filter(Wire::isHighlighted).toList()) {
+                        wires.remove(rmWire);
+                        rmWire.endComponent.disconnect(rmWire.startComponent);
+                        history.addEvent(History.Event.DELETED_WIRE, rmWire.startIndex, rmWire.endIndex, rmWire);
+                        repaint();
+                    }
+                    for (Component c : getComponents()) {
+                        if (c instanceof DraggableEditorComponent dec) {
+                            if (dec.isMultiSelected) {
+                                deleteComponent(dec.getElectricalComponent());
+                            }
+                        }
+                    }
+
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_EQUALS) {
