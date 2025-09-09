@@ -1,3 +1,4 @@
+
 package Editor;
 
 // ---------------------- // Imports // ---------------------- //
@@ -37,17 +38,14 @@ public class DraggableEditorComponent extends JComponent {
     public boolean isMultiSelected;
 
     // ---------------------- // Constructor // ---------------------- //
-    public DraggableEditorComponent(EditorArea editor, Image image, Image selectedImage, double worldX, double worldY,
+    public DraggableEditorComponent(EditorArea editor, double worldX, double worldY,
                                     ElectricalComponent parentElectricalComponent) {
         // ---- init vars ---- //
         this.editor = editor;
         this.electricalComponent = parentElectricalComponent;
 
-        this.image = image;
 
         this.currentDisplayedImage = image;
-        this.selectedImage = selectedImage;
-
         this.worldX = worldX;
         this.worldY = worldY;
         this.boundsOverride = 1;
@@ -159,8 +157,8 @@ public class DraggableEditorComponent extends JComponent {
                     Point panelPoint = SwingUtilities.convertPoint(DraggableEditorComponent.this, e.getPoint(), editor);
                     Point2D.Double worldPoint = screenToWorld(panelPoint.x, panelPoint.y);
 
-                    double imgWidthWorld = currentDisplayedImage.getWidth(null) / (editor.scale);
-                    double imgHeightWorld = currentDisplayedImage.getHeight(null) / (editor.scale);
+                    double imgWidthWorld = getWidth() / (editor.scale);
+                    double imgHeightWorld = getHeight() / (editor.scale);
 
                     Rectangle2D.Double worldBounds = new Rectangle2D.Double(
                             getWorldX(), getWorldY(), imgWidthWorld, imgHeightWorld
@@ -298,7 +296,6 @@ public class DraggableEditorComponent extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
-        Image imgToDraw = isFocusOwner()||isMultiSelected? selectedImage : image;
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -315,37 +312,12 @@ public class DraggableEditorComponent extends JComponent {
         }
 
         g2d.drawImage(
-                ComponentRenderer.render(g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id,
-                        isFocusOwner()||isMultiSelected),
+                ComponentRenderer.render(this, g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id,
+                        isFocusOwner()||isMultiSelected, boundsOverride),
                 0, 0, this);
     }
 
-    //color the components
-    private BufferedImage recolorImage(BufferedImage src, Color replacement, int tol) {
-        int width = src.getWidth();
-        int height = src.getHeight();
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int argb = src.getRGB(x, y);
-                Color c = new Color(argb, true);
-                if (c.getAlpha() > 0) {
-                    if (c.getRed() < tol && c.getGreen() < tol && c.getBlue() < tol) {
-                        Color newC = new Color(
-                                replacement.getRed(),
-                                replacement.getGreen(),
-                                replacement.getBlue(),
-                                c.getAlpha()
-                        );
-                        src.setRGB(x, y, newC.getRGB());
-                        continue;
-                    }
-                }
-                src.setRGB(x, y, argb);
-            }
-        }
-        return src;
-    }
 
     public void updateFromEditor() {
         updateBounds();

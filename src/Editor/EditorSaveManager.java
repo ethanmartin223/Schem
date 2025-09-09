@@ -1,3 +1,4 @@
+
 package Editor;
 
 import ElectronicsBackend.ElectricalComponent;
@@ -105,6 +106,7 @@ public class EditorSaveManager {
                     DraggableEditorComponent component = editor.createNewComponent(type, x, y, false);
                     component.orientation = rot;
                     component.getElectricalComponent().rotateConnectionPoints(rot);
+
                 } catch (Exception ignored){
                     ignored.printStackTrace();
                 };
@@ -172,3 +174,4 @@ public class EditorSaveManager {
         editor.mainWindow.setTitle("WireWorks V1.0 - "+editor.currentlyEditingFile.getName());
     }
 }
+ 

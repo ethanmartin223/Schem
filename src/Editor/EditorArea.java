@@ -1,3 +1,4 @@
+
 package Editor;
 
 // ---------------------- // Imports // ---------------------- //
@@ -127,7 +128,6 @@ public class EditorArea extends JPanel {
                         try {
                             double x = ((e.getX() - (scale / 2)) / scale) + xPosition;
                             double y = ((e.getY() - (scale / 2)) / scale) + yPosition;
-
                             // Snap coordinates
                             Point2D.Double snapped;
                             //TODO: this NEEDS to be removed
@@ -137,8 +137,8 @@ public class EditorArea extends JPanel {
 
                         } catch (Exception ignored) {}
                     }
-
-
+ 
+ 
                     /* handles clicks on wires, checks for mouse clicks to the closest wire and
                        determines if it falls within the click threshold */
                     if (e.getButton()==1) {
@@ -503,13 +503,16 @@ public class EditorArea extends JPanel {
      *                   leave false for creations like loading from a file or internal editor calls
      * @apiNote This operation may be logged in History (based on addHistory param)
      */
-    public DraggableEditorComponent createNewComponent(double worldX, double worldY, boolean addHistory) throws
-            NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public DraggableEditorComponent createNewComponent(double worldX, double worldY, boolean addHistory) {
         Class compClass = ElectricalComponentIdentifier.findClassFromID(creatingComponentID);
-        ElectricalComponent component =  (ElectricalComponent) compClass.getDeclaredConstructor(EditorArea.class, double.class, double.class)
-                .newInstance(this, worldX, worldY);
+        ElectricalComponent component = null;
+        try {
+            component = (ElectricalComponent) compClass.getDeclaredConstructor(EditorArea.class, double.class, double.class)
+                    .newInstance(this, worldX, worldY);
+        } catch (Exception e) {
+            System.err.println("ERROR IN CREATING COMPONENT");
+        }
         if (addHistory) history.addEvent(History.Event.CREATED_NEW_COMPONENT, worldX, worldY, component);
-
         return component.getDraggableEditorComponent();
     }
 
@@ -541,51 +544,51 @@ public class EditorArea extends JPanel {
 
             //undo deleting a component that was attached to wires
             case History.Event.DELETED_CONNECTING_WIRES:
-                    History.Event trackingEvent = null;
-                    ArrayList<Wire> removedWires = new ArrayList<>();
-                    do {
-                        HistoryEntry historyEntry = history.getLastAndRemove();
-                        trackingEvent = historyEntry.event;
-                        if (trackingEvent == History.Event.DELETED_WIRE) {
-                            removedWires.add((Wire) (historyEntry.component));
-                            ((Wire) (historyEntry.component)).endComponent
-                                    .connect(((Wire) (historyEntry.component)).startComponent);
-                        }
-                        if (trackingEvent == History.Event.DELETED_COMPONENT) {
-                            ElectricalComponent component = (ElectricalComponent) historyEntry.component;
-                            component.setDeleted(false);
-                            ElectricalComponent.allComponents.add(component);
-                            add(component.getDraggableEditorComponent());
-                            wires.addAll(removedWires);
-                        }
-                    } while (trackingEvent == History.Event.DELETED_WIRE);
-            break;
+                History.Event trackingEvent = null;
+                ArrayList<Wire> removedWires = new ArrayList<>();
+                do {
+                    HistoryEntry historyEntry = history.getLastAndRemove();
+                    trackingEvent = historyEntry.event;
+                    if (trackingEvent == History.Event.DELETED_WIRE) {
+                        removedWires.add((Wire) (historyEntry.component));
+                        ((Wire) (historyEntry.component)).endComponent
+                                .connect(((Wire) (historyEntry.component)).startComponent);
+                    }
+                    if (trackingEvent == History.Event.DELETED_COMPONENT) {
+                        ElectricalComponent component = (ElectricalComponent) historyEntry.component;
+                        component.setDeleted(false);
+                        ElectricalComponent.allComponents.add(component);
+                        add(component.getDraggableEditorComponent());
+                        wires.addAll(removedWires);
+                    }
+                } while (trackingEvent == History.Event.DELETED_WIRE);
+                break;
 
             case History.Event.DELETED_COMPONENT:
                 ElectricalComponent component = (ElectricalComponent) lastEvent.component;
                 component.setDeleted(false);
                 ElectricalComponent.allComponents.add(component);
                 add(component.getDraggableEditorComponent());
-            break;
+                break;
 
             case History.Event.DELETED_WIRE:
                 Wire wire = (Wire) lastEvent.component;
                 wires.add(wire);
                 ((Wire) lastEvent.component).endComponent.connect(((Wire) lastEvent.component).startComponent);
-            break;
+                break;
 
             case History.Event.CREATED_NEW_COMPONENT:
                 ElectricalComponent component1 = (ElectricalComponent) lastEvent.component;
                 remove(component1.getDraggableEditorComponent());
                 ElectricalComponent.allComponents.remove(component1);
                 component1.setDeleted(true);
-            break;
+                break;
 
             case History.Event.CREATED_WIRE:
                 Wire wire1 = (Wire) lastEvent.component;
                 ((Wire) lastEvent.component).endComponent.disconnect(((Wire) lastEvent.component).startComponent);
                 wires.remove(wire1);
-            break;
+                break;
 
             case History.Event.MOVED_COMPONENT:
                 ElectricalComponent component2 = (ElectricalComponent) lastEvent.component;
@@ -597,7 +600,7 @@ public class EditorArea extends JPanel {
                         .getDraggableEditorComponent();
                 component3.orientation = lastEvent.rotation;
                 ((ElectricalComponent) lastEvent.component).rotateConnectionPoints(lastEvent.rotation);
-            break;
+                break;
         }
         repaint();
     }
@@ -753,14 +756,13 @@ public class EditorArea extends JPanel {
             }
 
             // ---- Ghost new component ----
+            g2d.setColor(Color.lightGray);
             if (creatingNewComponent) {
-                try {
-                    Point mouse = getMousePosition();
-                    if (mouse != null) {
-                        ComponentRenderer.renderDirect(g2d,mouse.x,mouse.y,
-                                (int)(scale),creatingComponentID);
-                    }
-                } catch (Exception ignored) {}
+                Point mouse = getMousePosition();
+                if (mouse != null) {
+                    ComponentRenderer.renderDirect(null, g2d,mouse.x,mouse.y,
+                            (int)(scale),creatingComponentID);
+                }
             }
 
             // ---- Wires ----
@@ -797,9 +799,17 @@ public class EditorArea extends JPanel {
         g2d.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
         for (Component c : getComponents()) {
-            if (c instanceof DraggableEditorComponent) {
+            if (c instanceof DraggableEditorComponent dec) {
                 Rectangle bounds = c.getBounds();
                 g2d.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+
+                Point2D.Double[] connectorPoints = dec.getElectricalComponent().getConnectionPoints();
+                for (int i = 0; i < connectorPoints.length; i++) {
+                    Point2D point = worldToScreen(dec.getWorldX()+connectorPoints[i].x,
+                            (int) dec.getWorldY()+connectorPoints[i].y);
+                    g2d.drawOval((int) (point.getX()-(.1*scale)/2), (int) (point.getY()-(.1*scale)/2),
+                            (int) (.1*scale), (int) (.1*scale));
+                }
             }
         }
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
@@ -821,6 +831,18 @@ public class EditorArea extends JPanel {
             g2d.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2d.draw(strokeArea);
         }
+        if (currentFocusedComponent != null) {
+            String out = currentFocusedComponent.getElectricalComponent().electricalProperties.toString()
+                    .replace("{","")
+                    .replace("}","");
+            String[] splitout = out.split(", ");
+            for  (int i = 0; i < splitout.length; i++) {
+                g2d.drawString(splitout[i],
+                        10, 20+i*20);
+
+            }
+        }
+
     }
 
 
@@ -960,5 +982,4 @@ public class EditorArea extends JPanel {
     }
 
 }
-
-
+ 

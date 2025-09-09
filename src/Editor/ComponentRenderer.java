@@ -5,9 +5,11 @@ import ElectricalComponents.IntegratedCircuit;
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static ElectronicsBackend.ElectricalComponentIdentifier.*;
@@ -37,8 +39,41 @@ public class ComponentRenderer {
         return buffer.containsKey(id);
     }
 
+    public static BufferedImage render(DraggableEditorComponent caller, Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight, double sizeOverride) {
+        String key = id + "_" + size+"_"+isHighlight;
+        if (buffer.containsKey(key)) return buffer.get(key);
+        BufferedImage img = new BufferedImage((int) (size * sizeOverride), (int) (size * sizeOverride), BufferedImage.TYPE_INT_ARGB);
+        return createImageFromBuffer(caller,cx, cy, size, id, isHighlight, key, img);
+    }
 
-    public static void renderDirect(Graphics2D g2d, int cx, int cy, int size, String id) {
+    public static BufferedImage render(DraggableEditorComponent caller, Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight) {
+        String key = id + "_" + size+"_"+isHighlight;
+        if (buffer.containsKey(key)) return buffer.get(key);
+        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        return createImageFromBuffer(caller,cx, cy, size, id, isHighlight, key, img);
+    }
+
+    private static BufferedImage createImageFromBuffer(DraggableEditorComponent caller, int cx, int cy, int size, String id, boolean isHighlight, String key, BufferedImage img) {
+        Graphics2D g2d = img.createGraphics();
+        setHints(g2d);
+
+        if (isHighlight) {
+            g2d.setColor(HIGHLIGHT_COLOR);
+            g2d.setStroke(new BasicStroke((float) Math.max(.06 * size, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            renderDirect(caller, g2d, cx, cy, size, id);
+        }
+
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(Color.BLACK);
+        renderDirect(caller, g2d, cx, cy, size, id);
+
+        g2d.dispose();
+        buffer.put(key, img);
+        return img;
+    }
+
+
+    public static void renderDirect(DraggableEditorComponent caller, Graphics2D g2d, int cx, int cy, int size, String id) {
         if (id.equals(AND_GATE.id)) drawAND(g2d, cx, cy, size);
         else if (id.equals(CAPACITOR.id)) drawCapacitor(g2d, cx, cy, size);
         else if (id.equals(DIODE.id)) drawDiode(g2d, cx, cy, size);
@@ -56,10 +91,15 @@ public class ComponentRenderer {
         else if (id.equals(SPEAKER.id)) drawSpeaker(g2d, cx, cy, size);
         else if (id.equals(LAMP.id)) drawLamp(g2d, cx, cy, size);
         else if (id.equals(WIRE_NODE.id)) drawWireNode(g2d, cx, cy, size);
-        else if (id.equals(INTEGRATED_CIRCUIT.id)) drawIC(g2d, cx, cy, size, 8, true);
+        else if (id.equals(INTEGRATED_CIRCUIT.id)) drawIC(g2d, cx, cy, size,
+                caller!=null? (int)caller.getElectricalComponent().electricalProperties.get("number_of_pins") :16,
+                true);
     }
 
     private static void drawIC(Graphics2D g2d, int cx, int cy, int size, int leadCount, boolean showPinNumbers) {
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
         // Calculate IC body dimensions
         double bodyWidth = size;
         double bodyHeight = (leadCount / 2) * (size * 0.2);
@@ -70,8 +110,6 @@ public class ComponentRenderer {
         double leadSpacing = bodyHeight / (leadCount / 2);
 
         // Draw IC body
-        g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke(2));
         Rectangle2D body = new Rectangle2D.Double(
                 cx - bodyWidth / 2,
                 cy - bodyHeight / 2,
@@ -90,7 +128,6 @@ public class ComponentRenderer {
             double y = cy - bodyHeight / 2 + (i + 0.5) * leadSpacing;
             g2d.drawLine((int) (cx - bodyWidth / 2), (int) y,
                     (int) (cx - bodyWidth / 2 - leadLength), (int) y);
-
             if (showPinNumbers) {
                 drawPinNumber(g2d, (int) (cx - bodyWidth / 2 - leadLength - 5), (int) y, i + 1);
             }
@@ -101,7 +138,6 @@ public class ComponentRenderer {
             double y = cy + bodyHeight / 2 - (i + 0.5) * leadSpacing;
             g2d.drawLine((int) (cx + bodyWidth / 2), (int) y,
                     (int) (cx + bodyWidth / 2 + leadLength), (int) y);
-
             if (showPinNumbers) {
                 drawPinNumber(g2d, (int) (cx + bodyWidth / 2 + leadLength + 5), (int) y, leadCount - i);
             }
@@ -133,27 +169,6 @@ public class ComponentRenderer {
         g2d.fillOval(cx - radius, cy - radius, radius * 2, radius * 2);
     }
 
-    public static BufferedImage render(Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight) {
-        String key = id + "_" + size+"_"+isHighlight;
-        if (buffer.containsKey(key)) return buffer.get(key);
-        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = img.createGraphics();
-        setHints(g2d);
-
-        if (isHighlight) {
-            g2d.setColor(HIGHLIGHT_COLOR);
-            g2d.setStroke(new BasicStroke((float) Math.max(.06 * size, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            renderDirect(g2d, cx, cy, size, id);
-        }
-
-        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.setColor(Color.BLACK);
-        renderDirect(g2d, cx, cy, size, id);
-
-        g2d.dispose();
-        buffer.put(key, img);
-        return img;
-    }
 
     private static BufferedImage drawAND(Graphics2D g2d, int cx, int cy, int size) {
         // Proportions
