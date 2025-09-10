@@ -321,6 +321,11 @@ public class ElectricalComponent {
     public Point2D.Double[] getConnectionPoints() {
         return connectionPoints;
     }
+
+    // Override this if the component needs to be excluded from cached rendering
+    public boolean isIndividuallyRendered() {
+        return false;
+    }
 }
  
  

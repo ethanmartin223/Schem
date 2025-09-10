@@ -1,6 +1,7 @@
 
 package ElectricalComponents;
 
+import Editor.ComponentRenderer;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
@@ -18,6 +19,7 @@ public class IntegratedCircuit extends ElectricalComponent {
 
 
     public void recalculate_pin_points() {
+        if (electricalProperties.get("number_of_pins")==null) return;
         int numberOfPins = (int) electricalProperties.get("number_of_pins");
 
         double size = this.draggableEditorComponent.boundsOverride;
@@ -52,6 +54,12 @@ public class IntegratedCircuit extends ElectricalComponent {
     protected void onPropertiesChange() {
         super.onPropertiesChange();
         recalculate_pin_points();
+        ComponentRenderer.clearBuffer();
+    }
+
+    @Override
+    public boolean isIndividuallyRendered() {
+        return true;
     }
 
     @Override

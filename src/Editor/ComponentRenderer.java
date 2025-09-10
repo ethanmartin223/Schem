@@ -20,7 +20,7 @@ public class ComponentRenderer {
 
     //this method is expensive AF because it forces regenerating all assets,
     // try to avoid calling at all costs
-    static void clearBuffer() {
+    public static void clearBuffer() {
         buffer.clear();
     }
 
@@ -40,16 +40,12 @@ public class ComponentRenderer {
     }
 
     public static BufferedImage render(DraggableEditorComponent caller, Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight, double sizeOverride) {
-        String key = id + "_" + size+"_"+isHighlight;
+        String key = id + "_" + size+"_"+isHighlight+"_"+
+                ((caller==null)?null:
+                (caller.getElectricalComponent().isIndividuallyRendered()?
+                        caller.getElectricalComponent().hashCode()+"":null));
         if (buffer.containsKey(key)) return buffer.get(key);
         BufferedImage img = new BufferedImage((int) (size * sizeOverride), (int) (size * sizeOverride), BufferedImage.TYPE_INT_ARGB);
-        return createImageFromBuffer(caller,cx, cy, size, id, isHighlight, key, img);
-    }
-
-    public static BufferedImage render(DraggableEditorComponent caller, Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight) {
-        String key = id + "_" + size+"_"+isHighlight;
-        if (buffer.containsKey(key)) return buffer.get(key);
-        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         return createImageFromBuffer(caller,cx, cy, size, id, isHighlight, key, img);
     }
 
