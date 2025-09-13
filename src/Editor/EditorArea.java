@@ -36,6 +36,10 @@ public class EditorArea extends JPanel {
     // ---- FPS Tracking ---- //
     private long lastTime = System.nanoTime();
     private double fps = 0;
+
+    private long actualLastTime = System.nanoTime();
+    private double actaulFps = 0;
+
     private final double smoothing = .6; // higher = smoother/slower updates
 
     public static float DEBUG_NATIVE_DRAW_SIZE = .01f;
@@ -678,6 +682,19 @@ public class EditorArea extends JPanel {
     // ---------------------- // Draw all graphics // ---------------------- //
 
     @Override
+    public void paint(Graphics g) {
+        // ---- Realized FPS update ----
+        if (debugDrawMode){
+            long currentTime = System.nanoTime();
+            double deltaSeconds = (currentTime - lastTime) / 1_000_000_000.0;
+            actualLastTime = currentTime;
+
+            actaulFps = 1.0 / deltaSeconds;
+        }
+        super.paint(g);
+    }
+
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -789,12 +806,14 @@ public class EditorArea extends JPanel {
         g2d.setColor(Color.red);
 
         g2d.setFont(new Font("Arial", Font.BOLD, 14));
-        g2d.drawString(String.format("%.1f FPS", fps), 10, getHeight() - 10);
-        g2d.drawString(String.format("%s BUFFER OBJECTS", ComponentRenderer.buffer.size()), 10, getHeight() - 30);
+        g2d.drawString(String.format("%.1f DRAW FPS", fps), 10, getHeight() - 10);
+        g2d.drawString(String.format("%.1f REALIZED FPS", actaulFps), 10, getHeight() - 30);
+
+        g2d.drawString(String.format("%s BUFFER OBJECTS", ComponentRenderer.buffer.size()), 10, getHeight() - 50);
         g2d.drawString(String.format("%s TOTAL OBJECTS", ElectricalComponent.allComponents.size()),
-                10, getHeight() - 50);
-        g2d.drawString(String.format("%s TOTAL WIRES", wires.size()),
                 10, getHeight() - 70);
+        g2d.drawString(String.format("%s TOTAL WIRES", wires.size()),
+                10, getHeight() - 90);
 
         g2d.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 

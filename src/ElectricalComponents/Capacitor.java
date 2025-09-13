@@ -12,6 +12,9 @@ public class Capacitor extends ElectricalComponent {
     public Capacitor(EditorArea ea, double x, double y) {
         super(ea, "capacitor", x, y);
 
+        hitBoxHeightOverride = .6;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.9, .5));
         pins.add(new Point2D.Double(0.1, .5));

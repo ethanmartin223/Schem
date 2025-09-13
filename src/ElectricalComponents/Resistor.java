@@ -14,6 +14,9 @@ public class Resistor extends ElectricalComponent {
     public Resistor(EditorArea ea, double x, double y) {
         super(ea, "resistor", x, y);
 
+        hitBoxHeightOverride = .5;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.9, .5));
         pins.add(new Point2D.Double(0.1, .5));

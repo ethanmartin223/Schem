@@ -12,6 +12,9 @@ public class ANDGate extends ElectricalComponent {
     public ANDGate(EditorArea ea, double x, double y) {
         super(ea, "and", x, y);
 
+        hitBoxHeightOverride = .6;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.1, .3));
         pins.add(new Point2D.Double(0.1, .7));

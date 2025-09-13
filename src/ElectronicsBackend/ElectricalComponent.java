@@ -1,6 +1,7 @@
 
 package ElectronicsBackend;
 
+import Editor.ComponentRenderer;
 import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
 
@@ -21,6 +22,9 @@ import java.util.List;
 public class ElectricalComponent {
     public String id;
     public double x, y;
+
+    public Double hitBoxWidthOverride = null;
+    public Double hitBoxHeightOverride = null;
 
     protected JPanel infoCard;
     private HashMap<String, Component> infoCardComponents;

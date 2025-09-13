@@ -12,6 +12,9 @@ public class XORGate extends ElectricalComponent {
     public XORGate(EditorArea ea, double x, double y) {
         super(ea, "xor", x, y);
 
+        hitBoxHeightOverride = .6;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.1, .3));
         pins.add(new Point2D.Double(0.1, .7));

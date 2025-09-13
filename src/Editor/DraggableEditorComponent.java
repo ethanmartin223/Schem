@@ -9,6 +9,7 @@ import ElectronicsBackend.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -285,11 +286,35 @@ public class DraggableEditorComponent extends JComponent {
 
     private void updateBounds() {
         Point screen = worldToScreen(worldX, worldY);
-        int width = (int) (editor.scale * boundsOverride);
-        int height = (int) (editor.scale * boundsOverride);
-        int offsetX = (int) ((width - editor.scale) / 2.0d);
-        int offsetY = (int) ((height - editor.scale) / 2.0d);
-        setBounds(screen.x - offsetX, screen.y - offsetY, width, height);
+
+        double baseSize = editor.scale * boundsOverride;
+        double finalWidth = baseSize;
+        double finalHeight = baseSize;
+
+        ElectricalComponent eC = getElectricalComponent();
+        if (eC.hitBoxWidthOverride != null) {
+            if ((orientation==1)|| (orientation==3)) {
+                finalWidth *= eC.hitBoxHeightOverride;
+            }
+            else {
+                finalWidth *= eC.hitBoxWidthOverride;
+            }
+        }
+        if (eC.hitBoxHeightOverride != null) {
+            if ((orientation==1)|| (orientation==3)) {
+                finalHeight *= eC.hitBoxWidthOverride;
+            } else {
+                finalHeight *= eC.hitBoxHeightOverride;
+            }
+        }
+        int offsetX = (int) ((finalWidth - editor.scale) / 2.0d);
+        int offsetY = (int) ((finalHeight - editor.scale) / 2.0d);
+        setBounds(
+                (screen.x - offsetX),
+                (screen.y - offsetY),
+                (int) finalWidth,
+                (int) finalHeight
+        );
         electricalComponent.x = worldX;
         electricalComponent.y = worldY;
     }
@@ -297,29 +322,34 @@ public class DraggableEditorComponent extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-
-        int size = (int) editor.scale;
-
-        int drawX = (getWidth() - size) / 2;
-        int drawY = (getHeight() - size) / 2;
-
+        AffineTransform old = g2d.getTransform();
+        double centerX = getWidth() / 2.0;
+        double centerY = getHeight() / 2.0;
+        g2d.translate(centerX, centerY);
         if (orientation != 0) {
-            g2d.rotate(Math.toRadians(orientation * -90), getWidth() / 2.0, getHeight() / 2.0);
+            g2d.rotate(Math.toRadians(-orientation * 90));
         }
+        int size = (int) (editor.scale);
+        BufferedImage img = ComponentRenderer.render(
+                this,
+                g2d,
+                (int)(size*boundsOverride) / 2,
+                (int)(size*boundsOverride) / 2,
+                size,
+                electricalComponent.id,
+                isFocusOwner() || isMultiSelected,
+                boundsOverride
+        );
+        int imgWidth = img.getWidth();
+        int imgHeight = img.getHeight();
+        g2d.drawImage(img, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight, null);
+        g2d.setTransform(old);
 
-        g2d.drawImage(
-                ComponentRenderer.render(this, g2d, getWidth() / 2, getHeight() / 2, size, electricalComponent.id,
-                        isFocusOwner()||isMultiSelected, boundsOverride),
-                0, 0, this);
     }
-
-
-
-    public void updateFromEditor() {
+        public void updateFromEditor() {
         updateBounds();
         //repaint(); problem here
     }
