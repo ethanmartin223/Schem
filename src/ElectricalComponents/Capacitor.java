@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Capacitor extends ElectricalComponent {
+    public final static String id = "capacitor";
 
     public Capacitor(EditorArea ea, double x, double y) {
         super(ea, "capacitor", x, y);

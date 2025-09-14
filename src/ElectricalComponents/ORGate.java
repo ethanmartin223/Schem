@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class ORGate extends ElectricalComponent {
+    public final static String id = "or";
 
     public ORGate(EditorArea ea, double x, double y) {
         super(ea, "or", x, y);

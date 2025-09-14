@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Microphone extends ElectricalComponent {
+    public final static String id = "microphone";
 
     public Microphone(EditorArea ea, double x, double y) {
         super(ea, "microphone", x, y);

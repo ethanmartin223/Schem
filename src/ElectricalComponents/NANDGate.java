@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class NANDGate extends ElectricalComponent {
+    public final static String id = "nand";
 
     public NANDGate(EditorArea ea, double x, double y) {
         super(ea, "nand", x, y);

@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Diode extends ElectricalComponent {
+    public final static String id = "diode";
 
     public Diode(EditorArea ea, double x, double y) {
         super(ea, "diode", x, y);

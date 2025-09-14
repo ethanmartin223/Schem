@@ -10,6 +10,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Transformer extends ElectricalComponent {
+    public final static String id = "transformer";
 
     public Transformer(EditorArea ea, double x, double y) {
         super(ea, "transformer", x, y);

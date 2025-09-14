@@ -183,10 +183,10 @@ public class DraggableEditorComponent extends JComponent {
                 Point2D.Double snappedPos;
                 //todo this needs removed
                 if (!electricalComponent.id.equals("wirenode")) {
-                    snappedPos = editor.snapToGrid(getWorldX(), getWorldY());
+                    snappedPos = editor.snapToGrid(getWorldX(), getWorldY(), 1.0);
                     setWorldPosition(snappedPos.x, snappedPos.y);
                 } else {
-                    snappedPos = editor.snapToGrid(getWorldX(), getWorldY(), .1);
+                    snappedPos = editor.snapToGrid(getWorldX(), getWorldY(),.1);
                     setWorldPosition(snappedPos.x, snappedPos.y);
                 }
 

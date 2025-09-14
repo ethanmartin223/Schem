@@ -3,11 +3,12 @@ package ElectricalComponents;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class ANDGate extends ElectricalComponent {
+
+    public final static String id = "and";
 
     public ANDGate(EditorArea ea, double x, double y) {
         super(ea, "and", x, y);

@@ -10,6 +10,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Resistor extends ElectricalComponent {
+    public final static String id = "resistor";
 
     public Resistor(EditorArea ea, double x, double y) {
         super(ea, "resistor", x, y);

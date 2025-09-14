@@ -9,6 +9,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class PowerSupply extends ElectricalComponent {
+    public final static String id = "powerSupply";
 
     public PowerSupply(EditorArea ea, double x, double y) {
         super(ea, "powerSupply", x, y);

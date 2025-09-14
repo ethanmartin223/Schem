@@ -4,6 +4,7 @@ package ElectronicsBackend;
 import Editor.ComponentRenderer;
 import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
+import ElectricalComponents.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,6 +16,7 @@ import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
@@ -35,6 +37,59 @@ public class ElectricalComponent {
     protected EditorArea editorArea;
     protected DraggableEditorComponent draggableEditorComponent;
     public boolean isDeleted;
+
+    public static Class<?>[] subclasses = new Class[] {
+            ANDGate.class,
+            Capacitor.class,
+            Diode.class,
+            Ground.class,
+            NANDGate.class,
+            NpnTransistor.class,
+            ORGate.class,
+            PnpTransistor.class,
+            PowerSupply.class,
+            Resistor.class,
+            Transformer.class,
+            VariableResistor.class,
+            XORGate.class,
+            ZenerDiode.class,
+            Speaker.class,
+            Lamp.class,
+            WireNode.class,
+            Microphone.class,
+            LED.class,
+            Photoresistor.class,
+            IntegratedCircuit.class
+    };
+
+    public static Class<?> findClassFromID(String id) {
+        switch (id) {
+            case ANDGate.id ->   { return ANDGate.class; }
+            case Capacitor.id -> { return Capacitor.class; }
+            case Diode.id ->     { return Diode.class; }
+            case Ground.id ->    { return Ground.class; }
+            case NANDGate.id ->  { return NANDGate.class; }
+            case NpnTransistor.id -> { return NpnTransistor.class; }
+            case ORGate.id ->    { return ORGate.class; }
+            case PnpTransistor.id -> { return PnpTransistor.class; }
+            case PowerSupply.id -> { return PowerSupply.class; }
+            case Resistor.id -> { return Resistor.class; }
+            case Transformer.id -> { return Transformer.class; }
+            case VariableResistor.id -> { return VariableResistor.class; }
+            case XORGate.id -> { return XORGate.class; }
+            case ZenerDiode.id -> { return ZenerDiode.class; }
+            case Speaker.id -> { return Speaker.class; }
+            case Lamp.id -> { return Lamp.class; }
+            case WireNode.id -> { return WireNode.class; }
+            case Microphone.id -> { return Microphone.class; }
+            case LED.id -> { return LED.class; }
+            case Photoresistor.id -> { return Photoresistor.class; }
+            case IntegratedCircuit.id -> { return IntegratedCircuit.class; }
+            default -> {
+                return null;
+            }
+        }
+    }
 
     // ----------------------------------------------------- comp shit
     public static ArrayList<ElectricalComponent> allComponents = new ArrayList<>();

@@ -135,7 +135,7 @@ public class EditorArea extends JPanel {
                             // Snap coordinates
                             Point2D.Double snapped;
                             //TODO: this NEEDS to be removed
-                            if (!creatingComponentID.equals("wirenode")) snapped = snapToGrid(x, y);
+                            if (!creatingComponentID.equals("wirenode")) snapped = snapToGrid(x, y, 1.0);
                             else snapped = snapToGrid(x, y, .1);
                             createNewComponent(snapped.x, snapped.y);
 
@@ -508,7 +508,7 @@ public class EditorArea extends JPanel {
      * @apiNote This operation may be logged in History (based on addHistory param)
      */
     public DraggableEditorComponent createNewComponent(double worldX, double worldY, boolean addHistory) {
-        Class compClass = ElectricalComponentIdentifier.findClassFromID(creatingComponentID);
+        Class compClass = ElectricalComponent.findClassFromID(creatingComponentID);
         ElectricalComponent component = null;
         try {
             component = (ElectricalComponent) compClass.getDeclaredConstructor(EditorArea.class, double.class, double.class)

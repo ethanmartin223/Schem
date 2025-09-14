@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class PnpTransistor extends ElectricalComponent {
+    public final static String id = "pnptransistor";
 
     public PnpTransistor(EditorArea ea, double x, double y) {
         super(ea, "pnptransistor", x, y);

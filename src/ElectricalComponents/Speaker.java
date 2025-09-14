@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Speaker extends ElectricalComponent {
+    public final static String id = "speaker";
 
     public Speaker(EditorArea ea, double x, double y) {
         super(ea, "speaker", x, y);

@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class XORGate extends ElectricalComponent {
+    public final static String id = "xor";
 
     public XORGate(EditorArea ea, double x, double y) {
         super(ea, "xor", x, y);

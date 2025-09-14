@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Ground extends ElectricalComponent {
+    public final static String id = "ground";
 
     public Ground(EditorArea ea, double x, double y) {
         super(ea, "ground", x, y);

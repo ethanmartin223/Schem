@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class LED extends ElectricalComponent {
+    public final static String id = "led";
 
     public LED(EditorArea ea, double x, double y) {
         super(ea, "led", x, y);

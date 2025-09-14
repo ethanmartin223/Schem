@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Photoresistor extends ElectricalComponent {
+    public final static String id = "photoresistor";
 
     public Photoresistor(EditorArea ea, double x, double y) {
         super(ea, "photoresistor", x, y);

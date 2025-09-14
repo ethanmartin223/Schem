@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class WireNode extends ElectricalComponent {
+    public final static String id = "wirenode";
     public WireNode(EditorArea eA, double worldX, double worldY) {
         super(eA, "wirenode", worldX, worldY);
         ArrayList<Point2D.Double> pins = new ArrayList<>();

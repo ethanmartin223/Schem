@@ -1,6 +1,6 @@
 package Editor;
 
-import ElectricalComponents.IntegratedCircuit;
+import ElectricalComponents.*;
 
 import java.awt.*;
 import java.awt.geom.Arc2D;
@@ -12,7 +12,6 @@ import java.awt.image.VolatileImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static ElectronicsBackend.ElectricalComponentIdentifier.*;
 
 public class ComponentRenderer {
     static HashMap<String, BufferedImage> buffer;
@@ -26,7 +25,6 @@ public class ComponentRenderer {
 
     static {
         buffer = new HashMap<>();
-
     }
 
     static void setHints(Graphics2D g2d) {
@@ -70,30 +68,36 @@ public class ComponentRenderer {
 
 
     public static void renderDirect(DraggableEditorComponent caller, Graphics2D g2d, int cx, int cy, int size, String id) {
-        if (id.equals(AND_GATE.id)) drawAND(g2d, cx, cy, size);
-        else if (id.equals(CAPACITOR.id)) drawCapacitor(g2d, cx, cy, size);
-        else if (id.equals(DIODE.id)) drawDiode(g2d, cx, cy, size);
-        else if (id.equals(GROUND.id)) drawGround(g2d, cx, cy, size);
-        else if (id.equals(NAND_GATE.id)) drawNAND(g2d, cx, cy, size);
-        else if (id.equals(NPN_TRANSISTOR.id)) drawNPNTransistor(g2d, cx, cy, size);
-        else if (id.equals(OR_GATE.id)) drawOR(g2d, cx, cy, size);
-        else if (id.equals(PNP_TRANSISTOR.id)) drawPNPTransistor(g2d, cx, cy, size, id);
-        else if (id.equals(POWERSUPPLY.id)) drawPowerSupply(g2d, cx, cy, size);
-        else if (id.equals(RESISTOR.id)) drawResistor(g2d, cx, cy, size);
-        else if (id.equals(TRANSFORMER.id)) drawTransformer(g2d, cx, cy, size);
-        else if (id.equals(VARIABLE_RESISTOR.id)) drawVariableResistor(g2d, cx, cy, size);
-        else if (id.equals(XOR_GATE.id)) drawXOR(g2d, cx, cy, size);
-        else if (id.equals(ZENER_DIODE.id)) drawZenerDiode(g2d, cx, cy, size);
-        else if (id.equals(SPEAKER.id)) drawSpeaker(g2d, cx, cy, size);
-        else if (id.equals(LAMP.id)) drawLamp(g2d, cx, cy, size);
-        else if (id.equals(WIRE_NODE.id)) drawWireNode(g2d, cx, cy, size);
-        else if (id.equals(MICROPHONE.id)) drawMicrophone(g2d, cx, cy, size);
-        else if (id.equals(LED.id)) drawLED(g2d, cx, cy, size);
-        else if (id.equals(PHOTORESISTOR.id)) drawPhotoresistor(g2d, cx, cy, size);
-        else if (id.equals(INTEGRATED_CIRCUIT.id)) drawIC(g2d, cx, cy, size,
-                caller!=null? (int)caller.getElectricalComponent().electricalProperties.get("number_of_pins") :16,
-                true);
+        switch (id) {
+            case ANDGate.id -> drawAND(g2d, cx, cy, size);
+            case Capacitor.id -> drawCapacitor(g2d, cx, cy, size);
+            case Diode.id -> drawDiode(g2d, cx, cy, size);
+            case Ground.id -> drawGround(g2d, cx, cy, size);
+            case NANDGate.id -> drawNAND(g2d, cx, cy, size);
+            case NpnTransistor.id -> drawNPNTransistor(g2d, cx, cy, size);
+            case ORGate.id -> drawOR(g2d, cx, cy, size);
+            case PnpTransistor.id -> drawPNPTransistor(g2d, cx, cy, size, id);
+            case PowerSupply.id -> drawPowerSupply(g2d, cx, cy, size);
+            case Resistor.id -> drawResistor(g2d, cx, cy, size);
+            case Transformer.id -> drawTransformer(g2d, cx, cy, size);
+            case VariableResistor.id -> drawVariableResistor(g2d, cx, cy, size);
+            case XORGate.id -> drawXOR(g2d, cx, cy, size);
+            case ZenerDiode.id -> drawZenerDiode(g2d, cx, cy, size);
+            case Speaker.id -> drawSpeaker(g2d, cx, cy, size);
+            case Lamp.id -> drawLamp(g2d, cx, cy, size);
+            case WireNode.id -> drawWireNode(g2d, cx, cy, size);
+            case Microphone.id -> drawMicrophone(g2d, cx, cy, size);
+            case ElectricalComponents.LED.id -> drawLED(g2d, cx, cy, size);
+            case Photoresistor.id -> drawPhotoresistor(g2d, cx, cy, size);
+            case IntegratedCircuit.id -> drawIC(g2d, cx, cy, size,
+                    caller != null ? (int) caller.getElectricalComponent().electricalProperties.get("number_of_pins") : 16,
+                    true);
+            default -> {
+                System.err.println("Unknown component ID: " + id);
+            }
+        }
     }
+
 
     private static void drawIC(Graphics2D g2d, int cx, int cy, int size, int leadCount, boolean showPinNumbers) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
@@ -770,50 +774,11 @@ public class ComponentRenderer {
     }
 
     private static BufferedImage drawTransformer(Graphics2D g2d, int cx, int cy, int size) {
-        // Transformer dimensions
-        double coilWidth = size * 0.15;   // horizontal width of each vertical loop
-        double coilHeight = size * 0.5;   // vertical height of each coil
-        double spacing = size * 0.1;      // gap between coils
-        int turns = 3;                     // number of vertical loops per coil
-        int leadLength = (int)(size * 0.15);
-
-        double leftCoilX = cx - coilWidth - spacing / 2;
-        double rightCoilX = cx + spacing / 2;
-        double topY = cy - coilHeight / 2;
-        double bottomY = cy + coilHeight / 2;
-
-        double loopHeight = coilHeight / turns;
-
-        // Draw primary coil (left) facing right (toward center)
-        for (int i = 0; i < turns; i++) {
-            double y = topY + i * loopHeight;
-            Arc2D.Double arc = new Arc2D.Double(leftCoilX, y, coilWidth, loopHeight, 90, -180, Arc2D.OPEN);
-            g2d.draw(arc);
-        }
-
-        // Draw secondary coil (right) facing left (toward center)
-        for (int i = 0; i < turns; i++) {
-            double y = topY + i * loopHeight;
-            Arc2D.Double arc = new Arc2D.Double(rightCoilX, y, coilWidth, loopHeight, 90, 180, Arc2D.OPEN);
-            g2d.draw(arc);
-        }
-
-        // Draw vertical core lines
-        g2d.drawLine((int)(leftCoilX + coilWidth / 2), (int)topY, (int)(leftCoilX + coilWidth / 2), (int)bottomY);
-        g2d.drawLine((int)(rightCoilX + coilWidth / 2), (int)topY, (int)(rightCoilX + coilWidth / 2), (int)bottomY);
-
-        // Draw 4 leads (2 on each side, slightly offset from corners)
-        int offsetY = (int)(size * 0.1);
-
-        // Left side leads
-        g2d.drawLine((int)(leftCoilX - leadLength), (int)(topY + offsetY), (int)leftCoilX, (int)(topY + offsetY));
-        g2d.drawLine((int)(leftCoilX - leadLength), (int)(bottomY - offsetY), (int)leftCoilX, (int)(bottomY - offsetY));
-
-        // Right side leads
-        g2d.drawLine((int)(rightCoilX + coilWidth), (int)(topY + offsetY), (int)(rightCoilX + coilWidth + leadLength), (int)(topY + offsetY));
-        g2d.drawLine((int)(rightCoilX + coilWidth), (int)(bottomY - offsetY), (int)(rightCoilX + coilWidth + leadLength), (int)(bottomY - offsetY));
         return null;
     }
+
+
+
 
     private static BufferedImage drawVariableResistor(Graphics2D g2d, int cx, int cy, int size) {
         // Resistor body dimensions

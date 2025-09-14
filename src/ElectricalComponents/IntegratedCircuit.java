@@ -9,7 +9,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class IntegratedCircuit extends ElectricalComponent {
-
+    public final static String id = "ic";
     public IntegratedCircuit(EditorArea ea, double x, double y) {
         super(ea, "ic", x, y);
         this.draggableEditorComponent.boundsOverride = 2.0;
