@@ -11,6 +11,9 @@ public class Photoresistor extends ElectricalComponent {
     public Photoresistor(EditorArea ea, double x, double y) {
         super(ea, "photoresistor", x, y);
 
+        hitBoxHeightOverride = .85;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.9, .5));
         pins.add(new Point2D.Double(0.1, .5));

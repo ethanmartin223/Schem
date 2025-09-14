@@ -12,6 +12,9 @@ public class Ground extends ElectricalComponent {
     public Ground(EditorArea ea, double x, double y) {
         super(ea, "ground", x, y);
 
+        hitBoxHeightOverride = .8;
+        hitBoxWidthOverride = .5;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
 
         pins.add(new Point2D.Double(0.5, .5));

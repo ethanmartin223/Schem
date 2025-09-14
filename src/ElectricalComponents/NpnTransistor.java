@@ -12,6 +12,9 @@ public class NpnTransistor extends ElectricalComponent {
     public NpnTransistor(EditorArea ea, double x, double y) {
         super(ea, "npntransistor", x, y);
 
+        hitBoxHeightOverride = .85;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.6d, .1));
         pins.add(new Point2D.Double(0.6d, .9));

@@ -6,6 +6,7 @@ import ElectricalComponents.*;
 public enum ElectricalComponentIdentifier {
     DIODE("diode", Diode.class, "Diodes"),
     ZENER_DIODE("zenerdiode", ZenerDiode.class, "Diodes"),
+    LED("led", LED.class, "Diodes"),
 
     NPN_TRANSISTOR("npntransistor", NpnTransistor.class, "Transistors"),
     PNP_TRANSISTOR("pnptransistor", PnpTransistor.class, "Transistors"),

@@ -13,6 +13,9 @@ public class PowerSupply extends ElectricalComponent {
     public PowerSupply(EditorArea ea, double x, double y) {
         super(ea, "powerSupply", x, y);
 
+        hitBoxHeightOverride = .65;
+        hitBoxWidthOverride = .5;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
 
         pins.add(new Point2D.Double(0.5, .8));

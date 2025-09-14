@@ -12,6 +12,9 @@ public class PnpTransistor extends ElectricalComponent {
     public PnpTransistor(EditorArea ea, double x, double y) {
         super(ea, "pnptransistor", x, y);
 
+        hitBoxHeightOverride = .85;
+        hitBoxWidthOverride = .85;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.6d, .1d));
         pins.add(new Point2D.Double(0.6d, .9d));

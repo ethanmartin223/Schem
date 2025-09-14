@@ -87,6 +87,9 @@ public class ComponentRenderer {
         else if (id.equals(SPEAKER.id)) drawSpeaker(g2d, cx, cy, size);
         else if (id.equals(LAMP.id)) drawLamp(g2d, cx, cy, size);
         else if (id.equals(WIRE_NODE.id)) drawWireNode(g2d, cx, cy, size);
+        else if (id.equals(MICROPHONE.id)) drawMicrophone(g2d, cx, cy, size);
+        else if (id.equals(LED.id)) drawLED(g2d, cx, cy, size);
+        else if (id.equals(PHOTORESISTOR.id)) drawPhotoresistor(g2d, cx, cy, size);
         else if (id.equals(INTEGRATED_CIRCUIT.id)) drawIC(g2d, cx, cy, size,
                 caller!=null? (int)caller.getElectricalComponent().electricalProperties.get("number_of_pins") :16,
                 true);
@@ -149,9 +152,97 @@ public class ComponentRenderer {
         g2d.drawString(text, x - textWidth / 2, y + textHeight / 4);
     }
 
-    private static void drawSpeaker(Graphics2D g2d, int cx, int cy, int size) {
+    private static BufferedImage drawSpeaker(Graphics2D g2d, int cx, int cy, int size) {
+        // Proportions (similar style to your drawAND)
+        double totalWidth  = size * 0.5;   // whole speaker area (housing + cone)
+        double totalHeight = size * 0.4;   // overall height
+        double housingFrac = 0.250;         // fraction of totalWidth used by housing
+        double driverFrac  = 6;         // fraction of totalHeight used by driver circle
+        double waveGapFrac = 0.1;         // spacing between sound-wave arcs
 
+        // Compute integer coordinates
+        int width  = (int) Math.round(totalWidth);
+        int height = (int) Math.round(totalHeight);
+        int halfH  = height / 2;
+
+        // Housing (rounded rectangle on the left)
+        int housingW = (int) Math.round(width * housingFrac);
+        int housingX = cx - width / 2;
+        int housingY = cy - halfH;
+        int arcRadius = Math.max(1, (int)(size * 0.06)); // corner roundness
+        g2d.drawRect(housingX, housingY,
+                housingW, height);
+
+        int driverR = (int) (Math.round(height * driverFrac) / 4);
+
+        // Cone / horn area (a trapezoid-like polygon from housing edge -> right)
+        int coneLeftX = housingX + housingW;
+        int coneRightX = housingX + width;
+        int coneTopY = housingY + (int)Math.round(height * -.5);
+        int coneBottomY = housingY + (int)Math.round(height *1.5);
+
+        Polygon cone = new Polygon();
+        // Start near the driver vertical span for a smooth transition
+        cone.addPoint(coneLeftX, cy - (int)Math.round(driverR * 0.35));
+        cone.addPoint(coneRightX, coneTopY);
+        cone.addPoint(coneRightX, coneBottomY);
+        cone.addPoint(coneLeftX, cy + (int)Math.round(driverR * 0.35));
+        g2d.drawPolygon(cone);
+
+        // Sound-wave arcs to the right of the cone (3 arcs spaced evenly)
+        int waves = 3;
+        for (int i = 0; i < waves; i++) {
+            int r = (int)Math.round(size * 0.1) + i * (int)Math.round(size * waveGapFrac);
+            // center the arc roughly at the cone tip area
+            int arcX = coneRightX - r / 2 + (int)Math.round(size * 0.05);
+            int arcY = cy - r / 2;
+            // Draw a wide arc (~90 degrees) to mimic sound waves
+            g2d.drawArc(arcX, arcY, r, r, -45, 90);
+        }
+
+        // Match your drawAND signature (you returned null there), so return null here as well
+        return null;
     }
+
+    private static BufferedImage drawMicrophone(Graphics2D g2d, int cx, int cy, int size) {
+        // Dimensions
+        int headDiam   = (int) Math.round(size * 0.50); // circle diameter
+        int headR      = headDiam / 2;
+        int tangentLen = Math.max(6, (int) Math.round(size * 0.50)); // vertical tangent length
+        int leadSpacing = (int) Math.round(headDiam * 0.31); // spacing between leads (on 0.1 multiples)
+        int leadLen    = (int) Math.round(size * 0.25); // horizontal lead length
+
+        // Draw circle
+        g2d.drawOval(cx - headR, cy - headR, headDiam, headDiam);
+
+        // Left-side vertical tangent line (centered at circle midpoint)
+        int tangentX = cx - headR;
+        int tHalf = tangentLen / 2;
+        g2d.drawLine(tangentX, cy - tHalf, tangentX, cy + tHalf);
+
+        // Calculate exact connection points on the circle for each lead
+        // y-offsets from center
+        int offsetTop = (int)(-leadSpacing *1.3);
+        int offsetBot = (int) (leadSpacing *1.3);
+
+        // Compute intersection x for each offset: x = cx + sqrt(r^2 - dy^2)
+        double dyTop = offsetTop;
+        double dyBot = offsetBot;
+        int startXTop = (int) Math.round(cx + Math.sqrt(headR * headR - dyTop * dyTop));
+        int startXBot = (int) Math.round(cx + Math.sqrt(headR * headR - dyBot * dyBot));
+
+        int yTop = cy + offsetTop;
+        int yBot = cy + offsetBot;
+
+        // Draw leads starting at circle perimeter
+        g2d.drawLine(startXTop, yTop, startXTop + leadLen, yTop);
+        g2d.drawLine(startXBot, yBot, startXBot + leadLen, yBot);
+
+        return null;
+    }
+
+
+
 
     private static void drawWireNode(Graphics2D g2d, int cx, int cy, int size) {
         g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
@@ -206,6 +297,7 @@ public class ComponentRenderer {
         g2d.drawLine(rightX, centerY, rightX + (int)(size * 0.15), centerY);
         return null;
     }
+
 
     private static BufferedImage drawCapacitor(Graphics2D g2d, int cx, int cy, int size) {
         int half = size / 10;
@@ -271,6 +363,151 @@ public class ComponentRenderer {
         triangle.addPoint(cx + bodyLength / 2, cy);
         g2d.drawPolygon(triangle);
         g2d.drawLine(cx + bodyLength / 2, cy - halfHeight, cx + bodyLength / 2, cy + halfHeight);
+        return null;
+    }
+
+    private static BufferedImage drawLED(Graphics2D g2d, int cx, int cy, int size) {
+        int pinLength  = (int) (size * 0.2);
+        int bodyLength = (int) (size * 0.4);
+        int halfHeight = (int) (size * 0.2);
+
+        // diode leads
+        g2d.drawLine(cx - pinLength - bodyLength / 2, cy, cx - bodyLength / 2, cy);
+        g2d.drawLine(cx + bodyLength / 2, cy, cx + pinLength + bodyLength / 2, cy);
+
+        // diode triangle
+        Polygon triangle = new Polygon();
+        triangle.addPoint(cx - bodyLength / 2, cy - halfHeight);
+        triangle.addPoint(cx - bodyLength / 2, cy + halfHeight);
+        triangle.addPoint(cx + bodyLength / 2, cy);
+        g2d.drawPolygon(triangle);
+
+        // diode bar
+        g2d.drawLine(cx + bodyLength / 2, cy - halfHeight, cx + bodyLength / 2, cy + halfHeight);
+
+        // --- LED emission arrows ---
+        double arrowLen   = Math.max(3, size * 0.20);  // shaft length
+        double headLen    = Math.max(2, size * 0.06);  // arrowhead size along shaft
+        double headWidth  = Math.max(2, size * 0.05);  // arrowhead half-width
+
+        int shiftLeft = (int) (bodyLength * 0.2);
+
+        int startY = cy - halfHeight - (int) (size * 0.04);
+        int tipY   = startY - (int) Math.round(arrowLen * Math.sqrt(2) / 2);
+
+        int dy = startY - tipY;
+        int dx = dy; // keep 45° direction
+
+        // First arrow
+        int ax1 = cx + bodyLength / 2 - shiftLeft;
+        int ay1 = startY;
+        int tip1x = ax1 + dx;
+        int tip1y = tipY;
+
+        // Second arrow
+        int ax2 = ax1 + (int) (size * 0.12);
+        int ay2 = startY;
+        int tip2x = ax2 + dx;
+        int tip2y = tipY;
+
+        // Draw shafts
+        g2d.drawLine(ax1, ay1, tip1x, tip1y);
+        g2d.drawLine(ax2, ay2, tip2x, tip2y);
+
+        // Helper: draw open arrowhead (two lines)
+        java.util.function.BiConsumer<int[], int[]> drawOpenHead = (base, tip) -> {
+            double vx = tip[0] - base[0];
+            double vy = tip[1] - base[1];
+            double vlen = Math.hypot(vx, vy);
+            if (vlen == 0) vlen = 1;
+            double ux = vx / vlen, uy = vy / vlen;
+            double px = -uy, py = ux;
+
+            int hx1 = (int) Math.round(tip[0] - ux * headLen + px * headWidth);
+            int hy1 = (int) Math.round(tip[1] - uy * headLen + py * headWidth);
+            int hx2 = (int) Math.round(tip[0] - ux * headLen - px * headWidth);
+            int hy2 = (int) Math.round(tip[1] - uy * headLen - py * headWidth);
+
+            g2d.drawLine(tip[0], tip[1], hx1, hy1);
+            g2d.drawLine(tip[0], tip[1], hx2, hy2);
+        };
+
+        // Draw arrowheads (open)
+        drawOpenHead.accept(new int[]{ax1, ay1}, new int[]{tip1x, tip1y});
+        drawOpenHead.accept(new int[]{ax2, ay2}, new int[]{tip2x, tip2y});
+
+        return null;
+    }
+
+    private static BufferedImage drawPhotoresistor(Graphics2D g2d, int cx, int cy, int size) {
+        int pinLength  = (int) (size * 0.25);
+        int bodyLength = (int) (size * 0.5);
+        int halfHeight = (int) (size * 0.2);
+
+        // resistor body (rectangle)
+        int bodyLeft  = cx - bodyLength / 2;
+        int bodyRight = cx + bodyLength / 2;
+        int bodyTop   = cy - halfHeight;
+        int bodyBot   = cy + halfHeight;
+
+        g2d.drawRect(bodyLeft, bodyTop, bodyLength, halfHeight * 2);
+
+        // leads
+        g2d.drawLine(bodyLeft - pinLength, cy, bodyLeft, cy);
+        g2d.drawLine(bodyRight, cy, bodyRight + pinLength, cy);
+
+        // --- Light arrows (pointing toward the resistor) ---
+        double arrowLen   = Math.max(3, size * 0.20);  // shaft length
+        double headLen    = Math.max(2, size * 0.06);
+        double headWidth  = Math.max(2, size * 0.05);
+
+        int shiftLeft = (int) (bodyLength * 0.2);
+
+        // Parallel arrow placement (now "tip" is closer to resistor body)
+        int tipY = cy - halfHeight - (int) (size * 0.04); // tip near top of resistor
+        int startY = tipY - (int) Math.round(arrowLen * Math.sqrt(2) / 2);
+
+        int dy = tipY - startY;
+        int dx = dy; // still 45°
+
+        // First arrow (closer to left)
+        int ax1 = bodyLeft + shiftLeft;
+        int ay1 = startY;
+        int tip1x = ax1 + dx;
+        int tip1y = tipY;
+
+        // Second arrow (to the right, same y-levels)
+        int ax2 = ax1 + (int) (size * 0.12);
+        int ay2 = startY;
+        int tip2x = ax2 + dx;
+        int tip2y = tipY;
+
+        // Shafts (pointing toward resistor)
+        g2d.drawLine(ax1, ay1, tip1x, tip1y);
+        g2d.drawLine(ax2, ay2, tip2x, tip2y);
+
+        // Open arrowhead pointing TOWARD tip (i.e., toward resistor)
+        java.util.function.BiConsumer<int[], int[]> drawOpenHead = (base, tip) -> {
+            double vx = base[0] - tip[0];  // reversed direction
+            double vy = base[1] - tip[1];
+            double vlen = Math.hypot(vx, vy);
+            if (vlen == 0) vlen = 1;
+            double ux = vx / vlen, uy = vy / vlen;
+            double px = -uy, py = ux;
+
+            int hx1 = (int) Math.round(tip[0] + ux * headLen + px * headWidth);
+            int hy1 = (int) Math.round(tip[1] + uy * headLen + py * headWidth);
+            int hx2 = (int) Math.round(tip[0] + ux * headLen - px * headWidth);
+            int hy2 = (int) Math.round(tip[1] + uy * headLen - py * headWidth);
+
+            g2d.drawLine(tip[0], tip[1], hx1, hy1);
+            g2d.drawLine(tip[0], tip[1], hx2, hy2);
+        };
+
+        // Draw arrowheads (now pointing inward)
+        drawOpenHead.accept(new int[]{ax1, ay1}, new int[]{tip1x, tip1y});
+        drawOpenHead.accept(new int[]{ax2, ay2}, new int[]{tip2x, tip2y});
+
         return null;
     }
 

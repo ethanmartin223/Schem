@@ -820,12 +820,14 @@ public class EditorArea extends JPanel {
         for (Component c : getComponents()) {
             if (c instanceof DraggableEditorComponent dec) {
                 Rectangle bounds = c.getBounds();
+                g2d.setColor(Color.red);
                 g2d.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
+                g2d.setColor(Color.blue);
                 Point2D.Double[] connectorPoints = dec.getElectricalComponent().getConnectionPoints();
                 for (int i = 0; i < connectorPoints.length; i++) {
                     Point2D point = worldToScreen(dec.getWorldX()+connectorPoints[i].x,
-                            (int) dec.getWorldY()+connectorPoints[i].y);
+                             dec.getWorldY()+connectorPoints[i].y);
                     g2d.drawOval((int) (point.getX()-(.1*scale)/2), (int) (point.getY()-(.1*scale)/2),
                             (int) (.1*scale), (int) (.1*scale));
                 }
@@ -833,6 +835,7 @@ public class EditorArea extends JPanel {
         }
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         g2d.setStroke(new BasicStroke(6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(Color.green);
         for (Wire w : wires) {
             Point2D.Double startWorld = w.startComponent.getConnectionPointsAsWorldPoints().get(w.startIndex);
             Point2D.Double endWorld = w.endComponent.getConnectionPointsAsWorldPoints().get(w.endIndex);
@@ -841,8 +844,8 @@ public class EditorArea extends JPanel {
             Point endScreen = worldToScreen(endWorld.x, endWorld.y);
             Shape path = new Line2D.Double(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
 
-            BasicStroke outer = new BasicStroke((float) (.1*scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-            BasicStroke inner = new BasicStroke((float) (scale * .06), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // effectively the original path width
+            BasicStroke outer = new BasicStroke((float) (.16*scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            BasicStroke inner = new BasicStroke((float) (scale * .159), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND); // effectively the original path width
 
             Area strokeArea = new Area(outer.createStrokedShape(path));
             strokeArea.subtract(new Area(inner.createStrokedShape(path)));
@@ -850,6 +853,7 @@ public class EditorArea extends JPanel {
             g2d.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2d.draw(strokeArea);
         }
+        g2d.setColor(Color.BLACK);
         if (currentFocusedComponent != null) {
             String out = currentFocusedComponent.getElectricalComponent().electricalProperties.toString()
                     .replace("{","")

@@ -10,6 +10,8 @@ public class Speaker extends ElectricalComponent {
     public Speaker(EditorArea ea, double x, double y) {
         super(ea, "speaker", x, y);
 
+        draggableEditorComponent.boundsOverride = 1;
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(.23, .626));
         pins.add(new Point2D.Double(.23, .37));

@@ -90,7 +90,7 @@ public class DraggableEditorComponent extends JComponent {
                 }
 
                 // On press key "del" delete this component
-                if (e.getKeyCode() == 127) { //delete key
+                if (e.getKeyCode() == 127 || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) { //delete key
                     editor.deleteComponent(parentElectricalComponent);
                 }
 
@@ -181,6 +181,7 @@ public class DraggableEditorComponent extends JComponent {
             public void mouseReleased(MouseEvent e) {
                 dragging = false;
                 Point2D.Double snappedPos;
+                //todo this needs removed
                 if (!electricalComponent.id.equals("wirenode")) {
                     snappedPos = editor.snapToGrid(getWorldX(), getWorldY());
                     setWorldPosition(snappedPos.x, snappedPos.y);

@@ -6,12 +6,12 @@ import ElectronicsBackend.ElectricalComponent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class Microphone extends ElectricalComponent {
+public class LED extends ElectricalComponent {
 
-    public Microphone(EditorArea ea, double x, double y) {
-        super(ea, "microphone", x, y);
+    public LED(EditorArea ea, double x, double y) {
+        super(ea, "led", x, y);
 
-        hitBoxHeightOverride = .6;
+        hitBoxHeightOverride = .85;
         hitBoxWidthOverride = .85;
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
@@ -23,12 +23,8 @@ public class Microphone extends ElectricalComponent {
     @Override
     public void initInfoCard() {
         styleInfoCard();
-        addEntryToInfoCard("Sensitivity (mV/Pa)", 6);
-        addEntryToInfoCard("Impedance (Ω)", 8);
-        addEntryToInfoCard("Frequency Response Low (Hz)", 6);
-        addEntryToInfoCard("Frequency Response High (Hz)", 6);
-        addCheckboxToInfoCard("Is Muted");
+        addEntryToInfoCard("Response Time (ms)", 6);
+        addCheckboxToInfoCard("Temperature Dependent");
     }
-
 
 }
