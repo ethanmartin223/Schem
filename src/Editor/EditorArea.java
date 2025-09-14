@@ -258,8 +258,6 @@ public class EditorArea extends JPanel {
         this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                /* Check if mouse movement passed the threshold to be considered a drag and not a click,
-                    prevents slight movement right before a click registering as a drag */
                 if (!isDragging && (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
                     int dx = Math.abs(e.getX() - pressScreenX);
                     int dy = Math.abs(e.getY() - pressScreenY);
@@ -271,13 +269,12 @@ public class EditorArea extends JPanel {
                     }
                 }
 
-                // update drag+canvas position variables
                 if (isDragging) {
-                    xDrag = (int) (xPosition + e.getX());
-                    yDrag = (int) (yPosition + e.getY());
-                    xPosition = lastReleasedPositionX - (xDrag - pressScreenX) / scale;
-                    yPosition = lastReleasedPositionY - (yDrag - pressScreenY) / scale;
+                    int dx = e.getX() - pressScreenX;
+                    int dy = e.getY() - pressScreenY;
 
+                    xPosition = lastReleasedPositionX - dx / scale;
+                    yPosition = lastReleasedPositionY - dy / scale;
                     repaint();
                 }
             }
