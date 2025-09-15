@@ -1,23 +1,16 @@
 
 package ElectronicsBackend;
 
-import Editor.ComponentRenderer;
 import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
 import ElectricalComponents.*;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
 
@@ -38,7 +31,7 @@ public class ElectricalComponent {
     protected DraggableEditorComponent draggableEditorComponent;
     public boolean isDeleted;
 
-    public static Class<?>[] subclasses = new Class[] {
+    public static Class<?>[] subclasses = new Class[]{
             ANDGate.class,
             Capacitor.class,
             Diode.class,
@@ -158,10 +151,6 @@ public class ElectricalComponent {
             }
         }
         return path;
-    }
-
-    public boolean hasNativeDraw() {
-        return false;
     }
 
     public static List<List<ElectricalComponent>> findAllPaths(ElectricalComponent start, ElectricalComponent end) {
@@ -290,69 +279,6 @@ public class ElectricalComponent {
                 "|rot:" + draggableEditorComponent.orientation + "|children:" + Arrays.toString(c).replace(" ", "") + ")";
     }
 
-    // ---------- // INFO CARD METHODS // --------- //
-    protected void styleInfoCard() {
-        infoCard.setLayout(new BoxLayout(infoCard, BoxLayout.Y_AXIS));
-        infoCard.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    }
-
-    //override for components that need to recalculate things on properties updated, ie a changed image or drawing
-    protected void onPropertiesChange() {
-        editorArea.repaint();
-        System.out.println("onPropertiesChange Fired for "+this.toString());
-    }
-
-    private JPanel createMenuItem(Component iconOrField, String labelText) {
-        JPanel container = new JPanel();
-        container.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        container.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        electricalProperties.put(labelText, null);
-
-        JLabel label = new JLabel(labelText);
-
-        container.add(label);
-        if (iconOrField != null) container.add(iconOrField);
-        return container;
-    }
-
-    protected void addDropdownToInfoCard(String key, String[] dropdownItems) {
-        JComboBox<String> comboBox = new JComboBox<>();
-        for (String item : dropdownItems) {
-            comboBox.addItem(item);
-        }
-        comboBox.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                electricalProperties.put(key, dropdownItems[comboBox.getSelectedIndex()]);
-                onPropertiesChange();
-            }
-        });
-        electricalProperties.put(key, dropdownItems[comboBox.getSelectedIndex()]);
-
-        JPanel menuItem = createMenuItem(comboBox, key);
-        infoCard.add(menuItem);
-        infoCardComponents.put(key, comboBox);
-    }
-
-    protected void addEntryToInfoCard(String key, int entryWidth) {
-        JTextField textField = new JTextField(entryWidth);
-
-        JPanel menuItem = createMenuItem(textField, key);
-        infoCard.add(menuItem);
-        infoCardComponents.put(key, textField);
-        textField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) {update();}
-            public void removeUpdate(DocumentEvent e) {update();}
-            public void changedUpdate(DocumentEvent e) {update();}
-
-            public void update() {
-                electricalProperties.put(key, convertNumberString(textField.getText()));
-                onPropertiesChange();
-            }
-
-        });
-
-    }
-
     private Integer convertNumberString(String s) {
         try {
             return Integer.parseInt(s);
@@ -361,16 +287,9 @@ public class ElectricalComponent {
         }
     }
 
-    protected void addCheckboxToInfoCard(String key) {
-        JCheckBox checkbox = new JCheckBox();
-
-        JPanel menuItem = createMenuItem(checkbox, key);
-        infoCard.add(menuItem);
-        infoCardComponents.put(key, checkbox);
-        checkbox.addItemListener(e -> {
-            electricalProperties.put(key, e.getStateChange() == ItemEvent.SELECTED);
-            onPropertiesChange();
-        });
+    protected void onPropertiesChange() {
+        editorArea.repaint();
+        System.out.println("onPropertiesChange Fired for " + this.toString());
     }
 
     public void setDeleted(boolean b) {
@@ -385,6 +304,108 @@ public class ElectricalComponent {
     public boolean isIndividuallyRendered() {
         return false;
     }
+
+// ---------- // INFO CARD METHODS // --------- //
+    protected void styleInfoCard() {
+        infoCard.setLayout(new BoxLayout(infoCard, BoxLayout.Y_AXIS));
+        infoCard.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        infoCard.setBackground(new Color(245, 245, 245)); // light gray modern background
+    }
+
+    private JPanel createMenuItem(JComponent component, String labelText) {
+        JPanel container = new JPanel();
+        container.setLayout(new BorderLayout(10, 0));
+        container.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        container.setBackground(Color.WHITE);
+        container.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        label.setForeground(new Color(60, 60, 60));
+
+        if (component != null) {
+            component.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            component.setPreferredSize(new Dimension(150, 25));
+            container.add(component, BorderLayout.EAST);
+        }
+        container.add(label, BorderLayout.WEST);
+
+        // subtle hover effect
+        container.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                container.setBackground(new Color(235, 235, 235));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                container.setBackground(Color.WHITE);
+            }
+        });
+
+        electricalProperties.put(labelText, null);
+        return container;
+    }
+
+    protected void addDropdownToInfoCard(String key, String[] dropdownItems) {
+        JComboBox<String> comboBox = new JComboBox<>(dropdownItems);
+        comboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                electricalProperties.put(key, comboBox.getSelectedItem());
+                onPropertiesChange();
+            }
+        });
+        electricalProperties.put(key, comboBox.getSelectedItem());
+
+        JPanel menuItem = createMenuItem(comboBox, key);
+        infoCard.add(Box.createVerticalStrut(8));
+        infoCard.add(menuItem);
+        infoCardComponents.put(key, comboBox);
+    }
+
+    protected void addEntryToInfoCard(String key, int entryWidth) {
+        JTextField textField = new JTextField(entryWidth);
+        textField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        JPanel menuItem = createMenuItem(textField, key);
+        infoCard.add(Box.createVerticalStrut(8));
+        infoCard.add(menuItem);
+        infoCardComponents.put(key, textField);
+
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            private void update() {
+                electricalProperties.put(key, convertNumberString(textField.getText()));
+                onPropertiesChange();
+            }
+        });
+    }
+
+    protected void addCheckboxToInfoCard(String key) {
+        JCheckBox checkbox = new JCheckBox();
+        checkbox.setBackground(Color.WHITE);
+
+        JPanel menuItem = createMenuItem(checkbox, key);
+        infoCard.add(Box.createVerticalStrut(8));
+        infoCard.add(menuItem);
+        infoCardComponents.put(key, checkbox);
+
+        checkbox.addItemListener(e -> {
+            electricalProperties.put(key, e.getStateChange() == ItemEvent.SELECTED);
+            onPropertiesChange();
+        });
+    }
 }
- 
  

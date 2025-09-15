@@ -1,17 +1,11 @@
 package Editor;
 
 import ElectricalComponents.*;
-
 import java.awt.*;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.VolatileImage;
-import java.util.ArrayList;
 import java.util.HashMap;
-
 
 public class ComponentRenderer {
     static HashMap<String, BufferedImage> buffer;
@@ -33,11 +27,7 @@ public class ComponentRenderer {
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
     }
 
-    static boolean existsInBuffer(String id) {
-        return buffer.containsKey(id);
-    }
-
-    public static BufferedImage render(DraggableEditorComponent caller, Graphics2D g, int cx, int cy, int size, String id, boolean isHighlight, double sizeOverride) {
+    public static BufferedImage render(DraggableEditorComponent caller, int cx, int cy, int size, String id, boolean isHighlight, double sizeOverride) {
         String key = id + "_" + size+"_"+isHighlight+"_"+
                 ((caller==null)?null:
                 (caller.getElectricalComponent().isIndividuallyRendered()?
@@ -92,9 +82,6 @@ public class ComponentRenderer {
             case IntegratedCircuit.id -> drawIC(g2d, cx, cy, size,
                     caller != null ? (int) caller.getElectricalComponent().electricalProperties.get("number_of_pins") : 16,
                     true);
-            default -> {
-                System.err.println("Unknown component ID: " + id);
-            }
         }
     }
 
@@ -156,7 +143,7 @@ public class ComponentRenderer {
         g2d.drawString(text, x - textWidth / 2, y + textHeight / 4);
     }
 
-    private static BufferedImage drawSpeaker(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawSpeaker(Graphics2D g2d, int cx, int cy, int size) {
         // Proportions (similar style to your drawAND)
         double totalWidth  = size * 0.5;   // whole speaker area (housing + cone)
         double totalHeight = size * 0.4;   // overall height
@@ -205,10 +192,9 @@ public class ComponentRenderer {
         }
 
         // Match your drawAND signature (you returned null there), so return null here as well
-        return null;
     }
 
-    private static BufferedImage drawMicrophone(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawMicrophone(Graphics2D g2d, int cx, int cy, int size) {
         // Dimensions
         int headDiam   = (int) Math.round(size * 0.50); // circle diameter
         int headR      = headDiam / 2;
@@ -241,8 +227,6 @@ public class ComponentRenderer {
         // Draw leads starting at circle perimeter
         g2d.drawLine(startXTop, yTop, startXTop + leadLen, yTop);
         g2d.drawLine(startXBot, yBot, startXBot + leadLen, yBot);
-
-        return null;
     }
 
 
@@ -261,7 +245,7 @@ public class ComponentRenderer {
     }
 
 
-    private static BufferedImage drawAND(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawAND(Graphics2D g2d, int cx, int cy, int size) {
         // Proportions
         double width = size * 0.5;       // total width of AND gate
         double height = size * 0.5;      // total height
@@ -299,18 +283,16 @@ public class ComponentRenderer {
         // Output line (right)
         int rightX = leftX + (int)width;
         g2d.drawLine(rightX, centerY, rightX + (int)(size * 0.15), centerY);
-        return null;
     }
 
 
-    private static BufferedImage drawCapacitor(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawCapacitor(Graphics2D g2d, int cx, int cy, int size) {
         int half = size / 10;
         g2d.drawLine(cx - half, cy - size / 4, cx - half, cy + size / 4);
         g2d.drawLine(cx + half, cy - size / 4, cx + half, cy + size / 4);
 
         g2d.drawLine((int) (cx - size / 2.5), cy, cx - half, cy);
         g2d.drawLine(cx + half, cy, (int) (cx + size / 2.5), cy);
-        return null;
     }
 
     private static void drawLamp(Graphics2D g2d, int cx, int cy, int size) {
@@ -355,7 +337,7 @@ public class ComponentRenderer {
         g2d.drawLine(x3, y3, x4, y4);
     }
 
-    private static BufferedImage drawDiode(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawDiode(Graphics2D g2d, int cx, int cy, int size) {
         int pinLength = (int) (size * 0.2);
         int bodyLength = (int) (size * 0.4);
         int halfHeight = (int) (size * 0.2);
@@ -367,10 +349,9 @@ public class ComponentRenderer {
         triangle.addPoint(cx + bodyLength / 2, cy);
         g2d.drawPolygon(triangle);
         g2d.drawLine(cx + bodyLength / 2, cy - halfHeight, cx + bodyLength / 2, cy + halfHeight);
-        return null;
     }
 
-    private static BufferedImage drawLED(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawLED(Graphics2D g2d, int cx, int cy, int size) {
         int pinLength  = (int) (size * 0.2);
         int bodyLength = (int) (size * 0.4);
         int halfHeight = (int) (size * 0.2);
@@ -439,11 +420,9 @@ public class ComponentRenderer {
         // Draw arrowheads (open)
         drawOpenHead.accept(new int[]{ax1, ay1}, new int[]{tip1x, tip1y});
         drawOpenHead.accept(new int[]{ax2, ay2}, new int[]{tip2x, tip2y});
-
-        return null;
     }
 
-    private static BufferedImage drawPhotoresistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawPhotoresistor(Graphics2D g2d, int cx, int cy, int size) {
         int pinLength  = (int) (size * 0.25);
         int bodyLength = (int) (size * 0.5);
         int halfHeight = (int) (size * 0.2);
@@ -511,21 +490,18 @@ public class ComponentRenderer {
         // Draw arrowheads (now pointing inward)
         drawOpenHead.accept(new int[]{ax1, ay1}, new int[]{tip1x, tip1y});
         drawOpenHead.accept(new int[]{ax2, ay2}, new int[]{tip2x, tip2y});
-
-        return null;
     }
 
-    private static BufferedImage drawGround(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawGround(Graphics2D g2d, int cx, int cy, int size) {
         int step = size / 8;
         int width = size / 5;
         g2d.drawLine(cx, cy, cx, cy + step);
         g2d.drawLine(cx - width, cy + step, cx + width, cy + step);
         g2d.drawLine(cx - width / 2, cy + 2 * step, cx + width / 2, cy + 2 * step);
         g2d.drawLine(cx - width / 4, cy + 3 * step, cx + width / 4, cy + 3 * step);
-        return null;
     }
 
-    private static BufferedImage drawNAND(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawNAND(Graphics2D g2d, int cx, int cy, int size) {
         // Proportions
         double width = size * 0.5;       // total width of gate
         double height = size * 0.5;      // total height
@@ -571,10 +547,9 @@ public class ComponentRenderer {
         int circleX = rightX + negRad;
         int circleY = centerY;
         g2d.drawOval(circleX - negRad, circleY - negRad, 2 * negRad, 2 * negRad);
-        return null;
     }
 
-    private static BufferedImage drawNPNTransistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawNPNTransistor(Graphics2D g2d, int cx, int cy, int size) {
         double r = size * 0.3;        // circle radius
         double leadLength = size * 0.4;
         double arrowLength = size * 0.08;
@@ -614,11 +589,9 @@ public class ComponentRenderer {
         int arrowY2 = (int)(emitterBendY - arrowLength * Math.sin(angle + Math.PI/6));
         g2d.drawLine(emitterBendX, emitterBendY, arrowX1, arrowY1);
         g2d.drawLine(emitterBendX, emitterBendY, arrowX2, arrowY2);
-
-        return null;
     }
 
-    private static BufferedImage drawOR(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawOR(Graphics2D g2d, int cx, int cy, int size) {
         // Proportions
         double width = size * 0.5;       // total width of OR gate
         double height = size * 0.5;      // total height
@@ -659,10 +632,9 @@ public class ComponentRenderer {
         // Output lead
         int rightX = leftX + mainArcWidth;
         g2d.drawLine(rightX, centerY, rightX + (int)(inputLength), centerY);
-        return null;
     }
 
-    private static BufferedImage drawPNPTransistor(Graphics2D g2d, int cx, int cy, int size, String id) {
+    private static void drawPNPTransistor(Graphics2D g2d, int cx, int cy, int size, String id) {
         // Proportions
         double r = size * 0.3;        // circle radius
         double leadLength = size * 0.4;
@@ -713,7 +685,6 @@ public class ComponentRenderer {
         int arrowY2 = (int)(arrowBaseY + arrowLength * Math.sin(angle + Math.PI/6));
         g2d.drawLine(arrowBaseX, arrowBaseY, arrowX1, arrowY1);
         g2d.drawLine(arrowBaseX, arrowBaseY, arrowX2, arrowY2);
-        return null;
     }
 
     private static BufferedImage drawPowerSupply(Graphics2D g2d, int cx, int cy, int size) {
@@ -735,7 +706,7 @@ public class ComponentRenderer {
         return null;
     }
 
-    private static BufferedImage drawResistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawResistor(Graphics2D g2d, int cx, int cy, int size) {
         // Resistor dimensions
         double bodyWidth = size * 0.6;    // width of zig-zag body
         double amplitude = size * 0.2;    // vertical height of zig-zag (peak to center)
@@ -770,17 +741,16 @@ public class ComponentRenderer {
         }
 
         g2d.draw(path);
-        return null;
     }
 
-    private static BufferedImage drawTransformer(Graphics2D g2d, int cx, int cy, int size) {
-        return null;
+    private static void drawTransformer(Graphics2D g2d, int cx, int cy, int size) {
+
     }
 
 
 
 
-    private static BufferedImage drawVariableResistor(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawVariableResistor(Graphics2D g2d, int cx, int cy, int size) {
         // Resistor body dimensions
         double bodyWidth = size * 0.6;
         double amplitude = size * 0.2;
@@ -838,10 +808,9 @@ public class ComponentRenderer {
         int rx = (int)(arrowX2 - arrowHeadLength * cos - arrowHeadLength * sin);
         int ry = (int)(arrowY2 - arrowHeadLength * sin + arrowHeadLength * cos);
         g2d.drawLine(arrowX2, arrowY2, rx, ry);
-        return null;
     }
 
-    private static BufferedImage drawXOR(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawXOR(Graphics2D g2d, int cx, int cy, int size) {
         // Proportions
         double width = size * 0.6;   // total width of XOR gate
         double height = size * 0.5;  // total height
@@ -892,10 +861,9 @@ public class ComponentRenderer {
         // Output
         int rightX = leftX + arcWidth;
         g2d.drawLine(rightX, centerY, rightX + inputLength, centerY);
-        return null;
     }
 
-    private static BufferedImage drawZenerDiode(Graphics2D g2d, int cx, int cy, int size) {
+    private static void drawZenerDiode(Graphics2D g2d, int cx, int cy, int size) {
         int pinLength = (int)(size * 0.2);
         int bodyLength = (int)(size * 0.4);
         int halfHeight = (int)(size * 0.2);
@@ -922,6 +890,5 @@ public class ComponentRenderer {
 
         // Bottom Zener horizontal lead (goes right)
         g2d.drawLine(cx + bodyLength / 2, cy + halfHeight, cx + bodyLength / 2 + leadLength, cy + halfHeight);
-        return null;
     }
 }

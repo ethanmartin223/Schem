@@ -21,11 +21,4 @@ public class Capacitor extends ElectricalComponent {
         pins.add(new Point2D.Double(0.1, .5));
         setConnectionPoints(pins);
     }
-
-    @Override
-    public boolean hasNativeDraw() {
-        return true;
-    }
-
-
 }

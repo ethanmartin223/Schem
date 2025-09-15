@@ -3,7 +3,6 @@ package Editor;
 
 // ---------------------- // Imports // ---------------------- //
 import Editor.History.History;
-import ElectricalComponents.Diode;
 import ElectronicsBackend.*;
 
 import javax.swing.*;
@@ -336,7 +335,6 @@ public class DraggableEditorComponent extends JComponent {
         int size = (int) (editor.scale);
         BufferedImage img = ComponentRenderer.render(
                 this,
-                g2d,
                 (int)(size*boundsOverride) / 2,
                 (int)(size*boundsOverride) / 2,
                 size,
