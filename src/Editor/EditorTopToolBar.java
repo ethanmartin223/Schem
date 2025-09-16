@@ -126,7 +126,7 @@ public class EditorTopToolBar extends JPanel {
                             mainEditor.saveManager.loadFileToEditor(f);
                         }
                     }else if (text.equals("run")) {
-                        mainEditor.highlightBestPath();
+                        mainEditor.runSim();
                     }else if (text.equals("stop")) {
                         System.out.println("Stopping Sim");
                     }else if (text.equals("save")) {

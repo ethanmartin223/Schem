@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -28,8 +29,10 @@ public class EditorSaveManager {
     private String getEditorDataAsWritable() {
         StringBuilder content = new StringBuilder();
         for (Component c : editor.getComponents()){
-            if (c instanceof DraggableEditorComponent) {
-                content.append(((DraggableEditorComponent)c).getElectricalComponent().toString());
+            if (c instanceof DraggableEditorComponent dec) {
+                content.append(dec.getElectricalComponent().toString());
+                content.append("\n");
+                content.append("ElectricalProperties("+dec.getElectricalComponent().electricalProperties.toString()+")");
                 content.append("\n");
             }
         }
@@ -40,6 +43,8 @@ public class EditorSaveManager {
         return content.toString();
     }
 
+
+
     public static String compress(String str) throws IOException {
         if (str == null || str.isEmpty()) return str;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -47,6 +52,55 @@ public class EditorSaveManager {
         gzip.write(str.getBytes());
         gzip.close();
         return out.toString(StandardCharsets.ISO_8859_1);
+    }
+
+    public HashMap<String, Object> loadHashFromMemory(String input) throws Exception {
+        HashMap<String, Object> result = new HashMap<>();
+
+        input = input.trim();
+        if (input.startsWith("{")) input = input.substring(1);
+        if (input.endsWith("}")) input = input.substring(0, input.length() - 1);
+
+        ArrayList<String> pairs = new ArrayList();
+        int braceCount = 0;
+        StringBuilder current = new StringBuilder();
+        for (char c : input.toCharArray()) {
+            if (c == '{') braceCount++;
+            if (c == '}') braceCount--;
+            if (c == ',' && braceCount == 0) {
+                pairs.add(current.toString());
+                current = new StringBuilder();
+            } else {
+                current.append(c);
+            }
+        }
+        if (!current.isEmpty()) pairs.add(current.toString());
+
+        for (String pair : pairs) {
+            String[] kv = pair.split("=", 2);
+            if (kv.length != 2) continue;
+
+            String key = kv[0].trim();
+            String valueStr = kv[1].trim();
+
+            Object value = parseValue(valueStr);
+            result.put(key, value);
+        }
+
+        return result;
+    }
+
+    private Object parseValue(String valueStr) throws Exception {
+        if ("null".equalsIgnoreCase(valueStr)) return null;
+        try {
+            return Integer.parseInt(valueStr);
+        } catch (NumberFormatException ignored) {}
+        if ("true".equalsIgnoreCase(valueStr)) return true;
+        if ("false".equalsIgnoreCase(valueStr)) return false;
+        if (valueStr.startsWith("{") && valueStr.endsWith("}")) {
+            return loadHashFromMemory(valueStr);
+        }
+        return valueStr.replaceAll("^\"|\"$", "");
     }
 
     public static String decompress(String compressed) throws IOException {
@@ -77,12 +131,12 @@ public class EditorSaveManager {
         String data;
         try {data = getDataFromFile(file);}
         catch (IOException e) {throw new RuntimeException(e);}
-
+        System.out.println(data);
         Pattern pattern = Pattern.compile("(?:.*?\\:(.*?)\\||.*?(\\[.*?\\])\\))");
 
         String[] components = data.split("\n");
         ArrayList<int[]> childrenList = new ArrayList<>();
-
+        DraggableEditorComponent lastLoadedComponent = null;
         for (String c : components) {
             if (c.startsWith("ElectricalComponent")) {
                 Matcher matcher = pattern.matcher(c);
@@ -106,10 +160,22 @@ public class EditorSaveManager {
                     DraggableEditorComponent component = editor.createNewComponent(type, x, y, false);
                     component.orientation = rot;
                     component.getElectricalComponent().rotateConnectionPoints(rot);
+                    lastLoadedComponent = component;
 
                 } catch (Exception ignored){
                     ignored.printStackTrace();
                 };
+            }
+            else if (c.startsWith("ElectricalProperties")) {
+                try {
+                    assert lastLoadedComponent != null;
+                    String input = c.substring("ElectricalProperties(".length(),c.length()-1);
+                    ElectricalComponent lastLoadedElectricalComponent = lastLoadedComponent.getElectricalComponent();
+                    lastLoadedElectricalComponent.electricalProperties = loadHashFromMemory(input);
+                    lastLoadedElectricalComponent.updateInfoPanelFromProperties();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             }
         }
         //add children after all are loaded (prevents lookup on components that are not loaded yet)
@@ -140,6 +206,8 @@ public class EditorSaveManager {
                 int bStart = Integer.parseInt(matcher.group(2));
                 editor.connectComponents(a, aStart, b, bStart, false);
             }
+            //add properties to components after they all are loaded
+
         }
         editor.mainWindow.setTitle("WireWorks V1.0 - "+editor.currentlyEditingFile.getName());
         editor.zoomFit();
@@ -174,4 +242,3 @@ public class EditorSaveManager {
         editor.mainWindow.setTitle("WireWorks V1.0 - "+editor.currentlyEditingFile.getName());
     }
 }
- 

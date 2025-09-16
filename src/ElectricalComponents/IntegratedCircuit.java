@@ -1,10 +1,8 @@
-
 package ElectricalComponents;
 
 import Editor.ComponentRenderer;
 import Editor.EditorArea;
 import ElectronicsBackend.ElectricalComponent;
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -19,10 +17,10 @@ public class IntegratedCircuit extends ElectricalComponent {
 
 
     public void recalculate_pin_points() {
-        if (electricalProperties.get("number_of_pins")==null) return;
+        if (electricalProperties.get("number_of_pins") == null) return;
         int numberOfPins = (int) electricalProperties.get("number_of_pins");
 
-        double size = this.draggableEditorComponent.boundsOverride;
+        double size =1;
 
         double bodyWidth = size;
         double bodyHeight = (numberOfPins / 2.0) * (size * 0.2);
@@ -31,15 +29,23 @@ public class IntegratedCircuit extends ElectricalComponent {
         double leadLength = size * 0.2;
         double leadSpacing = bodyHeight / (numberOfPins / 2.0);
 
-        double cx = x;
-        double cy = y;
+        int rot = this.draggableEditorComponent.orientation;
+        if  (rot==0 || rot==2)hitBoxHeightOverride = bodyHeight/this.draggableEditorComponent.boundsOverride+this.draggableEditorComponent.boundsOverride*.2;
+        if  (rot==1 || rot==3)hitBoxWidthOverride = bodyHeight/this.draggableEditorComponent.boundsOverride+this.draggableEditorComponent.boundsOverride*.2;
+
+        double cx = .5; // This must be in world coordinates
+        double cy = .5;
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
+
+        // Left side pins (pins 1 to N/2)
         for (int i = 0; i < numberOfPins / 2; i++) {
             double py = cy - bodyHeight / 2 + (i + 0.5) * leadSpacing;
             double px = cx - bodyWidth / 2 - leadLength;
             pins.add(new Point2D.Double(px, py));
         }
+
+        // Right side pins (pins N to N/2+1 in reverse order)
         for (int i = 0; i < numberOfPins / 2; i++) {
             double py = cy + bodyHeight / 2 - (i + 0.5) * leadSpacing;
             double px = cx + bodyWidth / 2 + leadLength;
@@ -47,8 +53,8 @@ public class IntegratedCircuit extends ElectricalComponent {
         }
 
         setConnectionPoints(pins);
+        this.draggableEditorComponent.repaint();
     }
-
 
     @Override
     protected void onPropertiesChange() {

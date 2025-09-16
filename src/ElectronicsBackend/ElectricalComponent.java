@@ -1,18 +1,16 @@
-
 package ElectronicsBackend;
 
 import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
 import ElectricalComponents.*;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class ElectricalComponent {
     public String id;
@@ -305,7 +303,7 @@ public class ElectricalComponent {
         return false;
     }
 
-// ---------- // INFO CARD METHODS // --------- //
+    // ---------- // INFO CARD METHODS // --------- //
     protected void styleInfoCard() {
         infoCard.setLayout(new BoxLayout(infoCard, BoxLayout.Y_AXIS));
         infoCard.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -407,5 +405,22 @@ public class ElectricalComponent {
             onPropertiesChange();
         });
     }
+
+    public void updateInfoPanelFromProperties() {
+        for (String key :this.infoCardComponents.keySet()){
+            if (electricalProperties.get(key) == null) {
+                continue;
+            } else if (this.infoCardComponents.get(key).getClass() == JTextField.class) {
+                JTextField field = (JTextField)this.infoCardComponents.get(key);
+                field.setText(""+electricalProperties.get(key));
+            } else if (this.infoCardComponents.get(key).getClass() == JComboBox.class) {
+                JComboBox comboBox = (JComboBox)this.infoCardComponents.get(key);
+                comboBox.getModel().setSelectedItem(electricalProperties.get(key));
+
+            } else if (this.infoCardComponents.get(key).getClass() == JCheckBox.class) {
+                JCheckBox checkBox = (JCheckBox)this.infoCardComponents.get(key);
+                checkBox.setSelected((Boolean) electricalProperties.get(key));
+            }
+        }
+    }
 }
- 

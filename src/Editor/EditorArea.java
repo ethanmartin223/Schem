@@ -1001,5 +1001,7 @@ public class EditorArea extends JPanel {
         repaint();
     }
 
+    public void runSim() {
+    }
 }
  
