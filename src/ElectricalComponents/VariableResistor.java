@@ -10,11 +10,12 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class VariableResistor extends ElectricalComponent {
-
     public final static String id = "variableresistor";
+
     public VariableResistor(EditorArea ea, double x, double y) {
         super(ea, "variableresistor", x, y);
 
+        shortenedId = "RV";
         hitBoxHeightOverride = .6;
         hitBoxWidthOverride = .85;
 

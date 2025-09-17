@@ -292,7 +292,7 @@ public class DraggableEditorComponent extends JComponent {
         double finalHeight = baseSize;
 
         ElectricalComponent eC = getElectricalComponent();
-        if (eC.hitBoxWidthOverride != null) {
+        if (eC.hitBoxWidthOverride != null && eC.hitBoxHeightOverride != null) {
             if ((orientation==1)|| (orientation==3)) {
                 finalWidth *= eC.hitBoxHeightOverride;
             }
@@ -300,7 +300,7 @@ public class DraggableEditorComponent extends JComponent {
                 finalWidth *= eC.hitBoxWidthOverride;
             }
         }
-        if (eC.hitBoxHeightOverride != null) {
+        if (eC.hitBoxHeightOverride != null && eC.hitBoxWidthOverride != null) {
             if ((orientation==1)|| (orientation==3)) {
                 finalHeight *= eC.hitBoxWidthOverride;
             } else {

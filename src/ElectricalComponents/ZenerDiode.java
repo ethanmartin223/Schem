@@ -13,6 +13,7 @@ public class ZenerDiode extends ElectricalComponent {
     public ZenerDiode(EditorArea ea, double x, double y) {
         super(ea, "zenerdiode", x, y);
 
+        shortenedId = "ZD";
         hitBoxHeightOverride = .5;
         hitBoxWidthOverride = .85;
 

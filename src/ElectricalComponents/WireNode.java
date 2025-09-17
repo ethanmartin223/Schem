@@ -13,6 +13,7 @@ public class WireNode extends ElectricalComponent {
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.5, .5));
 
+        shortenedId = "";
         this.draggableEditorComponent.boundsOverride = .25;
         setConnectionPoints(pins);
 

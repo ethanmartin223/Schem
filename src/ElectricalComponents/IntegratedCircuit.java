@@ -8,9 +8,14 @@ import java.util.ArrayList;
 
 public class IntegratedCircuit extends ElectricalComponent {
     public final static String id = "ic";
+
     public IntegratedCircuit(EditorArea ea, double x, double y) {
         super(ea, "ic", x, y);
+
         this.draggableEditorComponent.boundsOverride = 2.0;
+
+        shortenedId = "IC";
+
         electricalProperties.put("number_of_pins", 16);
         recalculate_pin_points();
     }

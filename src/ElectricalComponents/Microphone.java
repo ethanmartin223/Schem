@@ -12,6 +12,7 @@ public class Microphone extends ElectricalComponent {
     public Microphone(EditorArea ea, double x, double y) {
         super(ea, "microphone", x, y);
 
+        shortenedId = "MIC";
         hitBoxHeightOverride = .6;
         hitBoxWidthOverride = .85;
 

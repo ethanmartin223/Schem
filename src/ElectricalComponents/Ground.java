@@ -13,6 +13,7 @@ public class Ground extends ElectricalComponent {
     public Ground(EditorArea ea, double x, double y) {
         super(ea, "ground", x, y);
 
+        shortenedId = "VSS";
         hitBoxHeightOverride = .8;
         hitBoxWidthOverride = .5;
 

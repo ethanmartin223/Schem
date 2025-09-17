@@ -15,6 +15,8 @@ public class Lamp extends ElectricalComponent {
         hitBoxHeightOverride = .5;
         hitBoxWidthOverride = .85;
 
+        shortenedId = "L";
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.9, .5));
         pins.add(new Point2D.Double(0.1, .5));

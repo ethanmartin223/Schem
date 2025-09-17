@@ -14,6 +14,7 @@ public class PowerSupply extends ElectricalComponent {
     public PowerSupply(EditorArea ea, double x, double y) {
         super(ea, "powerSupply", x, y);
 
+        shortenedId = "VCC";
         hitBoxHeightOverride = .65;
         hitBoxWidthOverride = .5;
 

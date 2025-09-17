@@ -15,6 +15,7 @@ public class Resistor extends ElectricalComponent {
     public Resistor(EditorArea ea, double x, double y) {
         super(ea, "resistor", x, y);
 
+        shortenedId = "R";
         hitBoxHeightOverride = .5;
         hitBoxWidthOverride = .85;
 

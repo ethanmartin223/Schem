@@ -13,6 +13,7 @@ public class Capacitor extends ElectricalComponent {
     public Capacitor(EditorArea ea, double x, double y) {
         super(ea, "capacitor", x, y);
 
+        shortenedId = "C";
         hitBoxHeightOverride = .6;
         hitBoxWidthOverride = .85;
 

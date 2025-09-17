@@ -6,6 +6,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
 
@@ -42,7 +43,7 @@ public class EditorTopToolBar extends JPanel {
         add(label);
     }
 
-    private ImageIcon loadIcon(String path) {
+    private static ImageIcon loadIcon(String path) {
         try {
             return new ImageIcon(path);
         } catch (Exception e) {
@@ -126,7 +127,17 @@ public class EditorTopToolBar extends JPanel {
                             mainEditor.saveManager.loadFileToEditor(f);
                         }
                     }else if (text.equals("run")) {
-                        mainEditor.runSim();
+                        if (mainEditor.currentlyRunningSim == null) {
+                            mainEditor.runSim();
+                            mainEditor.repaint();
+                            ClickableLabel.this.icon = loadIcon("resources/menuAssets/stop.png");
+                            ClickableLabel.this.repaint();
+                        } else {
+                            mainEditor.currentlyRunningSim = null;
+                            ClickableLabel.this.icon = loadIcon("resources/menuAssets/run.png");
+                            ClickableLabel.this.repaint();
+                            mainEditor.repaint();
+                        }
                     }else if (text.equals("stop")) {
                         System.out.println("Stopping Sim");
                     }else if (text.equals("save")) {

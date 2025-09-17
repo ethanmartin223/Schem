@@ -13,6 +13,7 @@ public class NANDGate extends ElectricalComponent {
     public NANDGate(EditorArea ea, double x, double y) {
         super(ea, "nand", x, y);
 
+        shortenedId = "NAND";
         hitBoxHeightOverride = .6;
         hitBoxWidthOverride = .85;
 

@@ -13,6 +13,7 @@ public class Diode extends ElectricalComponent {
     public Diode(EditorArea ea, double x, double y) {
         super(ea, "diode", x, y);
 
+        shortenedId = "D";
         hitBoxHeightOverride = .5;
         hitBoxWidthOverride = .85;
 

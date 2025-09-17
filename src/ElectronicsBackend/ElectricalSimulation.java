@@ -1,14 +1,19 @@
 package ElectronicsBackend;
 
+import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
 import ElectricalComponents.Ground;
 import ElectricalComponents.PowerSupply;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.swing.*;
+
+import static ElectronicsBackend.ElectricalComponent.findClassFromID;
 
 public class ElectricalSimulation{
 
@@ -16,15 +21,46 @@ public class ElectricalSimulation{
 //https://en.wikipedia.org/wiki/Kirchhoff%27s_circuit_laws
 
     EditorArea editor;
+    HashMap<Class<?>, ArrayList<ElectricalComponent>> simComponents;
 
     public ElectricalSimulation(EditorArea editorArea) {
         editor = editorArea;
 
-        Stream<ElectricalComponent> powerSupplies = ElectricalComponent.allComponents.stream().filter(e -> e instanceof PowerSupply);
-        Stream<ElectricalComponent> grounds = ElectricalComponent.allComponents.stream().filter(e -> e instanceof Ground);
+        List<ElectricalComponent> powerSupplies = ElectricalComponent.allComponents.stream()
+                .filter(e -> e instanceof PowerSupply).toList();
+        List<ElectricalComponent> grounds = ElectricalComponent.allComponents.stream()
+                .filter(e -> e instanceof Ground).toList();
+        List<ElectricalComponent> otherComponents = ElectricalComponent.allComponents.stream()
+                .filter(e -> !(e instanceof Ground) && !(e instanceof PowerSupply)).toList();
+        simComponents  = new HashMap<>();
+        for (ElectricalComponent component : otherComponents) {
+            Class<?> compType = findClassFromID(component.id);
+            simComponents.putIfAbsent(compType, new ArrayList<>());
+            ArrayList<ElectricalComponent> compList = simComponents.get(compType);
+            compList.add(component);
+        }
 
-        System.out.println(powerSupplies);
-        System.out.println(grounds);
+        System.out.println("Power Supplies:");
+        System.out.println("\t"+powerSupplies);
+        System.out.println("Grounds:");
+        System.out.println("\t"+grounds);
+        System.out.println("Components:");
+        System.out.println("\t"+otherComponents);
+    }
+
+    public void draw(Graphics2D g2d) {
+        g2d.setFont(new Font("Arial", Font.BOLD, (int) (.14*editor.scale)));
+        g2d.setColor(Color.BLUE);
+        for (Class<?> t : simComponents.keySet()) {
+            ArrayList<ElectricalComponent> currentComponentList = simComponents.get(t);
+            for (int i =0; i<currentComponentList.size(); i++) {
+                ElectricalComponent ec = currentComponentList.get(i);
+                DraggableEditorComponent dec = ec.draggableEditorComponent;
+                g2d.drawString( ec.shortenedId+ec.idNum,
+                        dec.getX(), dec.getY());
+
+            }
+        }
     }
 
     public static class Node {

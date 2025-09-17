@@ -13,6 +13,7 @@ public class ORGate extends ElectricalComponent {
     public ORGate(EditorArea ea, double x, double y) {
         super(ea, "or", x, y);
 
+        shortenedId = "OR";
         hitBoxHeightOverride = .6;
         hitBoxWidthOverride = .85;
 

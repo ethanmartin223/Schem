@@ -89,6 +89,7 @@ public class EditorArea extends JPanel {
     private float minScaleForGridLinesAppearing = 80f;    // scale at which lines start appearing
     private float maxScaleForGridLinesAppearing = 200f;   // scale at which lines are fully visible
     boolean debugDrawMode = false;
+    ElectricalSimulation currentlyRunningSim;
 
     // ---------------------- // Constructor // ---------------------- //
     public EditorArea(JFrame parent) {
@@ -788,7 +789,10 @@ public class EditorArea extends JPanel {
             // ---- Selection ----
             selectedArea.paint(g2d);
 
+            if (currentlyRunningSim != null) currentlyRunningSim.draw(g2d);
             if (debugDrawMode) debugGraphics(g2d);
+
+
 
             g2d.dispose();
 
@@ -1002,6 +1006,8 @@ public class EditorArea extends JPanel {
     }
 
     public void runSim() {
+        currentlyRunningSim = new ElectricalSimulation(this);
+
     }
 }
  

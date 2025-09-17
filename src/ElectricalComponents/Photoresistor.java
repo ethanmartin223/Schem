@@ -12,6 +12,7 @@ public class Photoresistor extends ElectricalComponent {
     public Photoresistor(EditorArea ea, double x, double y) {
         super(ea, "photoresistor", x, y);
 
+        shortenedId = "LDR";
         hitBoxHeightOverride = .85;
         hitBoxWidthOverride = .85;
 

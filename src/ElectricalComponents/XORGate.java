@@ -13,6 +13,7 @@ public class XORGate extends ElectricalComponent {
     public XORGate(EditorArea ea, double x, double y) {
         super(ea, "xor", x, y);
 
+        shortenedId = "XOR";
         hitBoxHeightOverride = .6;
         hitBoxWidthOverride = .85;
 

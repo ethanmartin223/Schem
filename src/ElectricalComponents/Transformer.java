@@ -11,9 +11,10 @@ import java.util.ArrayList;
 
 public class Transformer extends ElectricalComponent {
     public final static String id = "transformer";
-
     public Transformer(EditorArea ea, double x, double y) {
         super(ea, "transformer", x, y);
+
+        shortenedId = "T";
 
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.8, .2));

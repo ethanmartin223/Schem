@@ -15,6 +15,8 @@ public class LED extends ElectricalComponent {
         hitBoxHeightOverride = .85;
         hitBoxWidthOverride = .85;
 
+        shortenedId = "LED";
+
         ArrayList<Point2D.Double> pins = new ArrayList<>();
         pins.add(new Point2D.Double(0.9, .5));
         pins.add(new Point2D.Double(0.1, .5));

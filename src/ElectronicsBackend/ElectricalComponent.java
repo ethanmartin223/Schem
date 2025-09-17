@@ -18,6 +18,7 @@ public class ElectricalComponent {
 
     public Double hitBoxWidthOverride = null;
     public Double hitBoxHeightOverride = null;
+    public String shortenedId = null;
 
     protected JPanel infoCard;
     private HashMap<String, Component> infoCardComponents;
@@ -52,6 +53,7 @@ public class ElectricalComponent {
             Photoresistor.class,
             IntegratedCircuit.class
     };
+    int idNum;
 
     public static Class<?> findClassFromID(String id) {
         switch (id) {
@@ -211,6 +213,8 @@ public class ElectricalComponent {
         editorArea.add(draggableEditorComponent);
 
         allComponents.add(this);
+        idNum = allComponents.indexOf(this);
+
         initInfoCard();
 
     }
@@ -271,9 +275,11 @@ public class ElectricalComponent {
 
     @Override
     public String toString() {
+
         int[] c = new int[children.size()];
         for (int i = 0; i < children.size(); i++) c[i] = allComponents.indexOf(children.get(i));
-        return "ElectricalComponent(compId:" + allComponents.indexOf(this) + "|type:" + id + "|x:" + x + "|y:" + y + "|isDead:" + isDeleted +
+
+        return "ElectricalComponent(compId:" + idNum + "|type:" + id + "|x:" + x + "|y:" + y + "|isDead:" + isDeleted +
                 "|rot:" + draggableEditorComponent.orientation + "|children:" + Arrays.toString(c).replace(" ", "") + ")";
     }
 

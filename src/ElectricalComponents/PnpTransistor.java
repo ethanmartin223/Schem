@@ -13,6 +13,7 @@ public class PnpTransistor extends ElectricalComponent {
     public PnpTransistor(EditorArea ea, double x, double y) {
         super(ea, "pnptransistor", x, y);
 
+        shortenedId = "PNP";
         hitBoxHeightOverride = .85;
         hitBoxWidthOverride = .85;
 

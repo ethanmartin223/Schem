@@ -13,6 +13,7 @@ public class NpnTransistor extends ElectricalComponent {
     public NpnTransistor(EditorArea ea, double x, double y) {
         super(ea, "npntransistor", x, y);
 
+        shortenedId = "NPN";
         hitBoxHeightOverride = .85;
         hitBoxWidthOverride = .85;
 
