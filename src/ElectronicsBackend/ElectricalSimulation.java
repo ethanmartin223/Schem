@@ -56,7 +56,7 @@ public class ElectricalSimulation{
             for (int i =0; i<currentComponentList.size(); i++) {
                 ElectricalComponent ec = currentComponentList.get(i);
                 DraggableEditorComponent dec = ec.draggableEditorComponent;
-                g2d.drawString( ec.shortenedId+ec.idNum,
+                g2d.drawString( ec.shortenedId+(i+1),
                         dec.getX(), dec.getY());
 
             }
