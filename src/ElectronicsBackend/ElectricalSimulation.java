@@ -7,11 +7,10 @@ import ElectricalComponents.PowerSupply;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
-import javax.swing.*;
 
 import static ElectronicsBackend.ElectricalComponent.findClassFromID;
 
@@ -61,6 +60,67 @@ public class ElectricalSimulation{
 
             }
         }
+    }
+
+    public static double[][] multiply(double[][] a, double[][] b){
+
+        double[][] outputMatrix =  new double[a.length][a[0].length];
+        for (int y=0; y<a.length; y++){
+            for (int x=0; x<a[y].length; x++){
+                a[y][x] *= b[y][x];
+
+            }
+        }
+        return outputMatrix;
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
+
+    public static void showMatrix(double[][] a) {
+        int maxLengths[] = new int[a[0].length];;
+        for (int y = 0; y < a.length; y++) {
+            if  (y == 0)
+                System.out.print("[[");
+            else
+                System.out.print(" [");
+
+            for (int x = 0; x < a[y].length; x++) {
+                maxLengths[x] = Math.max(maxLengths[x], (""+round(a[y][x], 2)).length());
+                System.out.print(""+round(a[y][x], 2));
+                if (x != (a[y].length-1))
+                    System.out.print(", ");
+                else if (y!=a.length-1)
+                    System.out.print("], ");
+                else
+                    System.out.print("]]");
+            }
+            System.out.println();
+        }
+        System.out.println(Arrays.toString(maxLengths));
+    }
+
+    public static void main(String[] args) {
+
+        double[][] a = new double[][]
+            {{1,2},
+             {1,2},
+             {1,2},
+             {1,2}};
+
+        double[][] b = new double[][]
+           {{1,2,3,4},
+            {1,2,3,4},
+            {1,2,3,4}};
+
+        showMatrix(b);
     }
 
     public static class Node {
