@@ -64,11 +64,10 @@ public class ElectricalSimulation{
 
     public static double[][] multiply(double[][] a, double[][] b){
 
-        double[][] outputMatrix =  new double[a.length][a[0].length];
+        double[][] outputMatrix =  new double[a.length][b[0].length];
         for (int y=0; y<a.length; y++){
             for (int x=0; x<a[y].length; x++){
-                a[y][x] *= b[y][x];
-
+                outputMatrix[y][x] = a[y][x] * b[x][y];
             }
         }
         return outputMatrix;
@@ -87,14 +86,22 @@ public class ElectricalSimulation{
     public static void showMatrix(double[][] a) {
         int maxLengths[] = new int[a[0].length];;
         for (int y = 0; y < a.length; y++) {
+            for (int x = 0; x < a[y].length; x++) {
+                maxLengths[x] = Math.max(maxLengths[x], (""+round(a[y][x], 2)).length());
+            }
+        }
+        for (int y = 0; y < a.length; y++) {
             if  (y == 0)
                 System.out.print("[[");
             else
                 System.out.print(" [");
 
             for (int x = 0; x < a[y].length; x++) {
-                maxLengths[x] = Math.max(maxLengths[x], (""+round(a[y][x], 2)).length());
-                System.out.print(""+round(a[y][x], 2));
+                String output = ""+round(a[y][x], 2);
+                while  (output.length() < maxLengths[x]) {
+                    output =" "+output;
+                }
+                System.out.print(output);
                 if (x != (a[y].length-1))
                     System.out.print(", ");
                 else if (y!=a.length-1)
@@ -104,23 +111,38 @@ public class ElectricalSimulation{
             }
             System.out.println();
         }
-        System.out.println(Arrays.toString(maxLengths));
+    }
+
+    public double dotProduct(double[] a, double[] b) {
+        assert a.length == b.length;
+        double[] outArray = new double[a.length];
+        for  (int i = 0; i < a.length; i++) {
+            outArray[i] = a[i] * b[i];
+        }
+        return Arrays.stream(outArray).sum();
     }
 
     public static void main(String[] args) {
 
         double[][] a = new double[][]
-            {{1,2},
-             {1,2},
-             {1,2},
-             {1,2}};
+            {{7,8},
+             {9,10},
+             {11,12}};
 
         double[][] b = new double[][]
-           {{1,2,3,4},
-            {1,2,3,4},
-            {1,2,3,4}};
+           {{1,2,3},
+            {4,5,6}};
 
+        showMatrix(a);
+        System.out.println();
         showMatrix(b);
+
+        System.out.println();
+        System.out.println();
+
+
+        double[][] c = multiply(a,b);
+        showMatrix(c);
     }
 
     public static class Node {
