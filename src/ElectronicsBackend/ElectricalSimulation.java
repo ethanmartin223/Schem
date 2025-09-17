@@ -65,9 +65,10 @@ public class ElectricalSimulation{
     public static double[][] multiply(double[][] a, double[][] b){
 
         double[][] outputMatrix =  new double[a.length][b[0].length];
-        for (int y=0; y<a.length; y++){
-            for (int x=0; x<a[y].length; x++){
-                outputMatrix[y][x] = a[y][x] * b[x][y];
+        showMatrix(outputMatrix);
+        for (int y=0; y<a[0].length; y++){
+            for (int x=0; x<b.length; x++){
+                outputMatrix[y][x] = dotProduct(a[y], b[x]);
             }
         }
         return outputMatrix;
@@ -113,7 +114,7 @@ public class ElectricalSimulation{
         }
     }
 
-    public double dotProduct(double[] a, double[] b) {
+    public static double dotProduct(double[] a, double[] b) {
         assert a.length == b.length;
         double[] outArray = new double[a.length];
         for  (int i = 0; i < a.length; i++) {
@@ -124,14 +125,15 @@ public class ElectricalSimulation{
 
     public static void main(String[] args) {
 
+
         double[][] a = new double[][]
+           {{1,2,3},
+            {4,5,6}};
+
+        double[][] b = new double[][]
             {{7,8},
              {9,10},
              {11,12}};
-
-        double[][] b = new double[][]
-           {{1,2,3},
-            {4,5,6}};
 
         showMatrix(a);
         System.out.println();
