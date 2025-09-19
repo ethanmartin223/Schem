@@ -20,7 +20,7 @@ public class ElectricalSimulation{
 //https://en.wikipedia.org/wiki/Kirchhoff%27s_circuit_laws
 
     EditorArea editor;
-    HashMap<Class<?>, ArrayList<ElectricalComponent>> simComponents;
+    public HashMap<Class<?>, ArrayList<ElectricalComponent>> simComponents;
 
     public ElectricalSimulation(EditorArea editorArea) {
         editor = editorArea;
@@ -62,13 +62,20 @@ public class ElectricalSimulation{
         }
     }
 
+    public static double[] grabCol(double[][] a, int x) {
+        double[] output =  new double[a.length];
+        for (int y=0; y<a.length; y++){
+            output[y] = a[y][x];
+        }
+        return output;
+    }
+
     public static double[][] multiply(double[][] a, double[][] b){
 
         double[][] outputMatrix =  new double[a.length][b[0].length];
-        showMatrix(outputMatrix);
-        for (int y=0; y<a[0].length; y++){
-            for (int x=0; x<b.length; x++){
-                outputMatrix[y][x] = dotProduct(a[y], b[x]);
+        for (int y=0; y<a.length; y++){
+            for (int x=0; x<b[0].length; x++){
+                outputMatrix[y][x] = dotProduct(grabCol(b, x),a[y]);
             }
         }
         return outputMatrix;
@@ -125,15 +132,16 @@ public class ElectricalSimulation{
 
     public static void main(String[] args) {
 
-
         double[][] a = new double[][]
-           {{1,2,3},
-            {4,5,6}};
+           {{3,4,2}};
 
         double[][] b = new double[][]
-            {{7,8},
-             {9,10},
-             {11,12}};
+            {{13,9,7,15},
+             {8,7,4,6},
+             {6,4,0,3}};
+
+
+
 
         showMatrix(a);
         System.out.println();
