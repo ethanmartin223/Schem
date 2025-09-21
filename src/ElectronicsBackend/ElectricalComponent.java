@@ -30,6 +30,8 @@ public class ElectricalComponent {
     protected DraggableEditorComponent draggableEditorComponent;
     public boolean isDeleted;
 
+    //whenever you make a new component, just add it to the subclass list and add it to the findClassFromID function
+
     public static Class<?>[] subclasses = new Class[]{
             ANDGate.class,
             Capacitor.class,
@@ -51,7 +53,8 @@ public class ElectricalComponent {
             Microphone.class,
             LED.class,
             Photoresistor.class,
-            IntegratedCircuit.class
+            IntegratedCircuit.class,
+            VoltageSupply.class
     };
     int idNum;
 
@@ -78,6 +81,7 @@ public class ElectricalComponent {
             case LED.id -> { return LED.class; }
             case Photoresistor.id -> { return Photoresistor.class; }
             case IntegratedCircuit.id -> { return IntegratedCircuit.class; }
+            case VoltageSupply.id -> { return VoltageSupply.class; }
             default -> {
                 return null;
             }
@@ -104,7 +108,9 @@ public class ElectricalComponent {
     }
 
     public int getResistance() {
-        return resistance;
+        Object c = electricalProperties.get("Resistance (Ω)");
+        if (c!= null) return (int)c;
+        else return 0;
     }
 
     public ArrayList<ElectricalComponent> getChildren() {
@@ -117,6 +123,8 @@ public class ElectricalComponent {
         }
         System.out.println();
     }
+
+
 
     public static List<ElectricalComponent> findPathOfLeastResistance(ElectricalComponent start, ElectricalComponent end) {
         Map<ElectricalComponent, Integer> dist = new HashMap<>();

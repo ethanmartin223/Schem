@@ -43,8 +43,10 @@ public class OscilloscopeTrace {
 
         Path2D path = new Path2D.Double();
         for (int x = 0; x < width; x++) {
-            double screenX = x + oscilloscopeDisplay.leftMargin + horizShift;
-            double screenY = centerY - function[x] - vertShift;
+            double variation = (.5-Math.random())*5;
+
+            double screenX = x + oscilloscopeDisplay.leftMargin + horizShift+variation/4;
+            double screenY = centerY - function[x] - vertShift+variation;
 
             if (x == 0) {
                 path.moveTo(screenX, screenY);

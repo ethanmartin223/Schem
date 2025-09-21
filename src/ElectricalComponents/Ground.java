@@ -26,8 +26,11 @@ public class Ground extends ElectricalComponent {
     @Override
     public void initInfoCard() {
         styleInfoCard();
+
         addCheckboxToInfoCard("Reference Enabled");
         addEntryToInfoCard("Ground Offset (mV)", 6);
+        addEntryToInfoCard("Resistance (Ω)", 6);
+
     }
 
 }

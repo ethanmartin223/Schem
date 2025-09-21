@@ -2,15 +2,18 @@ package ElectronicsBackend;
 
 import Editor.DraggableEditorComponent;
 import Editor.EditorArea;
+import Editor.Wire;
 import ElectricalComponents.Ground;
 import ElectricalComponents.PowerSupply;
+import ElectricalComponents.VoltageSupply;
+import ElectricalComponents.WireNode;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Point2D;
+import java.util.*;
 import java.util.List;
-import java.util.function.Function;
 
 import static ElectronicsBackend.ElectricalComponent.findClassFromID;
 
@@ -21,16 +24,25 @@ public class ElectricalSimulation{
 
     EditorArea editor;
     public HashMap<Class<?>, ArrayList<ElectricalComponent>> simComponents;
+    List<ElectricalComponent> otherComponents;
+    List<ElectricalComponent> powerSupplies;
+    List<ElectricalComponent> grounds;
+    List<ElectricalComponent> wireNodes;
 
+    HashSet<ElectricalNode> mnaNodes;
     public ElectricalSimulation(EditorArea editorArea) {
         editor = editorArea;
 
-        List<ElectricalComponent> powerSupplies = ElectricalComponent.allComponents.stream()
-                .filter(e -> e instanceof PowerSupply).toList();
-        List<ElectricalComponent> grounds = ElectricalComponent.allComponents.stream()
+        powerSupplies = ElectricalComponent.allComponents.stream()
+                .filter(e -> e instanceof PowerSupply || e instanceof VoltageSupply).toList();
+        grounds = ElectricalComponent.allComponents.stream()
                 .filter(e -> e instanceof Ground).toList();
-        List<ElectricalComponent> otherComponents = ElectricalComponent.allComponents.stream()
-                .filter(e -> !(e instanceof Ground) && !(e instanceof PowerSupply)).toList();
+        wireNodes = ElectricalComponent.allComponents.stream()
+                .filter(e -> e instanceof WireNode).toList();
+        otherComponents = ElectricalComponent.allComponents.stream()
+                .filter(e -> !(e instanceof Ground) && !(e instanceof PowerSupply)
+                        && !(e instanceof VoltageSupply)
+                        && !(e instanceof WireNode)).toList();
         simComponents  = new HashMap<>();
         for (ElectricalComponent component : otherComponents) {
             Class<?> compType = findClassFromID(component.id);
@@ -45,9 +57,11 @@ public class ElectricalSimulation{
         System.out.println("\t"+grounds);
         System.out.println("Components:");
         System.out.println("\t"+otherComponents);
+
+        runMNA();
     }
 
-    public void draw(Graphics2D g2d) {
+    public void drawIdentifiers(Graphics2D g2d) {
         g2d.setFont(new Font("Arial", Font.BOLD, (int) (.14*editor.scale)));
         g2d.setColor(Color.BLUE);
         for (Class<?> t : simComponents.keySet()) {
@@ -58,6 +72,36 @@ public class ElectricalSimulation{
                 g2d.drawString( ec.shortenedId+(i+1),
                         dec.getX(), dec.getY());
 
+            }
+        }
+    }
+
+
+    public void drawPaths(Graphics2D g2d) {
+        g2d.setFont(new Font("Arial", Font.BOLD, (int) (.14*editor.scale)));
+        BasicStroke stippledStroke = new BasicStroke((float) (.07f*editor.scale), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        g2d.setStroke(stippledStroke);
+        for (ElectricalNode node : mnaNodes) {
+            g2d.setColor(node.color);
+            double avgX = 0;
+            double avgY = 0;
+            for (ElectricalComponent eC : node.components) {
+                avgX += eC.getDraggableEditorComponent().getX()+
+                        (double) eC.getDraggableEditorComponent().getWidth() /2;
+                avgY += eC.getDraggableEditorComponent().getY()+
+                        (double) eC.getDraggableEditorComponent().getHeight() /2;
+            }
+            avgX /= node.components.size();
+            avgY /= node.components.size();
+            LineMetrics lm = g2d.getFont().getLineMetrics("Node("+node.id+")", g2d.getFontRenderContext());
+            float width = g2d.getFontMetrics().stringWidth("Node("+node.id+")");
+            g2d.drawString("Node("+node.id+")", (int) avgX- width/4, (int) avgY-lm.getHeight());
+            for (Wire w : node.wires) {
+                Point2D.Double startWorld =w.startComponent.getConnectionPointsAsWorldPoints().get(w.startIndex);
+                Point2D.Double endWorld = w.endComponent.getConnectionPointsAsWorldPoints().get(w.endIndex);
+                Point startScreen = editor.worldToScreen(startWorld.x, startWorld.y);
+                Point endScreen = editor.worldToScreen(endWorld.x, endWorld.y);
+                g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
             }
         }
     }
@@ -130,68 +174,162 @@ public class ElectricalSimulation{
         return Arrays.stream(outArray).sum();
     }
 
-    public static void main(String[] args) {
-
-        double[][] a = new double[][]
-                {{3,4,2}};
-
-        double[][] b = new double[][]
-                {{13,9,7,15},
-                        {8,7,4,6},
-                        {6,4,0,3}};
 
 
+    // ----------------------- mna algorithm --------------------------- //
+    public void runMNA() {
+        mnaNodes = generateMNANodes();
 
+        //n is number of nodes
+        //m is number of independent voltage sources
+        int n = mnaNodes.size();
+        int m = powerSupplies.size();
 
-        showMatrix(a);
-        System.out.println();
-        showMatrix(b);
+        double[][] matrixG = generateMatrixG(n,m);
+        System.out.println("Matrix G:");
+        showMatrix(matrixG);
 
-        System.out.println();
-        System.out.println();
+        double[][] matrixB = generateMatrixB(n,m);
+        System.out.println("\nMatrix B:");
+        showMatrix(matrixB);
 
+        double[][] matrixC = generateMatrixC(n,m);
+        System.out.println("\nMatrix C:");
+        showMatrix(matrixC);
 
-        double[][] c = multiply(a,b);
-        showMatrix(c);
-    }
-
-    public static class Node {
-        List<Node> inputNodes;
-        List<Node> outputNodes;
-
-        double current = 0.0;
-
-        public Node(double current) {
-            inputNodes = new ArrayList<>();
-            outputNodes = new ArrayList<>();
-
-            this.current = current;
-        }
-
-        public void addChild(Node n) {
-            outputNodes.add(n);
-        }
-
-        public void addParent(Node n) {
-            inputNodes.add(n);
-        }
-
-        public double getCurrent() {
-            return current;
-        }
-
-
-        public double calculateKirchoffCurrentLaw() {
-            Function<List<Node>, Double> f = e ->
-                    e.stream().mapToDouble(Node::getCurrent).sum();
-
-            double inputSum =  f.apply(inputNodes);
-            double outputSum = f.apply(outputNodes);
-            return 0d;
-
-        }
+        double[][] matrixD = generateMatrixD(n,m);
+        System.out.println("\nMatrix D:");
+        showMatrix(matrixD);
 
     }
 
+    public double[][] generateMatrixG(int n, int m) {
+        double[][] G = new double[n][n];
 
+        for (int i = 0; i < n; i++) {
+            ElectricalNode currentNode = null;
+            for (ElectricalNode nd : mnaNodes) {
+                if (nd.id == i) {
+                    currentNode = nd;
+                    break;
+                }
+            }
+            if (currentNode == null) continue;
+
+            double diagConductance = 0.0;
+
+            for (ElectricalComponent eC : currentNode.getComponents()) {
+                double R = eC.getResistance();
+                if (R <= 0) continue; // skip wires/open circuits
+
+                double Gval = 1.0 / R;
+                ElectricalNode otherNode = findOtherNode(eC, currentNode);
+
+                if (otherNode != null) {
+                    int j = otherNode.id;
+                    if (j >= 0 && j < n) {
+                        // Off-diagonal entry: subtract conductance
+                        G[i][j] -= Gval;
+                        G[j][i] -= Gval; // keep symmetric
+                    }
+                }
+
+                // Diagonal always gets the conductance contribution
+                diagConductance += Gval;
+            }
+
+            G[i][i] += diagConductance;
+        }
+
+        return G;
+    }
+
+    private ElectricalNode findOtherNode(ElectricalComponent eC, ElectricalNode currentNode) {
+        for (ElectricalComponent neighbor : eC.getChildren()) {
+            // Check which node this neighbor belongs to
+            for (ElectricalNode n : mnaNodes) {
+                if (n.getComponents().contains(neighbor) && n != currentNode) {
+                    return n;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public double[][] generateMatrixB(int n, int m) {
+        double[][] output = new double[n][m];
+        return output;
+    }
+
+    public double[][] generateMatrixC(int n, int m) {
+        double[][] output = new double[m][n];
+        return output;
+    }
+
+    public double[][] generateMatrixD(int n, int m) {
+        double[][] output = new double[m][m];
+        return output;
+    }
+
+    public HashSet<ElectricalNode> generateMNANodes() {
+        record ConnectionKey(ElectricalComponent comp, int index) {}
+
+        Map<ConnectionKey, Set<ConnectionKey>> adjacency = new HashMap<>();
+        Map<ConnectionKey, Set<Wire>> connectionToWires = new HashMap<>();
+
+        for (Wire w : editor.wires) {
+            ConnectionKey start = new ConnectionKey(w.getStartComponent(), w.startIndex);
+            ConnectionKey end   = new ConnectionKey(w.getEndComponent(), w.endIndex);
+
+            adjacency.computeIfAbsent(start, k -> new HashSet<>()).add(end);
+            adjacency.computeIfAbsent(end, k -> new HashSet<>()).add(start);
+
+            connectionToWires.computeIfAbsent(start, k -> new HashSet<>()).add(w);
+            connectionToWires.computeIfAbsent(end, k -> new HashSet<>()).add(w);
+        }
+
+        Set<ConnectionKey> visited = new HashSet<>();
+        List<Set<ConnectionKey>> connectionGroups = new ArrayList<>();
+
+        for (ConnectionKey key : adjacency.keySet()) {
+            if (visited.contains(key)) continue;
+
+            Set<ConnectionKey> group = new HashSet<>();
+            Deque<ConnectionKey> stack = new ArrayDeque<>();
+            stack.push(key);
+
+            while (!stack.isEmpty()) {
+                ConnectionKey current = stack.pop();
+                if (!visited.add(current)) continue;
+                group.add(current);
+
+                for (ConnectionKey neighbor : adjacency.getOrDefault(current, Set.of())) {
+                    if (!visited.contains(neighbor)) stack.push(neighbor);
+                }
+            }
+            connectionGroups.add(group);
+        }
+
+        HashSet<ElectricalNode> nodes = new HashSet<>();
+        int nodeNum = 0;
+        for (Set<ConnectionKey> group : connectionGroups) {
+            ElectricalNode node = new ElectricalNode(nodeNum);
+            Set<Wire> groupWires = new HashSet<>();
+
+            for (ConnectionKey ck : group) {
+                node.addChild(ck.comp());
+                groupWires.addAll(connectionToWires.getOrDefault(ck, Set.of()));
+            }
+
+            // add all wires that touch this node
+            for (Wire w : groupWires) {
+                node.addWire(w);
+            }
+
+            nodes.add(node);
+            nodeNum+=1;
+        }
+        return nodes;
+    }
 }

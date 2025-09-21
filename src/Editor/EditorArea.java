@@ -780,6 +780,9 @@ public class EditorArea extends JPanel {
                 }
             }
 
+            //sim draw
+            if (currentlyRunningSim != null) currentlyRunningSim.drawPaths(g2d);
+
             // ---- Wires ----
             g2d.setColor(Color.BLACK);
             for (Wire wire : wires) {
@@ -789,11 +792,10 @@ public class EditorArea extends JPanel {
             // ---- Selection ----
             selectedArea.paint(g2d);
 
-            if (currentlyRunningSim != null) currentlyRunningSim.draw(g2d);
             if (debugDrawMode) debugGraphics(g2d);
 
 
-
+            if (currentlyRunningSim != null) currentlyRunningSim.drawIdentifiers(g2d);
             g2d.dispose();
 
         } while (buffer.contentsLost());

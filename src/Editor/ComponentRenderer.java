@@ -79,11 +79,40 @@ public class ComponentRenderer {
             case Microphone.id -> drawMicrophone(g2d, cx, cy, size);
             case ElectricalComponents.LED.id -> drawLED(g2d, cx, cy, size);
             case Photoresistor.id -> drawPhotoresistor(g2d, cx, cy, size);
+            case VoltageSupply.id -> drawVoltageSupply(g2d, cx, cy, size);
             case IntegratedCircuit.id -> drawIC(g2d, cx, cy, size,
                     caller != null ? (int) caller.getElectricalComponent().electricalProperties.get("number_of_pins") : 16,
                     true);
         }
     }
+
+    private static void drawVoltageSupply(Graphics2D g2d, int cx, int cy, int size) {
+        g2d.setStroke(new BasicStroke(Math.max(1f, size * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Configuration
+        int lineLength = size / 2;   // length of all horizontal lines
+        int spacing    = size / 8;   // distance between horizontal lines
+        int lineCount  = 4;          // total horizontal lines
+
+        int halfLength = lineLength / 2;
+        int halfCount = lineCount / 2;
+
+        g2d.drawLine(cx - halfLength, (int) (cy + -1.5 * spacing), cx + halfLength, (int) (cy + -1.5 * spacing));
+        g2d.drawLine(cx - halfLength/2, (int) (cy + -.5 * spacing), cx + halfLength/2, (int) (cy + -.5 * spacing));
+        g2d.drawLine(cx - halfLength, (int) (cy + .5 * spacing), cx + halfLength, (int) (cy + .5 * spacing));
+        g2d.drawLine(cx - halfLength/2, (int) (cy + 1.5 * spacing), cx + halfLength/2, (int) (cy + 1.5 * spacing));
+
+        g2d.drawLine((int) (cx + halfLength + .05*size), (int) (cy + -2 * spacing), (int)(cx + halfLength+.15*size), (int) (cy + -2 * spacing));
+        g2d.drawLine((int) (cx + halfLength + .1*size), (int) (cy + -2 * spacing+.05*size), (int)(cx + halfLength+.1*size), (int) (cy + -2 * spacing-.05*size));
+
+
+        g2d.drawLine(cx, (int) (cy - 1.5 * spacing), cx, (int) (cy - 1.5 * spacing-.21*size));
+        g2d.drawLine(cx, (int) (cy + 1.5 * spacing), cx, (int) (cy + 1.5 * spacing+.21*size));
+
+
+    }
+
 
 
     private static void drawIC(Graphics2D g2d, int cx, int cy, int size, int leadCount, boolean showPinNumbers) {

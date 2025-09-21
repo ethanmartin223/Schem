@@ -18,4 +18,12 @@ public class WireNode extends ElectricalComponent {
         setConnectionPoints(pins);
 
     }
+
+    @Override
+    public void initInfoCard() {
+        styleInfoCard();
+
+        addEntryToInfoCard("Resistance (Ω)", 6);
+
+    }
 }
