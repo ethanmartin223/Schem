@@ -7,11 +7,10 @@ import ElectricalComponents.PowerSupply;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
-import javax.swing.*;
 
 import static ElectronicsBackend.ElectricalComponent.findClassFromID;
 
@@ -21,7 +20,7 @@ public class ElectricalSimulation{
 //https://en.wikipedia.org/wiki/Kirchhoff%27s_circuit_laws
 
     EditorArea editor;
-    HashMap<Class<?>, ArrayList<ElectricalComponent>> simComponents;
+    public HashMap<Class<?>, ArrayList<ElectricalComponent>> simComponents;
 
     public ElectricalSimulation(EditorArea editorArea) {
         editor = editorArea;
@@ -61,6 +60,99 @@ public class ElectricalSimulation{
 
             }
         }
+    }
+
+    public static double[] grabCol(double[][] a, int x) {
+        double[] output =  new double[a.length];
+        for (int y=0; y<a.length; y++){
+            output[y] = a[y][x];
+        }
+        return output;
+    }
+
+    public static double[][] multiply(double[][] a, double[][] b){
+
+        double[][] outputMatrix =  new double[a.length][b[0].length];
+        for (int y=0; y<a.length; y++){
+            for (int x=0; x<b[0].length; x++){
+                outputMatrix[y][x] = dotProduct(grabCol(b, x),a[y]);
+            }
+        }
+        return outputMatrix;
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
+
+    public static void showMatrix(double[][] a) {
+        int maxLengths[] = new int[a[0].length];;
+        for (int y = 0; y < a.length; y++) {
+            for (int x = 0; x < a[y].length; x++) {
+                maxLengths[x] = Math.max(maxLengths[x], (""+round(a[y][x], 2)).length());
+            }
+        }
+        for (int y = 0; y < a.length; y++) {
+            if  (y == 0)
+                System.out.print("[[");
+            else
+                System.out.print(" [");
+
+            for (int x = 0; x < a[y].length; x++) {
+                String output = ""+round(a[y][x], 2);
+                while  (output.length() < maxLengths[x]) {
+                    output =" "+output;
+                }
+                System.out.print(output);
+                if (x != (a[y].length-1))
+                    System.out.print(", ");
+                else if (y!=a.length-1)
+                    System.out.print("], ");
+                else
+                    System.out.print("]]");
+            }
+            System.out.println();
+        }
+    }
+
+    public static double dotProduct(double[] a, double[] b) {
+        assert a.length == b.length;
+        double[] outArray = new double[a.length];
+        for  (int i = 0; i < a.length; i++) {
+            outArray[i] = a[i] * b[i];
+        }
+        return Arrays.stream(outArray).sum();
+    }
+
+    public static void main(String[] args) {
+
+        double[][] a = new double[][]
+                {{3,4,2}};
+
+        double[][] b = new double[][]
+                {{13,9,7,15},
+                        {8,7,4,6},
+                        {6,4,0,3}};
+
+
+
+
+        showMatrix(a);
+        System.out.println();
+        showMatrix(b);
+
+        System.out.println();
+        System.out.println();
+
+
+        double[][] c = multiply(a,b);
+        showMatrix(c);
     }
 
     public static class Node {
