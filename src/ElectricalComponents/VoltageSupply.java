@@ -29,6 +29,7 @@ public class VoltageSupply extends ElectricalComponent {
     public void initInfoCard() { // Power Supply
         styleInfoCard();
         addEntryToInfoCard("Voltage (V)", 6);
+        addEntryToInfoCard("Current (A)", 6);
         addEntryToInfoCard("Current Limit (mA)", 6);
         addEntryToInfoCard("Ripple Voltage (mV)", 6);
         addEntryToInfoCard("Resistance (Ω)", 6);
@@ -36,4 +37,11 @@ public class VoltageSupply extends ElectricalComponent {
     }
 
 
+    public double getVoltage() {
+        return Double.parseDouble(electricalProperties.get("Voltage (V)")+"");
+    }
+
+    public double getCurrent() {
+        return Double.parseDouble(electricalProperties.get("Current (A)")+"");
+    }
 }

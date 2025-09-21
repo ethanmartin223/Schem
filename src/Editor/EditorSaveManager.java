@@ -131,7 +131,6 @@ public class EditorSaveManager {
         String data;
         try {data = getDataFromFile(file);}
         catch (IOException e) {throw new RuntimeException(e);}
-        System.out.println(data);
         Pattern pattern = Pattern.compile("(?:.*?\\:(.*?)\\||.*?(\\[.*?\\])\\))");
 
         String[] components = data.split("\n");

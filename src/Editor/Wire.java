@@ -42,22 +42,30 @@ public class Wire {
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         Point2D.Double startWorld = startComponent.getConnectionPointsAsWorldPoints().get(startIndex);
-        Point2D.Double endWorld = endComponent.getConnectionPointsAsWorldPoints().get(endIndex);
+        Point2D.Double endWorld   = endComponent.getConnectionPointsAsWorldPoints().get(endIndex);
+        Point s = editor.worldToScreen(startWorld.x, startWorld.y);
+        Point e = editor.worldToScreen(endWorld.x, endWorld.y);
 
-        Point startScreen = editor.worldToScreen(startWorld.x, startWorld.y);
-        Point endScreen = editor.worldToScreen(endWorld.x, endWorld.y);
+        double ex = e.x;
+        double ey = e.y;
+        double sx = s.x;
+        double sy = s.y;
 
         if (isHighlighted || isMultiSelected) {
-            float width = (float) (editor.scale * .06);
+            float width = (float) (editor.scale * 0.06);
             g2d.setColor(HIGHLIGHT_COLOR);
-            g2d.setStroke(new BasicStroke(width,  BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
+            g2d.setStroke(new BasicStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2d.draw(new java.awt.geom.Line2D.Double(sx, sy, ex, ey));
         }
-
         g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke((float) (editor.scale * EditorArea.DEBUG_NATIVE_DRAW_SIZE), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.drawLine(startScreen.x, startScreen.y, endScreen.x, endScreen.y);
+        g2d.setStroke(new BasicStroke(
+                (float) (editor.scale * EditorArea.DEBUG_NATIVE_DRAW_SIZE),
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        ));
+        g2d.draw(new java.awt.geom.Line2D.Double(sx, sy, ex, ey));
     }
+
 
 
 

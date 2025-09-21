@@ -301,7 +301,6 @@ public class ElectricalComponent {
 
     protected void onPropertiesChange() {
         editorArea.repaint();
-        System.out.println("onPropertiesChange Fired for " + this.toString());
     }
 
     public void setDeleted(boolean b) {
