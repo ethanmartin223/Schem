@@ -1,9 +1,9 @@
 package ElectronicsBackend;
 
 import Editor.Wire;
-import ElectronicsBackend.ElectricalComponent;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,15 +11,30 @@ class ElectricalNode {
     final Set<ElectricalComponent> components = new HashSet<>();
     final Set<Wire> wires = new HashSet<>();
 
+    static Color[] availableColors = new Color[] {
+            Color.RED,                       // bright red
+            new Color(0, 153, 0),            // vibrant green
+            new Color(0, 153, 204),          // teal / cyan
+            new Color(204, 0, 153),          // magenta / fuchsia
+            new Color(255, 102, 0),          // vivid orange
+            new Color(0, 102, 204),          // royal blue
+            new Color(102, 0, 204),          // deep purple
+            new Color(0, 204, 102),          // bright sea green
+            new Color(255, 51, 153),         // hot pink
+            new Color(204, 51, 0),           // deep orange / brick
+            new Color(51, 102, 204),         // steel blue
+            new Color(0, 51, 102),           // navy (very high contrast)
+            new Color(153, 51, 102),         // wine / maroon
+            new Color(139, 69, 19)           // brown (good for distinction)
+    };
+
+
     int id=0;
     Color color;
 
     public ElectricalNode(int nodeNum) {
         id=nodeNum;
-        color = new Color(
-                (int)(128+Math.random()*127),
-                (int)(128+Math.random()*127),
-                (int)(128+Math.random()*127));
+        color = availableColors[(int) (Math.random()* availableColors.length)];
     }
 
     public void addChild(ElectricalComponent c) {
