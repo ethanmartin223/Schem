@@ -332,12 +332,12 @@ public class DraggableEditorComponent extends JComponent {
         if (orientation != 0) {
             g2d.rotate(Math.toRadians(-orientation * 90));
         }
-        int size = (int) (editor.scale);
+        double size = editor.scale;
         BufferedImage img = ComponentRenderer.render(
                 this,
                 (int)(size*boundsOverride) / 2,
                 (int)(size*boundsOverride) / 2,
-                size,
+                (int)size,
                 electricalComponent.id,
                 isFocusOwner() || isMultiSelected,
                 boundsOverride

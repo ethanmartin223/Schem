@@ -333,7 +333,6 @@ public class EditorArea extends JPanel {
             double oldScale = scale;
             double zoomFactor = e.getPreciseWheelRotation() < 0 ? 1.1 : 1 / 1.1;
             scale*=zoomFactor;
-            scale = ((int) scale);
             if (scale < 10) scale = 10; // lock scroll to positive values
             if (scale >= 1200) scale = 1200;
 
